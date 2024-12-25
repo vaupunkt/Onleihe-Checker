@@ -1,12 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
-from storeToDB.storeBooks import store_books
-from storeToDB.storeCategories import store_categories
-from scrapeFunctions.getBooks import get_books
-from scrapeFunctions.getCategories import get_categories
-from scrapeFunctions.getLibraries import get_libraries
-from storeToDB.storeLibraries import store_libraries
+from storeCategories import store_categories
+from getBooks import get_books
+from getCategories import get_categories
+from getLibraries import get_libraries
+from storeLibraries import store_libraries
 from models import Library
 
 # Database setup
@@ -24,7 +23,7 @@ try:
     categories = get_categories(library)
     store_categories(categories, Session)
 
-    books = get_books(library,Session, session)
+    books = get_books(library, session, Session)
 
 except Exception as e:
     print(f"Database error: {e}")
