@@ -1,20 +1,35 @@
 from bs4 import BeautifulSoup
 import requests
-from models import Category, Book
+from models import Book
 from storeBooks import store_book
+import logging
 
+# Configure logging
+logging.basicConfig(filename='scraper.log', level=logging.INFO, format='%(asctime)s - %(message)s')
 
 def get_books(library, session1, Session2):
 
-    url = library.baseURL + "/frontend/mediaList,0-0-0-102-0-0-0-0-400001-0-0.html"
+    url = library.baseURL + "/frontend/mediaList,0-0-0-102-0-0-0-2004-400001-0-0.html"
 
     page = 1
 
+    with open('scraper.log', 'r') as log:
+        last_page = 1
+        for line in log:
+            if f"Library {library.id}: Processed page" in line and f"Finished processing {library.name}" not in line:
+                try:
+                    last_page = int(line.split("page ")[1].split(",")[0])
+                    page = last_page 
+                except:
+                    pass
     with session1.no_autoflush:
         while True:
             # Send a GET request to the URL
             urlStart = url.split(',')[0]
             urlEnd = url.split('.html')[1]
+
+
+            # Check log for last processed page for this library
             if page == 1:
                 url = url
             else:
@@ -35,12 +50,12 @@ def get_books(library, session1, Session2):
                 link = url.split("media")[0] + book.select_one('.link.stretched-link').get('href')
                 book_id = link.split('mediaInfo,0-0-')[1].split('-')[0]
 
-                print(f"Processing book {title} - {book_id} - {link}")
+                logging.info(f"Library {library.id}: Processing book {title} - {book_id} - {link}")
                 book_in_db = session1.query(Book).filter(Book.id == book_id).first()
                 if book_in_db:
                     library_ids = book_in_db.library_ids.split('; ')
                     if (library.id in library_ids):
-                        print(f"Library {library.name} already in database")
+                        logging.info(f"Library {library.name} already in database")
                         continue
                     else:
                         new_library_ids = book_in_db.library_ids +"; "+ str(library.id) + "; "
@@ -54,7 +69,7 @@ def get_books(library, session1, Session2):
                             'language': book_in_db.language,
                             'category_ids': book_in_db.category_ids.rstrip("; "),
                             'year': book_in_db.year,
-                            'link': link.split("/frontend/")[1]
+                            'link': "frontend/"+link.split("/frontend/")[1]
                         }
                         store_book(book_data, Session2)
                         continue
@@ -87,7 +102,8 @@ def get_books(library, session1, Session2):
 
                             authors = "; ".join([author.text for author in value_list])
                             attributes[key] = authors
-                        
+                        elif key == 'ISBN':
+                            attributes[key] = value[0]
                         else: attributes[key] = value
 
                     title = title
@@ -108,12 +124,12 @@ def get_books(library, session1, Session2):
                         'language': language,
                         'category_ids': category.rstrip("; "),
                         'year': year,
-                        'link': link.split("/frontend/")[1]
+                        'link': "frontend/"+link.split("/frontend/")[1]
                     }
 
                     store_book(book_data, Session2)
 
             
-            print(f"Processed page {page}, found {len(books_on_page)} books")
+            logging.info(f"Library {library.id}: Processed page {page}, found {len(books_on_page)} books")
             page += 1
-        print(f"Finished processing {library.name}")
+        logging.info(f"Finished processing {library.name}")
