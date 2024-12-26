@@ -43,7 +43,7 @@ def get_books(library, session1, Session2):
                         print(f"Library {library.name} already in database")
                         continue
                     else:
-                        new_library_ids = "; ".join([library.id for library in library_ids])
+                        new_library_ids = book_in_db.library_ids +"; "+ str(library.id) + "; "
                         book_data = {
                             'id': book_in_db.id,
                             'title': book_in_db.title,

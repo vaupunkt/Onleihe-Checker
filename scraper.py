@@ -39,7 +39,7 @@ def main():
         with session_scope() as session:
             # store_libraries(libraries, session)
             
-            library = session.query(Library).filter(Library.name == 'Erfurt').first()
+            library = session.query(Library).filter(Library.name == 'Greifswald').first()
             if library:
                 # categories = get_categories(library)
                 # store_categories(categories, Session)

@@ -52,12 +52,12 @@ def check_book(isbn):
             if library_id in availableLibraries:
                 libraries = session.query(Library).filter(Library.id.in_(availableLibraries)).all()
                 return jsonify({
-                    'available': bool(libraries),
+                    'available': True,
                     'title': book.title,
                     'author': book.author,
                     'isbn': book.isbn,
                     'link': book.link,
-                    'libraries': [{'name': lib.name, 'baseURL': lib.baseURL} for lib in libraries]
+                    'libraries': [{'name': lib.name, 'baseURL': lib.baseURL, 'id': lib.id} for lib in libraries]
                 })
         return jsonify({
             'available': False,
@@ -91,14 +91,16 @@ def search_title(query):
             book = books[0]
             availableLibraries = book.library_ids.split('; ')
             if library_id in availableLibraries:
-              return jsonify({
-                'available': bool(book.libraries),
-                'title': book.title,
-                'author': book.author,
-                'isbn': book.isbn,
-                'link': book.link,
-                'libraries': [{'name': lib.name, 'baseURL': lib.baseURL} for lib in book.libraries]
-            })
+                libraries = session.query(Library).filter(Library.id.in_(availableLibraries)).all()
+
+                return jsonify({
+                    'available': True,
+                    'title': book.title,
+                    'author': book.author,
+                    'isbn': book.isbn,
+                    'link': book.link,
+                    'libraries': [{'name': lib.name, 'baseURL': lib.baseURL, 'id': lib.id} for lib in libraries]
+                })
         return jsonify({
                     'available': False,
                     'message': 'Book not found',

@@ -11,7 +11,6 @@ function findISBN() {
       const text = element.textContent.split("-").join("");
       const matches = text.match(/\b\d{13}\b/);
       if (matches) {
-        console.log("ISBN found:", matches[0]);
         return matches[0];
       }
     }
@@ -29,7 +28,6 @@ function findBookTitle() {
   for (const selector of possibleTitleSelectors) {
     const element = document.querySelector(selector);
     if (element.textContent) {
-      console.log("Title found:", element.textContent);
       return element.textContent.trim();
     }
   }
@@ -66,7 +64,6 @@ async function checkAvailabilityByTitle(title, libraryId) {
 
 // Verfügbarkeitsanzeige einfügen
 async function showAvailability(available, isbn) {
-  const title = await checkAvailability(isbn);
   // Entferne vorhandene Anzeige falls vorhanden
   const existingContainer = document.getElementById("onleihe-availability");
   if (existingContainer) {
@@ -83,9 +80,25 @@ async function showAvailability(available, isbn) {
   container.style.textAlign = "center";
 
   if (available) {
+    const { selectedLibrary } = await chrome.storage.sync.get([
+      "selectedLibrary",
+    ]);
+    const title = await checkAvailability(isbn, selectedLibrary);
+    const library = await getLibraryData(selectedLibrary);
+    const linkToTitle = library.baseURL + "/frontend/" + title.link;
+
+    const link = document.createElement("a");
+    link.href = linkToTitle;
+    link.textContent = "Zum Buch";
+    link.target = "_blank";
+    link.style.color = "white";
+    link.style.textDecoration = "underline";
+    link.style.marginLeft = "10px";
+
     container.style.backgroundColor = "#4CAF50";
     container.style.color = "white";
     container.textContent = "Dieses Buch ist in deiner Bibliothek verfügbar!";
+    container.appendChild(link);
   } else {
     container.style.backgroundColor = "#f44336";
     container.style.color = "white";
@@ -113,39 +126,44 @@ async function showAvailability(available, isbn) {
 async function initializePlugin() {
   console.log("Amazon-Plugin wird initialisiert...");
 
-  // Warte kurz, bis die Seite vollständig geladen ist
+  // Wait for page to load
   await new Promise((resolve) => setTimeout(resolve, 100));
 
-  let isbn = findISBN();
+  const isbn = findISBN();
   const title = findBookTitle();
 
-  // Retrieve selected library from storage
-  chrome.storage.sync.get(["selectedLibrary"], async function (result) {
-    const selectedLibrary = result.selectedLibrary;
-    console.log("Ausgewählte Bibliothek:", selectedLibrary);
-    if (isbn && selectedLibrary) {
-      console.log("ISBN gefunden:", isbn);
-      const { available } = await checkAvailability(isbn, selectedLibrary);
+  // Get selected library
+  const { selectedLibrary } = await chrome.storage.sync.get([
+    "selectedLibrary",
+  ]);
 
-      if (available === false) {
-        if (title) {
-          console.log("Titel gefunden:", title);
-          const { available, isbn: titleIsbn } = await checkAvailabilityByTitle(
-            title,
-            selectedLibrary
-          );
-          console.log("Verfügbarkeit:", available);
-          showAvailability(available, titleIsbn);
-        } else {
-          console.log("Kein Titel gefunden");
+  if (!selectedLibrary) {
+    console.log("No library selected");
+    return;
+  }
+
+  // Check availability by ISBN first
+  if (isbn) {
+    const isbnAvailability = await checkAvailability(isbn, selectedLibrary);
+    if (isbnAvailability.available === false) {
+      // If ISBN check fails, try title
+      if (title) {
+        const titleAvailability = await checkAvailabilityByTitle(
+          title,
+          selectedLibrary
+        );
+        if (titleAvailability) {
+          showAvailability(titleAvailability.available, titleAvailability.isbn);
+          return;
         }
-      } else {
-        showAvailability(available, isbn);
       }
     } else {
-      console.log("Keine Daten gefunden");
+      showAvailability(isbnAvailability.available, isbn);
+      return;
     }
-  });
+  }
+
+  console.log("No availability data found");
 }
 
 // Ausführung wenn Seite geladen ist
@@ -157,3 +175,14 @@ if (document.readyState === "loading") {
 
 // Zusätzlicher Event Listener für dynamisch nachgeladene Inhalte
 window.addEventListener("load", initializePlugin);
+
+async function getLibraryData(libraryId) {
+  try {
+    const response = await fetch("http://127.0.0.1:5000/library/" + libraryId);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error getting library data:", error);
+    return false;
+  }
+}
