@@ -9,13 +9,24 @@ from getLibraries import get_libraries
 from storeLibraries import store_libraries
 from models import Library
 from datetime import datetime
+from dotenv import load_dotenv
+import os
 
 # Configure logging
 logging.basicConfig(filename="scraper.log",level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Database setup
+load_dotenv()
+
+DB_USER = os.getenv('DB_USER')
+DB_PASSWORD = os.getenv('DB_PASSWORD')
+DB_HOST = os.getenv('DB_HOST')
+DB_PORT = os.getenv('DB_PORT')
+DB_NAME = os.getenv('DB_NAME')
+
+DATABASE_URL = f'mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+
 engine = create_engine(
-    'mysql+pymysql://root:supersecret@localhost:3306/onleihe_db',
+    DATABASE_URL,
     pool_recycle=3600,
     pool_size=10,
     max_overflow=20
@@ -46,24 +57,30 @@ def should_skip_fetch(last_log, threshold_seconds=24*3600):
     return False
 
 def fetch_and_store_libraries(session):
-    logging.info("Fetching libraries...")
-    libraries = get_libraries()
-    logging.info("Storing libraries to db...")
-    store_libraries(libraries, session)
+    try:
+        logging.info("Fetching libraries...")
+        libraries = get_libraries()
+        logging.info("Storing libraries to db...")
+        store_libraries(libraries, session)
+    except Exception as e:
+        logging.error(f"Error fetching/storing libraries: {e}")
 
 def fetch_and_store_categories_and_books(library, session):
-    logging.info(f"Fetching categories for library: {library.name} - {library.id}")
-    categories = get_categories(library)
-    logging.info("Storing categories...")
-    store_categories(categories, Session)
-    logging.info(f"Categories stored for library: {library.name} - {library.id}")
-    logging.info("Fetching books...")
-    get_books(library, session, Session)
+    try:
+        logging.info(f"Fetching categories for library: {library.name} - {library.id}")
+        categories = get_categories(library)
+        logging.info("Storing categories...")
+        store_categories(categories, Session)
+        logging.info(f"Categories stored for library: {library.name} - {library.id}")
+        logging.info("Fetching books...")
+        get_books(library, session, Session)
+    except Exception as e:
+        logging.error(f"Error processing library {library.name}: {e}")
 
 def main():
+    logging.info("Starting the main function")
+    last_log = None
     try:
-        logging.info("Starting the main function")
-        last_log = None
         with open("scraper.log", "r") as f:
             for line in f:
                 if "Fetching libraries..." in line:
@@ -75,20 +92,27 @@ def main():
             else:
                 fetch_and_store_libraries(session)
             
-            libraries = session.query(Library).all()
-            for library in libraries:
-                last_category_store = None
-                with open("scraper.log", "r") as f:
-                    for line in f:
-                        if "Storing categories..." in line:
-                            last_category_store = line.split(" - ")[0]
-                if should_skip_fetch(last_category_store):
-                    logging.info("Skipping categories fetch - last fetch within 24 hours")
-                    get_books(library, session, Session)
-                else:
-                    fetch_and_store_categories_and_books(library, session)
+            try:
+                libraries = session.query(Library).all()
+                for library in libraries:
+                    try:
+                        last_category_store = None
+                        with open("scraper.log", "r") as f:
+                            for line in f:
+                                if "Storing categories..." in line:
+                                    last_category_store = line.split(" - ")[0]
+                        if should_skip_fetch(last_category_store):
+                            logging.info("Skipping categories fetch - last fetch within 24 hours")
+                            get_books(library, session, Session)
+                        else:
+                            fetch_and_store_categories_and_books(library, session)
+                    except Exception as e:
+                        logging.error(f"Error processing library {library.name}: {e}")
+                        continue  # Continue with next library
+            except Exception as e:
+                logging.error(f"Error querying libraries: {e}")
     except Exception as e:
-        logging.error(f"Database error: {e}")
+        logging.error(f"Database error in main: {e}")
 
 if __name__ == "__main__":
     logging.info("Script started")
