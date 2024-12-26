@@ -22,8 +22,6 @@ def get_categories(library):
         category_element = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.ID, "category_facet"))
         )
-
-        print("Categories found", category_element)
         
         # Additional wait to ensure all categories are loaded
         time.sleep(2)
