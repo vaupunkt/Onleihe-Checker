@@ -38,19 +38,21 @@ def get_books(library, session1, Session2):
                 print(f"Processing book {title} - {book_id} - {link}")
                 book_in_db = session1.query(Book).filter(Book.id == book_id).first()
                 if book_in_db:
-                    if (library.id in book_in_db.library_ids):
+                    library_ids = book_in_db.library_ids.split('; ')
+                    if (library.id in library_ids):
                         print(f"Library {library.name} already in database")
                         continue
                     else:
+                        new_library_ids = "; ".join([library.id for library in library_ids])
                         book_data = {
                             'id': book_in_db.id,
                             'title': book_in_db.title,
                             'author': book_in_db.author,
                             'publisher': book_in_db.publisher,
                             'isbn': book_in_db.isbn,
-                            'library_ids': [*book_in_db.library_ids, library.id],
+                            'library_ids': new_library_ids.rstrip("; "),
                             'language': book_in_db.language,
-                            'category_ids': book_in_db.category_ids,
+                            'category_ids': book_in_db.category_ids.rstrip("; "),
                             'year': book_in_db.year,
                             'link': link.split("/frontend/")[1]
                         }
@@ -72,18 +74,18 @@ def get_books(library, session1, Session2):
                                 value[i] = value[i].removesuffix(',').removesuffix(";")
                         
                         if key == 'Kategorie':
-                            category_ids = []
                             value_list = info.select('span a')
+                            category_ids = ""
                             for item in value_list:
                                 item_id = item.get('href').split('-')[1]
-                                category_ids.append(int(item_id))
-                            attributes[key] = category_ids
+                                category_ids = category_ids + item_id + "; "
+
+                            attributes[key] = category_ids.rstrip("; ")
                         
                         elif key == 'Autor*in':
                             value_list = info.select('span a')
-                            authors = []
-                            for item in value_list:
-                                authors.append(item.text.strip())
+
+                            authors = "; ".join([author.text for author in value_list])
                             attributes[key] = authors
                         
                         else: attributes[key] = value
@@ -102,9 +104,9 @@ def get_books(library, session1, Session2):
                         'author': author,
                         'publisher': publisher,
                         'isbn': isbn,
-                        'library_ids': [library.id], 
+                        'library_ids': str(library.id), 
                         'language': language,
-                        'category_ids': category,
+                        'category_ids': category.rstrip("; "),
                         'year': year,
                         'link': link.split("/frontend/")[1]
                     }

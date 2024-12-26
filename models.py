@@ -18,25 +18,16 @@ class Book(Base):
     __tablename__ = 'books'
     id = Column(String(20), primary_key=True)
     title = Column(String(255), nullable=False)
-    author = Column(Text)  # Will store JSON string of authors
+    author = Column(Text)
     publisher = Column(String(255))
     language = Column(String(50))
     year = Column(String(4))
     isbn = Column(String(13))
-    category_ids = Column(Text)  # Will store comma-separated IDs
-    library_ids = Column(Text)  # Will store comma-separated IDs
+    category_ids = Column(Text)  # Store as Text for MySQL compatibility
+    library_ids = Column(Text)   # Store as Text for MySQL compatibility
     link = Column(Text)
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     
-    def __init__(self, **kwargs):
-        # Convert lists to strings for storage
-        if 'author' in kwargs and isinstance(kwargs['author'], list):
-            kwargs['author'] = json.dumps(kwargs['author'])
-        if 'category_ids' in kwargs and isinstance(kwargs['category_ids'], list):
-            kwargs['category_ids'] = ','.join(map(str, kwargs['category_ids']))
-        if 'library_ids' in kwargs and not isinstance(kwargs['library_ids'], str):
-            kwargs['library_ids'] = str(kwargs['library_ids'])
-        super(Book, self).__init__(**kwargs)
 
 class Category(Base):
     __tablename__ = 'categories'
