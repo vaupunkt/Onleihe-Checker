@@ -78,6 +78,9 @@ def get_libraries():
                     baseURL = baseURL.split("/frontend")[0]
                 if baseURL.endswith("/"):
                     baseURL = baseURL[:-1]
+
+                if "thuebibnet" in baseURL:
+                    baseURL = "https://www.onleihe.de/thuebibnet"
                 
                 # Check if the current element is a country header
                 if library.get('class') and 'country-header' in library.get('class'):

@@ -1,6 +1,6 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, event
+from sqlalchemy.orm import declarative_base, sessionmaker
+from contextlib import contextmanager
 from storeCategories import store_categories
 from getBooks import get_books
 from getCategories import get_categories
@@ -9,23 +9,44 @@ from storeLibraries import store_libraries
 from models import Library
 
 # Database setup
-engine = create_engine('sqlite:///onleihe_books.db')
+engine = create_engine(
+    'mysql+pymysql://root:supersecret@localhost:3306/onleihe_db',
+    pool_recycle=3600,
+    pool_size=10,
+    max_overflow=20
+)
+
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
 
-libraries = get_libraries()
-store_libraries(libraries, Session)
+@contextmanager
+def session_scope():
+    session = Session()
+    session.autoflush = False
+    try:
+        yield session
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise e
+    finally:
+        session.close()
 
-session = Session()
-try:
-    # Get first library from database
-    library = session.query(Library).filter(Library.name == 'Greifswald').first()
-    categories = get_categories(library)
-    store_categories(categories, Session)
+def main():
+    try:
+        # libraries = get_libraries()
+        
+        with session_scope() as session:
+            # store_libraries(libraries, session)
+            
+            library = session.query(Library).filter(Library.name == 'Erfurt').first()
+            if library:
+                # categories = get_categories(library)
+                # store_categories(categories, Session)
+                books = get_books(library, session, Session)
+                
+    except Exception as e:
+        print(f"Database error: {e}")
 
-    books = get_books(library, session, Session)
-
-except Exception as e:
-    print(f"Database error: {e}")
-finally:
-    session.close()
+if __name__ == "__main__":
+    main()

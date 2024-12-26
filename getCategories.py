@@ -16,12 +16,14 @@ def get_categories(library):
     # Initialize headless Chrome driver
     driver = webdriver.Chrome(options=chrome_options)
     driver.get(url)
-    
+   
     try:
         # Wait for category element to be present (max 10 seconds)
         category_element = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.ID, "category_facet"))
         )
+
+        print("Categories found", category_element)
         
         # Additional wait to ensure all categories are loaded
         time.sleep(2)
