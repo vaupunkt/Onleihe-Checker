@@ -38,26 +38,26 @@ function findBookTitle() {
 }
 
 // Prüfen ob Buch in Bibliothek verfügbar ist
-async function checkAvailability(isbn) {
+async function checkAvailability(isbn, libraryId) {
   try {
-    const response = await fetch(`http://127.0.0.1:5000/books/${isbn}`);
+    const response = await fetch(
+      `http://127.0.0.1:5000/books/${isbn}?library=${libraryId}`
+    );
     const data = await response.json();
-    console.log("API response:", data);
-    return data.available;
+    return data;
   } catch (error) {
     console.error("Error checking availability:", error);
     return false;
   }
 }
 
-async function checkAvailabilityByTitle(title) {
+async function checkAvailabilityByTitle(title, libraryId) {
   try {
     const response = await fetch(
-      `http://127.0.0.1:5000/title/${decodeURI(title)}`
+      `http://127.0.0.1:5000/title/${decodeURI(title)}?library=${libraryId}`
     );
     const data = await response.json();
-    console.log("API response:", data);
-    return data.length > 0;
+    return data;
   } catch (error) {
     console.error("Error checking availability:", error);
     return false;
@@ -65,7 +65,8 @@ async function checkAvailabilityByTitle(title) {
 }
 
 // Verfügbarkeitsanzeige einfügen
-function showAvailability(available) {
+async function showAvailability(available, isbn) {
+  const title = await checkAvailability(isbn);
   // Entferne vorhandene Anzeige falls vorhanden
   const existingContainer = document.getElementById("onleihe-availability");
   if (existingContainer) {
@@ -115,26 +116,36 @@ async function initializePlugin() {
   // Warte kurz, bis die Seite vollständig geladen ist
   await new Promise((resolve) => setTimeout(resolve, 100));
 
-  const isbn = findISBN();
+  let isbn = findISBN();
   const title = findBookTitle();
 
-  if (isbn) {
-    console.log("ISBN gefunden:", isbn);
-    const available = await checkAvailability(isbn);
+  // Retrieve selected library from storage
+  chrome.storage.sync.get(["selectedLibrary"], async function (result) {
+    const selectedLibrary = result.selectedLibrary;
+    console.log("Ausgewählte Bibliothek:", selectedLibrary);
+    if (isbn && selectedLibrary) {
+      console.log("ISBN gefunden:", isbn);
+      const { available } = await checkAvailability(isbn, selectedLibrary);
 
-    if (available === false) {
-      if (title) {
-        console.log("Titel gefunden:", title);
-        const available = await checkAvailabilityByTitle(title);
-        console.log("Verfügbarkeit:", available);
-        showAvailability(available);
+      if (available === false) {
+        if (title) {
+          console.log("Titel gefunden:", title);
+          const { available, isbn: titleIsbn } = await checkAvailabilityByTitle(
+            title,
+            selectedLibrary
+          );
+          console.log("Verfügbarkeit:", available);
+          showAvailability(available, titleIsbn);
+        } else {
+          console.log("Kein Titel gefunden");
+        }
+      } else {
+        showAvailability(available, isbn);
       }
     } else {
-      showAvailability(available);
+      console.log("Keine Daten gefunden");
     }
-  } else {
-    console.log("Keine Daten gefunden");
-  }
+  });
 }
 
 // Ausführung wenn Seite geladen ist
