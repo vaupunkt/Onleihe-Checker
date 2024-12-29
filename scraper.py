@@ -24,7 +24,7 @@ DB_PORT = os.getenv('DB_PORT')
 DB_NAME = os.getenv('DB_NAME')
 
 DATABASE_URL = f'mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
-
+print(DATABASE_URL)
 engine = create_engine(
     DATABASE_URL,
     pool_recycle=3600,
@@ -62,6 +62,7 @@ def fetch_and_store_libraries(session):
         libraries = get_libraries()
         logging.info("Storing libraries to db...")
         store_libraries(libraries, session)
+        logging.info("Libraries stored")
     except Exception as e:
         logging.error(f"Error fetching/storing libraries: {e}")
 
@@ -83,7 +84,7 @@ def main():
     try:
         with open("scraper.log", "r") as f:
             for line in f:
-                if "Fetching libraries..." in line:
+                if "Libraries stored" in line:
                     last_log = line.split(" - ")[0]
 
         with session_scope() as session:

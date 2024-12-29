@@ -3,18 +3,22 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from bs4 import BeautifulSoup
 import time
 
 def get_categories(library):
     url = library.baseURL + "/frontend/mediaList,0-0-0-102-0-0-0-0-400001-0-0.html"
-    # Setup Chrome options for headless mode
+     # Setup Chrome options for headless mode
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--disable-dev-shm-usage')
+    chrome_options.binary_location = '/usr/bin/google-chrome'
     
     # Initialize headless Chrome driver
-    driver = webdriver.Chrome(options=chrome_options)
+    service = Service('/usr/local/bin/chromedriver')
+    driver = webdriver.Chrome(service=service, options=chrome_options)
     driver.get(url)
    
     try:

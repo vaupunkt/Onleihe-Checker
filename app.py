@@ -11,7 +11,7 @@ CORS(app)
 def home():
     return "Onleihe API is running!"
 
-@app.route('/libraries')
+@app.route('/libraries', methods=['GET'])
 def get_libraries():
     try:
         libraries = session.query(Library).all()
@@ -24,7 +24,7 @@ def get_libraries():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
-@app.route("/library/<library_id>")
+@app.route("/library/<library_id>", methods=['GET'])
 def get_library(library_id):
     try:
         library = session.query(Library).filter(Library.id == library_id).first()
@@ -42,7 +42,7 @@ def get_library(library_id):
         return jsonify({'error': str(e)}), 500
     
 
-@app.route('/books/<isbn>')
+@app.route('/books/<isbn>', methods=['GET'])
 def check_book(isbn):
     try:
         library_id = request.args.get('library')
@@ -77,7 +77,7 @@ def check_book(isbn):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/title/<query>')
+@app.route('/title/<query>', methods=['GET'])
 def search_title(query):
     try:
         library_id = request.args.get('library')
@@ -130,23 +130,6 @@ def search_title(query):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Endpoint zum Testen der Datenbankverbindung
-@app.route('/test-db')
-def test_db():
-    try:
-        # Versuche, die Anzahl der Bücher zu zählen
-        book_count = session.query(Book).count()
-        library_count = session.query(Library).count()
-        return jsonify({
-            'status': 'success',
-            'book_count': book_count,
-            'library_count': library_count
-        })
-    except Exception as e:
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(app.run(host='0.0.0.0', port=8000))
