@@ -1,7 +1,6 @@
 # Use the official Python image from the Docker Hub
 FROM python:3.10-slim
 
-
 RUN apt-get update && apt-get install -y \
     wget \
     unzip \
@@ -42,10 +41,10 @@ RUN apt-get update && apt-get install -y \
     google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
 
-RUN wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$(curl -s http://chromedriver.storage.googleapis.com/LATEST_RELEASE)/chromedriver_linux64.zip
+# Instead of using the Chrome version, use the latest chromedriver version directly
+RUN wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$(curl -s https://chromedriver.storage.googleapis.com/LATEST_RELEASE)/chromedriver_linux64.zip
 RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
 RUN chmod +x /usr/local/bin/chromedriver
-
 
 # Set the working directory
 WORKDIR /app
@@ -68,4 +67,3 @@ EXPOSE 8000
 
 # Run the application
 CMD ["sh", "-c", "./wait-for-it.sh db:3306 -- python create_tables.py && gunicorn -w 4 -b 0.0.0.0:8000 app:app"]
-
