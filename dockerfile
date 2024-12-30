@@ -41,9 +41,14 @@ RUN apt-get update && apt-get install -y \
     google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
 
-# Instead of using the Chrome version, use the latest chromedriver version directly
-RUN wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$(curl -s https://chromedriver.storage.googleapis.com/LATEST_RELEASE)/chromedriver_linux64.zip
-RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
+# Download the latest ChromeDriver version that supports Chrome 131
+RUN wget -O /tmp/chromedriver-linux64.zip https://storage.googleapis.com/chrome-for-testing-public/131.0.6778.204/linux64/chromedriver-linux64.zip
+
+# Extract the ChromeDriver binary and make it executable
+RUN unzip /tmp/chromedriver-linux64.zip chromedriver-linux64/chromedriver -d /tmp
+RUN mv /tmp/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+
+# Set permissions on the extracted binary (assuming correct path)
 RUN chmod +x /usr/local/bin/chromedriver
 
 # Set the working directory
