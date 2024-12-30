@@ -1,7 +1,7 @@
 app = "onleihe-scraper"
 
 [build]
-  image = "docker.io/dein-docker-image"
+  image = "onleihe-scraper-web"
 
 [[services]]
   internal_port = 8000
