@@ -14,8 +14,14 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: mysql+pymysql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
     env_file:
       - .env
     depends_on:
       - db
+    command:
+      [
+        "sh",
+        "-c",
+        "./wait-for-it.sh db:3306 -- python create_tables.py && gunicorn -w 4 -b 0.0.0.0:8000 app:app",
+      ]
