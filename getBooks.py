@@ -102,8 +102,8 @@ def get_books(library, session1, Session2):
 
                             authors = "; ".join([author.text for author in value_list])
                             attributes[key] = authors
-                        elif key == 'ISBN':
-                            attributes[key] = value[0]
+                        # elif key == 'ISBN':
+                        #     attributes[key] = value[0]
                         else: attributes[key] = value
 
                     title = title

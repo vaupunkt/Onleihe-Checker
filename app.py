@@ -29,11 +29,18 @@ def get_library(library_id):
     try:
         library = session.query(Library).filter(Library.id == library_id).first()
         if library:
+            books = session.query(Book).filter(Book.library_ids.contains(library_id)).all()
             return jsonify({
                 'id': library.id,
                 'name': library.name,
                 'baseURL': library.baseURL,
-                'country': library.country
+                'country': library.country,
+                'books': [{
+                    'title': book.title,
+                    'author': book.author,
+                    'isbn': book.isbn,
+                    'link': book.link
+                } for book in books]
             })
         return jsonify({
             'message': 'Library not found'
@@ -46,7 +53,7 @@ def get_library(library_id):
 def check_book(isbn):
     try:
         library_id = request.args.get('library')
-        book = session.query(Book).filter_by(isbn=isbn).first()
+        book = session.query(Book).filter_by(Book.isbn.in_(isbn)).first()
         if book and library_id:
             availableLibraries = book.library_ids.split('; ')
             if library_id in availableLibraries:
