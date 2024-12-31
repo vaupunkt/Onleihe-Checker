@@ -31,6 +31,7 @@ RUN apt-get update && apt-get install -y \
     libxss1 \
     lsb-release \
     xdg-utils \
+    cron \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -sSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-linux-signing-key.gpg
@@ -51,6 +52,9 @@ RUN mv /tmp/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
 # Set permissions on the extracted binary (assuming correct path)
 RUN chmod +x /usr/local/bin/chromedriver
 
+# Install cron
+RUN apt-get update && apt-get install -y cron
+
 # Set the working directory
 WORKDIR /app
 
@@ -63,6 +67,9 @@ RUN pip install -r requirements.txt
 
 # Copy the rest of the application code into the image
 COPY . .
+
+COPY crontab /etc/crontabs/root
+
 
 # Set the environment variable to tell Flask to run in production
 ENV FLASK_ENV=production

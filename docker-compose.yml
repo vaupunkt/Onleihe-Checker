@@ -8,6 +8,8 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3306:3306"
+    env_file:
+      - .env
 
   web:
     build: .
@@ -23,5 +25,5 @@ services:
       [
         "sh",
         "-c",
-        "./wait-for-it.sh db:3306 -- python create_tables.py && gunicorn -w 4 -b 0.0.0.0:8000 app:app",
+        "./wait-for-it.sh db:3306 -t 60 -- python create_tables.py && gunicorn -w 4 -b 0.0.0.0:8000 app:app",
       ]
