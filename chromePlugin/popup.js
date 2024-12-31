@@ -1,7 +1,7 @@
-// Verbindung zur API/Datenbank herstellen
+// Connect to API/Database
 async function getLibraries() {
   try {
-    const response = await fetch("http://127.0.0.1:5000/libraries");
+    const response = await fetch("http://164.90.234.103:8000/libraries");
     const libraries = await response.json();
     const sortedLibraries = libraries.sort((a, b) =>
       a.name.localeCompare(b.name)
@@ -13,7 +13,7 @@ async function getLibraries() {
   }
 }
 
-// Bibliotheken in Dropdown laden
+// Load libraries into dropdown
 async function populateLibrarySelect() {
   const select = document.getElementById("librarySelect");
   const libraries = await getLibraries();
@@ -25,7 +25,7 @@ async function populateLibrarySelect() {
     select.appendChild(option);
   });
 
-  // Gespeicherte Auswahl wiederherstellen
+  // Restore saved selection
   chrome.storage.sync.get(["selectedLibrary"], function (result) {
     if (result.selectedLibrary) {
       select.value = result.selectedLibrary;
@@ -33,18 +33,18 @@ async function populateLibrarySelect() {
   });
 }
 
-// Event Listener für Änderungen
+// Event listener for changes
 document
   .getElementById("librarySelect")
   .addEventListener("change", function (e) {
     const selectedLibrary = e.target.value;
     chrome.storage.sync.set({ selectedLibrary: selectedLibrary }, function () {
       const status = document.getElementById("status");
-      status.textContent = "Einstellungen gespeichert!";
+      status.textContent = "Settings saved!";
       status.style.backgroundColor = "#4CAF50";
       status.style.color = "white";
     });
   });
 
-// Initialisierung
+// Initialization
 document.addEventListener("DOMContentLoaded", populateLibrarySelect);

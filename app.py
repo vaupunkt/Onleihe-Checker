@@ -53,7 +53,7 @@ def get_library(library_id):
 def check_book(isbn):
     try:
         library_id = request.args.get('library')
-        book = session.query(Book).filter_by(Book.isbn.in_(isbn)).first()
+        book = session.query(Book).filter(Book.isbn.contains(isbn)).first()
         if book and library_id:
             availableLibraries = book.library_ids.split('; ')
             if library_id in availableLibraries:

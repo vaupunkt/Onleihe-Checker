@@ -130,6 +130,38 @@ async function initializePlugin() {
   // Wait for page to load
   await new Promise((resolve) => setTimeout(resolve, 100));
 
+  const existingContainer = document.getElementById("onleihe-availability");
+  if (existingContainer) {
+    existingContainer.remove();
+  }
+
+  const container = document.createElement("div");
+  container.id = "onleihe-availability";
+  container.style.padding = "10px";
+  container.style.margin = "10px 0";
+  container.style.borderRadius = "5px";
+  container.style.fontSize = "16px";
+  container.style.fontWeight = "bold";
+  container.style.textAlign = "center";
+  container.style.backgroundColor = "#FFA500";
+  container.style.color = "white";
+  container.textContent = "Checking if book is available...";
+
+  // Different possible insertion points for the display
+  const insertionPoints = [
+    document.getElementById("buybox"),
+    document.getElementById("dp"),
+    document.querySelector(".dp-container"),
+  ];
+
+  for (const point of insertionPoints) {
+    if (point) {
+      point.insertAdjacentElement("beforebegin", container);
+      console.log("Availability container inserted");
+      break;
+    }
+  }
+
   const isbn = findISBN();
   const title = findBookTitle();
 
@@ -179,7 +211,9 @@ window.addEventListener("load", initializePlugin);
 
 async function getLibraryData(libraryId) {
   try {
-    const response = await fetch("http://127.0.0.1:5000/library/" + libraryId);
+    const response = await fetch(
+      "http://164.90.234.103:8000/library/" + libraryId
+    );
     const data = await response.json();
     return data;
   } catch (error) {

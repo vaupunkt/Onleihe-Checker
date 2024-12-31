@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Onleihe Checker",
   "version": "1.0",
-  "description": "Prüft, ob Bücher von Amazon in deiner Onleihe-Bibliothek verfügbar sind",
+  "description": "Checks if books from Amazon are available in your Onleihe library",
   "permissions": ["activeTab", "storage"],
   "host_permissions": ["*://*.amazon.de/*"],
   "action": {
