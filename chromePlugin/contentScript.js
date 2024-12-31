@@ -1,8 +1,8 @@
-// ISBN auf Amazon-Seite finden
+// Find ISBN on Amazon page
 function findISBN() {
-  // Verschiedene Möglichkeiten, die ISBN zu finden
+  // Different ways to find the ISBN
   const possibleISBNSelectors = [
-    "#rpi-attribute-book_details-isbn13 .a-section.a-spacing-none.a-text-center.rpi-attribute-value span", // Neues Amazon Format
+    "#rpi-attribute-book_details-isbn13 .a-section.a-spacing-none.a-text-center.rpi-attribute-value span", // New Amazon Format
   ];
 
   for (const selector of possibleISBNSelectors) {
@@ -20,9 +20,9 @@ function findISBN() {
 }
 
 function findBookTitle() {
-  // Verschiedene Möglichkeiten, den Titel zu finden
+  // Different ways to find the title
   const possibleTitleSelectors = [
-    "#productTitle", // Neues Amazon Format
+    "#productTitle", // New Amazon Format
   ];
 
   for (const selector of possibleTitleSelectors) {
@@ -35,11 +35,11 @@ function findBookTitle() {
   return null;
 }
 
-// Prüfen ob Buch in Bibliothek verfügbar ist
+// Check if book is available in library
 async function checkAvailability(isbn, libraryId) {
   try {
     const response = await fetch(
-      `http://127.0.0.1:5000/books/${isbn}?library=${libraryId}`
+      `http://164.90.234.103:8000/books/${isbn}?library=${libraryId}`
     );
     const data = await response.json();
     return data;
@@ -52,7 +52,9 @@ async function checkAvailability(isbn, libraryId) {
 async function checkAvailabilityByTitle(title, libraryId) {
   try {
     const response = await fetch(
-      `http://127.0.0.1:5000/title/${decodeURI(title)}?library=${libraryId}`
+      `http://164.90.234.103:8000/title/${decodeURI(
+        title
+      )}?library=${libraryId}`
     );
     const data = await response.json();
     return data;
@@ -62,9 +64,9 @@ async function checkAvailabilityByTitle(title, libraryId) {
   }
 }
 
-// Verfügbarkeitsanzeige einfügen
+// Insert availability display
 async function showAvailability(available, isbn) {
-  // Entferne vorhandene Anzeige falls vorhanden
+  // Remove existing display if present
   const existingContainer = document.getElementById("onleihe-availability");
   if (existingContainer) {
     existingContainer.remove();
@@ -89,7 +91,7 @@ async function showAvailability(available, isbn) {
 
     const link = document.createElement("a");
     link.href = linkToTitle;
-    link.textContent = "Zum Buch";
+    link.textContent = "Go to Book";
     link.target = "_blank";
     link.style.color = "white";
     link.style.textDecoration = "underline";
@@ -97,16 +99,15 @@ async function showAvailability(available, isbn) {
 
     container.style.backgroundColor = "#4CAF50";
     container.style.color = "white";
-    container.textContent = "Dieses Buch ist in deiner Bibliothek verfügbar!";
+    container.textContent = "This book is available in your library!";
     container.appendChild(link);
   } else {
     container.style.backgroundColor = "#f44336";
     container.style.color = "white";
-    container.textContent =
-      "Dieses Buch ist in deiner Bibliothek nicht verfügbar.";
+    container.textContent = "This book is not available in your library.";
   }
 
-  // Verschiedene Möglichkeiten, wo die Anzeige eingefügt werden kann
+  // Different possible insertion points for the display
   const insertionPoints = [
     document.getElementById("buybox"),
     document.getElementById("dp"),
@@ -122,9 +123,9 @@ async function showAvailability(available, isbn) {
   }
 }
 
-// Hauptfunktion
+// Main function
 async function initializePlugin() {
-  console.log("Amazon-Plugin wird initialisiert...");
+  console.log("Amazon plugin initializing...");
 
   // Wait for page to load
   await new Promise((resolve) => setTimeout(resolve, 100));
@@ -166,14 +167,14 @@ async function initializePlugin() {
   console.log("No availability data found");
 }
 
-// Ausführung wenn Seite geladen ist
+// Execute when page is loaded
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initializePlugin);
 } else {
   initializePlugin();
 }
 
-// Zusätzlicher Event Listener für dynamisch nachgeladene Inhalte
+// Additional event listener for dynamically loaded content
 window.addEventListener("load", initializePlugin);
 
 async function getLibraryData(libraryId) {

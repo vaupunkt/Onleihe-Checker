@@ -10,12 +10,11 @@ This script collects information from the Onleihe platform, which is used by Ger
 
 - Scrapes book information from Onleihe websites
 - Stores library and book data in a database
-- Tracks digital media availability
 
 ## Requirements
 
 - Python 3.x
-- Database system (details to be specified)
+- Docker
 
 ## Usage
 
