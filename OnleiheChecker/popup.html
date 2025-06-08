@@ -4,73 +4,238 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Onleihe Checker</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Base styles */
         body {
-            width: 320px;
-            font-family: 'Inter', sans-serif;
-            @apply bg-gray-100 text-gray-800 p-4;
+            width: 300px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            color: #2d3748;
+            padding: 0;
+            margin: 0;
+        
         }
+
         .container {
-            @apply flex flex-col space-y-4;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            border-radius: 0 0 8px 8px;
+         
         }
-        select, button, input[type="text"] {
-            @apply w-full p-2 rounded-md border border-gray-300;
+
+        /* Flexbox and spacing container */
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .flex.flex-col.space-y-3 { gap: 0.75rem; }
+
+        /* Form elements */
+        .search-container {
+            position: relative;
         }
-        select, input[type="text"] {
-            @apply bg-white;
+
+        #library-search {
+            padding: 0.75rem 2.5rem 0.75rem 0.75rem;
+            border-radius: 6px;
+            border: 2px solid #e2e8f0;
+            background: #ffffff;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
+
+        #library-search:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+
+        #library-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .dropdown-item:hover {
+            background: #f8fafc;
+        }
+
+        .dropdown-item.selected {
+            background: #667eea;
+            color: white;
+        }
+
+        .dropdown-group {
+            font-weight: 600;
+            color: #4a5568;
+            background: #f7fafc;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Labels */
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Button styling */
         button {
-            @apply bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200;
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
         }
-        .message-box {
-            @apply bg-blue-100 text-blue-800 p-3 rounded-md text-sm;
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(102, 126, 234, 0.4);
         }
-        .warning-box {
-            @apply bg-yellow-100 text-yellow-800 p-3 rounded-md text-sm;
+
+        button:active {
+            transform: translateY(0);
         }
-        .info-box {
-            @apply bg-gray-200 text-gray-700 p-3 rounded-md text-sm;
+
+        /* Sizing */
+        .hidden { display: none; }
+
+        /* Message boxes */
+        .message-box { 
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            border-left: 3px solid;
+            animation: slideIn 0.3s ease;
         }
-        .success-box {
-            @apply bg-green-100 text-green-800 p-3 rounded-md text-sm;
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .error-box {
-            @apply bg-red-100 text-red-800 p-3 rounded-md text-sm;
+
+        .info-box { 
+            color: #2b6cb0;
         }
-        /* Style für Optgroup-Header */
-        optgroup {
-            font-weight: bold;
-            color: #333;
+
+        .warning-box { 
+            color: #b45309;
+            border-left-color: #d69e2e;
+        }
+
+        .success-box { 
+            background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+            color: #2f855a;
+            border-left-color: #38a169;
+        }
+
+        .error-box { 
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            color: #c53030;
+            border-left-color: #e53e3e;
+        }
+
+        /* Divider */
+        hr {
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+            margin: 0.5rem 0;
+        }
+
+        /* Header styling */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem;
+            margin: -1rem -1rem 1rem -1rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Subtle animations */
+        .container > * {
+            animation: fadeInUp 0.3s ease forwards;
+            opacity: 0;
+        }
+
+        .container > *:nth-child(1) { animation-delay: 0.1s; }
+        .container > *:nth-child(2) { animation-delay: 0.2s; }
+        .container > *:nth-child(3) { animation-delay: 0.3s; }
+        .container > *:nth-child(4) { animation-delay: 0.4s; }
+        .container > *:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="text-lg font-semibold text-center mb-2">Onleihe Checker</h1>
-
-        <div class="info-box">
-            Wähle deine Bibliothek aus oder suche danach und speichere sie.
+        <div class="header">
+            <h1>📚 Onleihe Checker</h1>
         </div>
 
-        <label for="search-input" class="block text-sm font-medium text-gray-700">Bibliothek suchen:</label>
-        <input type="text" id="search-input" placeholder="Nach Bibliothek suchen..." class="focus:ring-blue-500 focus:border-blue-500">
+        <div class="flex flex-col space-y-3">
+            <div class="info-box">
+                Suche und wähle deine Bibliothek aus.
+            </div>
 
-        <label for="library-select" class="block text-sm font-medium text-gray-700">Bibliothek wählen:</label>
-        <select id="library-select" class="focus:ring-blue-500 focus:border-blue-500">
-            <!-- Optionen und Optgroups werden von JavaScript eingefügt -->
-        </select>
+            <div>
+                <label for="library-search">🔍 Bibliothek suchen & auswählen:</label>
+                <div class="search-container">
+                    <input type="text" id="library-search" placeholder="Bibliothek suchen...">
+                    <div id="library-dropdown">
+                        <!-- Dropdown-Optionen werden von JavaScript eingefügt -->
+                    </div>
+                </div>
+            </div>
 
-        <button id="save-library-btn" class="save-button">Bibliothek speichern</button>
-        
-        <div id="message" class="message-box hidden"></div>
+            <button id="save-library-btn">💾 Bibliothek speichern</button>
+            
+            <div id="message" class="message-box hidden"></div>
 
-        <hr class="border-t border-gray-300 my-4">
+            <hr>
 
-        <div class="info-box">
-            Öffne eine Amazon.de Buchseite, um die Onleihe-Verfügbarkeit zu sehen.
+            <div class="info-box">
+                🌐 Öffne eine Amazon.de Buchseite für die Verfügbarkeitsprüfung.
+            </div>
         </div>
-        <!-- Die Anzeige der Buchinfos und Onleihe-Prüfergebnisse erfolgt jetzt direkt auf der Amazon-Seite via content.js -->
     </div>
 
     <script src="popup.js"></script>

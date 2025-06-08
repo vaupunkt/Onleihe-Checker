@@ -9,6 +9,42 @@ from selenium.webdriver.chrome.options import Options
 import re
 import json
 import time
+from urllib.parse import urlparse
+
+def clean_base_url(url):
+    """
+    Clean baseURL by removing frontend paths and query parameters.
+    Keep only the base domain and main path segment.
+    """
+    if not url:
+        return url
+    
+    # Parse the URL
+    parsed = urlparse(url)
+    
+    # Start with the base URL (scheme + netloc)
+    clean_url = f"{parsed.scheme}://{parsed.netloc}"
+    
+    # Process the path
+    path_parts = [part for part in parsed.path.split('/') if part]
+    
+    # Keep only the main path segment (like 'thuebibnet', 'verbund_hessen', etc.)
+    # Remove 'frontend' and everything after it
+    clean_path_parts = []
+    for part in path_parts:
+        if part == 'frontend':
+            break
+        clean_path_parts.append(part)
+    
+    # Add the cleaned path
+    if clean_path_parts:
+        clean_url += '/' + '/'.join(clean_path_parts)
+    
+    # Ensure trailing slash for consistency
+    if not clean_url.endswith('/'):
+        clean_url += '/'
+    
+    return clean_url
 
 def get_libraries_and_save_to_json():
     url = "https://hilfe.onleihe.de/hilfe-onleihe-de/deine-onleihe-finden/c-3750"
@@ -32,9 +68,6 @@ def get_libraries_and_save_to_json():
         driver.get(url)
         print(f"Seite geladen: {url}")
 
-        # Screenshot VOR der Cookie-Interaktion
-        driver.save_screenshot('debug_onleihe_page_initial.png')
-        print("Screenshot 'debug_onleihe_page_initial.png' erstellt (Zustand vor Cookie-Interaktion).")
 
         print("Versuche, den Cookie-Banner zu schließen/akzeptieren...")
         try:
@@ -62,10 +95,6 @@ def get_libraries_and_save_to_json():
                 print(f"Fehler beim Klicken per JavaScript: {js_e}")
                 print("Fahre fort ohne Cookie-Interaktion (dies könnte das Scraping blockieren).")
         
-        # Screenshot NACH der Cookie-Interaktion (oder dem fehlgeschlagenen Versuch)
-        driver.save_screenshot('debug_onleihe_page_after_cookie.png')
-        print("Screenshot 'debug_onleihe_page_after_cookie.png' erstellt (Zustand nach Cookie-Interaktion).")
-
         # Warte auf das Haupt-Content-Element ('Onleihen in Deutschland') als Marker
         print("Warte auf das Haupt-Content-Element ('Onleihen in Deutschland')...")
         WebDriverWait(driver, 20).until(
@@ -142,14 +171,16 @@ def get_libraries_and_save_to_json():
                         if a_tag:
                             found_any_library = True
                             name = a_tag.get_text(strip=True)
-                            baseURL = a_tag.get('href')
+                            raw_baseURL = a_tag.get('href')
+                            # Clean the baseURL to remove frontend paths and parameters
+                            baseURL = clean_base_url(raw_baseURL)
 
                             libraries.append({
                                 'name': name,
                                 'baseURL': baseURL,
                                 'country': current_country_code,
                             })
-                            # print(f"    -> Bibliothek hinzugefügt ({li_idx}): '{name}' ({clean_baseURL})")
+                            # print(f"    -> Bibliothek hinzugefügt ({li_idx}): '{name}' ({baseURL})")
                         # else:
                             # print(f"    -> LI-Element {li_idx} ohne anklickbaren Link gefunden.")
                 # elif sibling.name == 'p': # Zeigt die Buchstaben-Header an

@@ -1,67 +1,106 @@
 // content.js
-// Dieses Skript läuft auf Amazon.de Seiten.
-console.log("Onleihe Checker: content.js wird geladen!"); // DIESER LOG MUSS ERSCHEINEN!
+// This script runs on Amazon.de pages.
 
-// Funktion zum Erstellen und Einfügen des Onleihe-Statusfelds
-function injectOnleiheStatusField() {
-    console.log("Onleihe Checker: Starte Suche nach geeigneten Elementen für Statusfeld-Injektion...");
-    let targetElement = document.getElementById('productTitle'); // Oben beim Titel
-    if (targetElement) {
-        console.log("Onleihe Checker: productTitle gefunden als Ziel.");
-    } else {
-        console.log("Onleihe Checker: productTitle nicht gefunden. Versuche detailBulletsWrapper_feature_div...");
-        targetElement = document.getElementById('detailBulletsWrapper_feature_div'); // Bei den Produktdetails
-        if (targetElement) {
-            console.log("Onleihe Checker: detailBulletsWrapper_feature_div gefunden als Ziel.");
-        } else {
-            console.log("Onleihe Checker: detailBulletsWrapper_feature_div nicht gefunden. Versuche dp-container...");
-            targetElement = document.getElementById('dp-container'); // Als Fallback irgendwo sichtbar
-            if (targetElement) {
-                console.log("Onleihe Checker: dp-container gefunden als Ziel.");
+// ==============================================================================
+// Helper functions for DOM manipulation and waiting for elements
+// ==============================================================================
+
+/**
+ * Waits until a specific DOM element becomes visible on the page.
+ * Uses MutationObserver and requestAnimationFrame for robust detection.
+ * @param {string} selector - The CSS selector of the element to wait for.
+ * @param {number} timeout - Maximum timeout in milliseconds.
+ * @returns {Promise<HTMLElement>} A Promise that resolves the element once found.
+ */
+function waitForElement(selector, timeout = 15000) {
+    return new Promise((resolve, reject) => {
+        const startTime = Date.now();
+        let frameRequest;
+        let observer;
+
+        const checkElement = () => {
+            const element = document.querySelector(selector);
+            if (element) {
+                if (observer) observer.disconnect();
+                if (frameRequest) cancelAnimationFrame(frameRequest);
+                resolve(element);
+            } else if (Date.now() - startTime > timeout) {
+                if (observer) observer.disconnect();
+                if (frameRequest) cancelAnimationFrame(frameRequest);
+                reject(new Error(`Timeout: Element '${selector}' not found.`));
             } else {
-                console.log("Onleihe Checker: Alle spezifischen Ziele nicht gefunden. Versuche body als letzten Fallback...");
-                targetElement = document.body; // Letzter Fallback: direkt in den Body einfügen
-                if (targetElement) {
-                    console.log("Onleihe Checker: Body als Ziel gefunden (Fallback).");
-                }
+                frameRequest = requestAnimationFrame(checkElement);
             }
+        };
+
+        if (document.body) {
+            observer = new MutationObserver(() => {
+                checkElement();
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
+
+        checkElement();
+    });
+}
+
+// Function to create and inject the Onleihe status field
+async function injectOnleiheStatusField() {
+    // Check if field already exists to avoid duplicates
+    if (document.getElementById('onleihe-checker-status')) {
+        return document.getElementById('onleihe-checker-status');
+    }
+
+    let targetElement = null;
+    const selectors = [
+        '#productTitle',
+        '#detailBulletsWrapper_feature_div',
+        '#corePriceDisplay_desktop_feature_div',
+        '#dp',
+        '#dp-container',
+        'body'
+    ];
+
+    for (const selector of selectors) {
+        try {
+            targetElement = await waitForElement(selector, 8000);
+            if (targetElement) break;
+        } catch (error) {
+            // Continue to next selector
         }
     }
 
     if (!targetElement) {
-        console.warn("Onleihe Checker: KEIN geeignetes Element zum Einfügen des Statusfeldes gefunden. Das Feld wird NICHT angezeigt.");
+        console.error("Onleihe Checker: No suitable element found for injecting status field.");
         return null;
-    }
-
-    // Prüfe, ob das Feld bereits existiert, um Doppelungen zu vermeiden
-    if (document.getElementById('onleihe-checker-status')) {
-        console.log("Onleihe Checker: Statusfeld existiert bereits, überspringe Injektion.");
-        return document.getElementById('onleihe-checker-status');
     }
 
     const onleiheStatusDiv = document.createElement('div');
     onleiheStatusDiv.id = 'onleihe-checker-status';
-    onleiheStatusDiv.className = 'a-section a-spacing-small a-color-secondary'; // Amazon-ähnliche Klassen
-    onleiheStatusDiv.style.marginTop = '15px';
-    onleiheStatusDiv.style.padding = '10px';
-    onleiheStatusDiv.style.border = '1px solid #ccc';
-    onleiheStatusDiv.style.borderRadius = '8px';
-    onleiheStatusDiv.style.backgroundColor = '#f7f7f7'; // Helles Grau
-    onleiheStatusDiv.style.fontFamily = 'Inter, sans-serif'; // Konsistente Schriftart
-
+    onleiheStatusDiv.className = 'a-section a-spacing-small a-color-secondary';
+    onleiheStatusDiv.style.cssText = `
+        margin-top: 15px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background-color: #f7f7f7;
+        font-family: 'Inter', sans-serif;
+        color: #333;
+    `;
+    
     onleiheStatusDiv.innerHTML = `
         <div style="display: flex; align-items: center;">
             <div id="onleihe-status-spinner" style="
                 border: 4px solid rgba(0, 0, 0, 0.1);
-                border-left-color: #2563eb; /* Blau */
+                border-left-color: #2563eb;
                 border-radius: 50%;
                 width: 20px;
                 height: 20px;
                 animation: spin 1s linear infinite;
                 margin-right: 10px;
-                display: none; /* Standardmäßig versteckt */
+                display: none;
             "></div>
-            <p id="onleihe-status-message" style="margin: 0; font-size: 14px; color: #333;">Lade Onleihe-Informationen...</p>
+            <p id="onleihe-status-message" style="margin: 0; font-size: 14px; color: inherit;">Loading Onleihe information...</p>
         </div>
         <style>
             @keyframes spin {
@@ -71,74 +110,77 @@ function injectOnleiheStatusField() {
     `;
     
     try {
-        // Füge das Element ein. Bei body als targetElement wird es an den Anfang des Bodys eingefügt.
-        if (targetElement === document.body) {
-            targetElement.insertBefore(onleiheStatusDiv, targetElement.firstChild);
+        if (targetElement.id === 'dp-container' || targetElement.id === 'dp' || targetElement.tagName === 'BODY') {
+            if (targetElement.querySelector('h1')) { 
+                targetElement.querySelector('h1').after(onleiheStatusDiv);
+            } else if (targetElement.firstChild) {
+                targetElement.insertBefore(onleiheStatusDiv, targetElement.firstChild);
+            } else {
+                targetElement.appendChild(onleiheStatusDiv);
+            }
         } else {
             targetElement.parentNode.insertBefore(onleiheStatusDiv, targetElement.nextSibling);
         }
-        console.log("Onleihe Checker: Statusfeld erfolgreich auf Amazon-Seite eingefügt.");
         return onleiheStatusDiv;
     } catch (e) {
-        console.error("Onleihe Checker: FEHLER beim Einfügen des Statusfeldes in den DOM:", e);
+        console.error("Onleihe Checker: Error injecting status field:", e);
         return null;
     }
 }
 
-// Funktion zum Aktualisieren des Statusfelds
+// Function to update the status field
 function updateOnleiheStatus(statusDiv, message, type = 'info', onleiheUrl = null) {
     const spinner = statusDiv.querySelector('#onleihe-status-spinner');
     const msgElement = statusDiv.querySelector('#onleihe-status-message');
 
-    spinner.style.display = 'none'; // Spinner immer ausblenden, es sei denn, es ist 'loading'
+    spinner.style.display = 'none';
     
-    statusDiv.style.backgroundColor = '#f7f7f7'; // Standard
-    statusDiv.style.borderColor = '#ccc'; // Standard
-    statusDiv.style.color = '#333'; // Standard
+    statusDiv.style.backgroundColor = '#f7f7f7';
+    statusDiv.style.borderColor = '#ccc';
+    statusDiv.style.color = '#333';
 
     if (type === 'loading') {
         spinner.style.display = 'block';
         msgElement.innerHTML = message;
     } else if (type === 'success') {
-        statusDiv.style.backgroundColor = '#e6ffe6'; // Grünton
+        statusDiv.style.backgroundColor = '#e6ffe6';
         statusDiv.style.borderColor = '#66cc66';
-        statusDiv.style.color = '#1f8b1f'; // Dunkelgrün
+        statusDiv.style.color = '#1f8b1f';
         msgElement.innerHTML = `<strong>${message}</strong>`;
         if (onleiheUrl) {
-            msgElement.innerHTML += `<br><a href="${onleiheUrl}" target="_blank" style="color: #007bff; text-decoration: underline;">Im Onleihe-Katalog ansehen</a>`;
+            msgElement.innerHTML += `<br><a href="${onleiheUrl}" target="_blank" style="color: #007bff; text-decoration: underline;">View in Onleihe catalog</a>`;
         }
     } else if (type === 'not_found') {
-        statusDiv.style.backgroundColor = '#ffe6e6'; // Rotton
+        statusDiv.style.backgroundColor = '#ffe6e6';
         statusDiv.style.borderColor = '#ff6666';
-        statusDiv.style.color = '#cc0000'; // Dunkelrot
+        statusDiv.style.color = '#cc0000';
         msgElement.innerHTML = `<strong>${message}</strong>`;
         if (onleiheUrl) {
-            msgElement.innerHTML += `<br><a href="${onleiheUrl}" target="_blank" style="color: #007bff; text-decoration: underline;">Direkt im Onleihe-Katalog suchen</a>`;
+            msgElement.innerHTML += `<br><a href="${onleiheUrl}" target="_blank" style="color: #007bff; text-decoration: underline;">Search directly in Onleihe catalog</a>`;
         }
     } else if (type === 'error') {
-        statusDiv.style.backgroundColor = '#fff0e6'; // Orangeton
+        statusDiv.style.backgroundColor = '#fff0e6';
         statusDiv.style.borderColor = '#ff9933';
-        statusDiv.style.color = '#e65c00'; // Dunkelorange
+        statusDiv.style.color = '#e65c00';
         msgElement.innerHTML = `<strong>${message}</strong>`;
-    } else { // info oder default
+    } else {
         msgElement.innerHTML = message;
     }
 }
 
-
-// --- Buchinformationen von Amazon-Seite extrahieren ---
+// ==============================================================================
+// Extract book information from Amazon page
+// ==============================================================================
 function getBookInfoFromAmazon() {
     let isbn = null;
     let title = null;
     let author = null;
 
-    console.log("Content script: Starte Suche nach Buchinformationen auf Amazon.de...");
-
-    // Titel extrahieren und bereinigen
+    // Extract and clean title
     const titleElement = document.getElementById('productTitle');
     if (titleElement) {
         let fullTitle = titleElement.textContent.trim();
-        const separators = [':', '|', '(', '[', '—', ' - '];
+        const separators = [':', '|', '(', '[', '—', ' - ','.'];
         for (const sep of separators) {
             const index = fullTitle.indexOf(sep);
             if (index !== -1) {
@@ -146,12 +188,11 @@ function getBookInfoFromAmazon() {
             }
         }
         title = fullTitle;
-        console.log("Content script: Bereinigter Titel:", title);
     } else {
         const fallbackTitleElement = document.querySelector('h1 span.a-text-bold, h1 span#ebooksProductTitle');
         if (fallbackTitleElement) {
             let fullTitle = fallbackTitleElement.textContent.trim();
-            const separators = [':', '|', '(', '[', '—', ' - '];
+            const separators = [':', '|', '(', '[', '—', ' - ', '.'];
             for (const sep of separators) {
                 const index = fullTitle.indexOf(sep);
                 if (index !== -1) {
@@ -159,13 +200,10 @@ function getBookInfoFromAmazon() {
                 }
             }
             title = fullTitle;
-            console.log("Content script: Bereinigter Titel (Fallback):", title);
-        } else {
-            console.log("Content script: Titel-Element nicht gefunden.");
         }
     }
 
-    // Autor extrahieren (nur Nachname)
+    // Extract author (last name only)
     const authorElement = document.querySelector('.author a.a-link-normal, .contributorNameID a.a-link-normal');
     let fullAuthorName = null;
 
@@ -190,16 +228,13 @@ function getBookInfoFromAmazon() {
     if (fullAuthorName) {
         const nameParts = fullAuthorName.split(' ');
         if (nameParts.length > 0) {
-            author = nameParts[nameParts.length - 1]; // Letztes Wort als Nachname
+            author = nameParts[nameParts.length - 1];
         } else {
             author = fullAuthorName;
         }
-        console.log("Content script: Autor Nachname für Suche:", author);
-    } else {
-        console.log("Content script: Autor-Element nicht gefunden.");
     }
 
-    // ISBN extrahieren
+    // Extract ISBN
     const detailLists = document.querySelectorAll(
         '#detailBullets_feature_div .detail-bullet-list, ' +
         '#productDetails_techSpec_section_1 .detail-bullet-list, ' +
@@ -220,13 +255,10 @@ function getBookInfoFromAmazon() {
 
                 if (cleanLabel.includes('ISBN-10')) {
                     isbn = value;
-                    console.log("Content script: ISBN-10 gefunden:", isbn);
                     break;
                 } else if (cleanLabel.includes('ISBN-13')) {
-                    // Bevorzugen wir ISBN-10, speichern wir ISBN-13 nur, wenn keine ISBN-10 gefunden wird
                     if (!isbn) {
                        isbn = value;
-                       console.log("Content script: ISBN-13 gefunden:", isbn);
                     }
                 }
             }
@@ -234,154 +266,119 @@ function getBookInfoFromAmazon() {
         if (isbn) break;
     }
 
-    if (!isbn) {
-        console.log("Content script: ISBN-Element nicht gefunden.");
-    }
-
     return { isbn: isbn, title: title, author: author };
 }
 
-// --- Hauptlogik, die beim Laden der Amazon-Seite ausgeführt wird ---
-async function runOnleiheCheck() {
-    console.log("Onleihe Checker: Content-Skript wird ausgeführt.");
+/**
+ * Parses the HTML response from Onleihe page and counts the results.
+ * @param {string} html - The raw HTML string from Onleihe search results page.
+ * @returns {number} The number of found results.
+ */
+function parseOnleiheHtmlForCount(html) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
 
-    // Schritt 1: MutationObserver für dynamisch geladene Elemente
-    // Wir beobachten den Body auf Hinzufügung von Knoten, die unsere Ziel-Elemente enthalten könnten.
-    const observer = new MutationObserver(async (mutations, obs) => {
-        // Prüfe, ob eines der Ziel-Elemente jetzt im DOM ist
-        const targetElementsExist = document.getElementById('productTitle') ||
-                                   document.getElementById('detailBulletsWrapper_feature_div') ||
-                                   document.getElementById('dp-container');
+    let resultCount = 0;
+    let foundDirectCount = false;
 
-        if (targetElementsExist) {
-            obs.disconnect(); // Beobachtung beenden, sobald ein Ziel gefunden wurde
-            console.log("Onleihe Checker: Ziel-Element für Injektion per MutationObserver gefunden.");
+    const possibleSelectors = [
+        'h3.headline[test-id="titleRange"]',
+        'h3[test-id="titleRange"]',
+        '.headline[test-id="titleRange"]',
+        '[test-id="titleRange"]',
+        '.result-count',
+        '.search-results-info__count', 
+        '.media-count',
+        '.resultCount',
+        '.search-result-count',
+        '.treffer-anzahl',
+        '.ergebnis-anzahl',
+        '.titleRange'
+    ];
+
+    for (const selector of possibleSelectors) {
+        const totalCountElement = doc.querySelector(selector);
+        if (totalCountElement) {
+            const countText = totalCountElement.textContent.trim();
             
-            const statusField = injectOnleiheStatusField();
-            if (!statusField) {
-                console.error("Onleihe Checker: Statusfeld konnte nicht eingefügt werden, Abbruch der Prüfung.");
-                return; // Kann nicht fortfahren, wenn kein Feld eingefügt werden kann
-            }
-
-            // Der Rest der Logik, sobald das Statusfeld eingefügt ist
-            const result = await chrome.storage.local.get(['selectedOnleiheLibraryURL', 'selectedOnleiheLibraryName']);
-            const selectedLibraryBaseURL = result.selectedOnleiheLibraryURL;
-            const selectedLibraryName = result.selectedLibraryName;
-
-            if (!selectedLibraryBaseURL) {
-                updateOnleiheStatus(statusField, 'Bitte wähle deine Onleihe-Bibliothek im Plugin-Popup aus.', 'warning');
-                return;
-            }
-            updateOnleiheStatus(statusField, `Prüfe Verfügbarkeit in "${selectedLibraryName}"...`, 'loading');
-
-            const bookInfo = getBookInfoFromAmazon();
-            const amazonIsbn = bookInfo.isbn;
-            const amazonTitle = bookInfo.title;
-            const amazonAuthor = bookInfo.author;
-
-            let searchTerm = '';
-            if (amazonTitle && amazonTitle !== 'Nicht gefunden') {
-                searchTerm = amazonTitle;
-                if (amazonAuthor && amazonAuthor !== 'Nicht gefunden') {
-                    searchTerm = `${amazonTitle} ${amazonAuthor}`;
-                }
-            } else if (amazonIsbn && amazonIsbn !== 'Nicht gefunden') {
-                searchTerm = amazonIsbn;
-            } else {
-                updateOnleiheStatus(statusField, 'Keine Buchinformationen (Titel, Autor oder ISBN) von Amazon gefunden.', 'not_found');
-                return;
-            }
-
-            const onleiheSearchURL = `${selectedLibraryBaseURL}/frontend/search,0-0-0-0-0-0-0-0-0-0-0.html?cmdId=703&sK=1000&pText=${encodeURIComponent(searchTerm)}&pMediaType=400001&Suchen=Suchen`;
-
-            console.log(`Onleihe Checker: Sende Suchanfrage an Service Worker für URL: ${onleiheSearchURL}`);
+            const patterns = [
+                /(\d+)-\d+\s+von\s+(\d+)/i,
+                /von\s+(\d+)/i,
+                /(\d+)\s+Treffer/i,
+                /(\d+)\s+Ergebnisse?/i,
+                /(\d+)\s+Titel/i,
+                /Treffer:\s*(\d+)/i,
+                /^(\d+)$/
+            ];
             
-            try {
-                const responseFromBackground = await chrome.runtime.sendMessage({ 
-                    action: "fetch_onleihe_results", 
-                    url: onleiheSearchURL 
-                });
-
-                if (responseFromBackground && responseFromBackground.success) {
-                    const count = responseFromBackground.count;
-                    if (count > 0) {
-                        updateOnleiheStatus(statusField, `Im Onleihe-Katalog "${selectedLibraryName}" ${count} Treffer gefunden!`, 'success', onleiheSearchURL);
-                    } else {
-                        updateOnleiheStatus(statusField, `Keine Treffer im Onleihe-Katalog "${selectedLibraryName}" gefunden.`, 'not_found', onleiheSearchURL);
+            for (const pattern of patterns) {
+                const match = countText.match(pattern);
+                if (match) {
+                    if (pattern.source.includes('von') && match[2]) {
+                        resultCount = parseInt(match[2]);
+                        foundDirectCount = true;
+                        break;
+                    } else if (match[1]) {
+                        resultCount = parseInt(match[1]);
+                        foundDirectCount = true;
+                        break;
                     }
-                } else {
-                    updateOnleiheStatus(statusField, `Fehler beim Abruf der Onleihe-Daten: ${responseFromBackground.error || 'Unbekannter Fehler'}`, 'error');
                 }
-            } catch (error) {
-                console.error("Onleihe Checker: Fehler bei der Kommunikation mit dem Service Worker:", error);
-                updateOnleiheStatus(statusField, `Kommunikationsfehler: ${error.message}`, 'error');
             }
+            
+            if (foundDirectCount) break;
         }
-    });
-
-    // Beginne die Beobachtung des gesamten Dokuments (oder eines spezifischeren Containers)
-    // Wir beobachten Änderungen an den Kindknoten und allen Nachkommen.
-    if (document.body) {
-        observer.observe(document.body, { childList: true, subtree: true });
-        console.log("Onleihe Checker: MutationObserver auf document.body gestartet.");
-    } else {
-        console.error("Onleihe Checker: document.body nicht verfügbar, kann MutationObserver nicht starten.");
-        // Fallback: Direkter Versuch nach kurzem Timeout, falls Body später geladen wird
-        setTimeout(() => {
-            const statusField = injectOnleiheStatusField();
-            if (statusField) {
-                 updateOnleiheStatus(statusField, 'Plugin-Elemente nach kurzer Verzögerung eingefügt. Prüfe Onleihe...', 'loading');
-                 // Re-run the core logic if elements successfully inserted as a fallback
-                 runOnleiheCheckCore(); // Call a separate function for the main logic
-             } else {
-                console.warn("Onleihe Checker: Statusfeld konnte auch nach kurzem Timeout nicht eingefügt werden (document.body nicht verfügbar).");
-             }
-        }, 500); // Kurze Verzögerung für body
     }
 
-
-    // Fallback-Timeout für den Fall, dass die Elemente nie erscheinen (oder der Observer aus irgendeinem Grund nicht triggert)
-    // Dieser Timeout dient als Sicherheitsnetz und meldet, wenn die Initialisierung nach 10 Sekunden nicht erfolgreich war.
-    setTimeout(() => {
-        if (observer && typeof observer.disconnect === 'function') {
-            observer.disconnect();
-            console.log("Onleihe Checker: MutationObserver nach Timeout getrennt.");
-        }
+    // Fallback: If no direct result count found, count media items
+    if (!foundDirectCount) {
+        const itemSelectors = [
+            '.media-list-view .media-item',
+            '.item-list .item',
+            '.result-item',
+            '.media-item',
+            '.list-item',
+            '.search-result'
+        ];
         
-        const existingStatusField = document.getElementById('onleihe-checker-status');
-        if (!existingStatusField) {
-             console.log("Onleihe Checker: Timeout erreicht, Statusfeld noch nicht eingefügt. Versuch einer letzten Injektion...");
-             const finalStatusField = injectOnleiheStatusField(); // Letzter Versuch, das Feld einzufügen
-             if (finalStatusField) {
-                 console.warn("Onleihe Checker: Feld nach 10s Timeout eingefügt, aber möglicherweise zu spät für automatische Prüfung. Bitte prüfe manuell.");
-                 updateOnleiheStatus(finalStatusField, 'Seite lädt zu lange oder benötigte Elemente nicht gefunden (nach Timeout).', 'error');
-             } else {
-                 console.error("Onleihe Checker: Statusfeld konnte nach 10s Timeout nicht eingefügt werden. Abbruch.");
-             }
+        for (const selector of itemSelectors) {
+            const mediaItems = doc.querySelectorAll(selector);
+            if (mediaItems.length > 0) {
+                resultCount = mediaItems.length;
+                break;
+            }
         }
-    }, 10000); // 10 Sekunden Timeout für den Observer (falls er nicht triggert)
-
+    }
+    
+    return resultCount;
 }
 
-// Separate Funktion für die Kernlogik, damit sie bei Fallback erneut aufgerufen werden kann
-async function runOnleiheCheckCore() {
-    console.log("Onleihe Checker: Kernprüfung wird ausgeführt.");
-    const statusField = document.getElementById('onleihe-checker-status'); // Annahme, dass es jetzt existiert
-
-    if (!statusField) {
-        console.error("Onleihe Checker: runOnleiheCheckCore aufgerufen, aber Statusfeld nicht gefunden.");
+// ==============================================================================
+// Main logic executed when Amazon page loads
+// ==============================================================================
+async function runOnleiheCheck() {
+    let statusField;
+    try {
+        statusField = await injectOnleiheStatusField();
+        if (!statusField) {
+            console.error("Onleihe Checker: Status field could not be initialized.");
+            return;
+        }
+    } catch (e) {
+        console.error("Onleihe Checker: Error during status field injection:", e);
         return;
     }
 
     const result = await chrome.storage.local.get(['selectedOnleiheLibraryURL', 'selectedOnleiheLibraryName']);
     const selectedLibraryBaseURL = result.selectedOnleiheLibraryURL;
-    const selectedLibraryName = result.selectedLibraryName;
+    const selectedLibraryName = result.selectedOnleiheLibraryName;
 
     if (!selectedLibraryBaseURL) {
-        updateOnleiheStatus(statusField, 'Bitte wähle deine Onleihe-Bibliothek im Plugin-Popup aus.', 'warning');
+        updateOnleiheStatus(statusField, 'Please select your Onleihe library in the extension popup.', 'warning');
         return;
     }
-    updateOnleiheStatus(statusField, `Prüfe Verfügbarkeit in "${selectedLibraryName}"...`, 'loading');
+    
+    updateOnleiheStatus(statusField, `Checking availability in "${selectedLibraryName}"...`, 'loading');
 
     const bookInfo = getBookInfoFromAmazon();
     const amazonIsbn = bookInfo.isbn;
@@ -389,21 +386,19 @@ async function runOnleiheCheckCore() {
     const amazonAuthor = bookInfo.author;
 
     let searchTerm = '';
-    if (amazonTitle && amazonTitle !== 'Nicht gefunden') {
+    if (amazonTitle && amazonTitle !== 'Not found') {
         searchTerm = amazonTitle;
-        if (amazonAuthor && amazonAuthor !== 'Nicht gefunden') {
+        if (amazonAuthor && amazonAuthor !== 'Not found') {
             searchTerm = `${amazonTitle} ${amazonAuthor}`;
         }
-    } else if (amazonIsbn && amazonIsbn !== 'Nicht gefunden') {
+    } else if (amazonIsbn && amazonIsbn !== 'Not found') {
         searchTerm = amazonIsbn;
     } else {
-        updateOnleiheStatus(statusField, 'Keine Buchinformationen (Titel, Autor oder ISBN) von Amazon gefunden.', 'not_found');
+        updateOnleiheStatus(statusField, 'No book information (title, author or ISBN) found on Amazon.', 'not_found');
         return;
     }
 
     const onleiheSearchURL = `${selectedLibraryBaseURL}/frontend/search,0-0-0-0-0-0-0-0-0-0-0.html?cmdId=703&sK=1000&pText=${encodeURIComponent(searchTerm)}&pMediaType=400001&Suchen=Suchen`;
-
-    console.log(`Onleihe Checker: Sende Suchanfrage an Service Worker für URL: ${onleiheSearchURL}`);
     
     try {
         const responseFromBackground = await chrome.runtime.sendMessage({ 
@@ -411,24 +406,78 @@ async function runOnleiheCheckCore() {
             url: onleiheSearchURL 
         });
 
-        if (responseFromBackground && responseFromBackground.success) {
-            const count = responseFromBackground.count;
+        if (responseFromBackground && responseFromBackground.success && responseFromBackground.html) {
+            const count = parseOnleiheHtmlForCount(responseFromBackground.html);
+
             if (count > 0) {
-                updateOnleiheStatus(statusField, `Im Onleihe-Katalog "${selectedLibraryName}" ${count} Treffer gefunden!`, 'success', onleiheSearchURL);
+                updateOnleiheStatus(statusField, `Found ${count} results in Onleihe catalog "${selectedLibraryName}"!`, 'success', onleiheSearchURL);
             } else {
-                updateOnleiheStatus(statusField, `Keine Treffer im Onleihe-Katalog "${selectedLibraryName}" gefunden.`, 'not_found', onleiheSearchURL);
+                updateOnleiheStatus(statusField, `No results found in Onleihe catalog "${selectedLibraryName}".`, 'not_found', onleiheSearchURL);
             }
         } else {
-            updateOnleiheStatus(statusField, `Fehler beim Abruf der Onleihe-Daten: ${responseFromBackground.error || 'Unbekannter Fehler'}`, 'error');
+            updateOnleiheStatus(statusField, `Error retrieving Onleihe data: ${responseFromBackground.error || 'Unknown error'}`, 'error');
+            console.error(`Onleihe Checker: Error from background service worker: ${responseFromBackground.error}`);
         }
     } catch (error) {
-        console.error("Onleihe Checker: Fehler bei der Kommunikation mit dem Service Worker:", error);
-        updateOnleiheStatus(statusField, `Kommunikationsfehler: ${error.message}`, 'error');
+        console.error("Onleihe Checker: Error communicating with service worker:", error);
+        updateOnleiheStatus(statusField, `Communication error: ${error.message}`, 'error');
     }
 }
 
+// Initialization function with retry mechanism
+async function initializeOnleiheChecker() {
+    // Check if we're on an Amazon product page
+    if (!window.location.href.includes('/dp/') && !window.location.href.includes('/gp/product/')) {
+        return;
+    }
+    
+    // Avoid multiple executions if already active
+    if (window.onleiheCheckerInitialized) {
+        return;
+    }
+    window.onleiheCheckerInitialized = true;
 
-// Führe die Hauptlogik aus, sobald das DOM geladen ist
-// Wir nutzen DOMContentLoaded, um sicherzustellen, dass die Amazon-Seite initial bereit ist.
-// Der MutationObserver kümmert sich um dynamische Inhalte.
-document.addEventListener('DOMContentLoaded', runOnleiheCheck);
+    let retryCount = 0;
+    const maxRetries = 3;
+    const retryDelay = 2000;
+    
+    while (retryCount < maxRetries) {
+        try {
+            await runOnleiheCheck();
+            return;
+        } catch (error) {
+            console.error(`Onleihe Checker: Initialization attempt ${retryCount + 1} failed:`, error);
+            retryCount++;
+            
+            if (retryCount < maxRetries) {
+                await new Promise(resolve => setTimeout(resolve, retryDelay));
+            }
+        }
+    }
+    
+    console.error("Onleihe Checker: All initialization attempts failed.");
+}
+
+// Event listeners for different loading methods
+document.addEventListener('DOMContentLoaded', initializeOnleiheChecker);
+window.addEventListener('load', initializeOnleiheChecker);
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    initializeOnleiheChecker();
+}
+
+// Observe URL changes for SPA navigation
+let currentUrl = window.location.href;
+const urlObserver = new MutationObserver(() => {
+    if (window.location.href !== currentUrl) {
+        currentUrl = window.location.href;
+        window.onleiheCheckerInitialized = false;
+        setTimeout(initializeOnleiheChecker, 500);
+    }
+});
+
+setTimeout(() => {
+    if (document.body) {
+        urlObserver.observe(document.body, { childList: true, subtree: true });
+    }
+}, 500);
