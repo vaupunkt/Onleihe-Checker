@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "Onleihe Checker",
+  "version": "1.4",
+  "description": "Prüft, ob ein Buch auf Amazon.de in deiner Onleihe-Bibliothek verfügbar ist und zeigt Ergebnisse direkt an.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "*://*.onleihe.de/*",
+    "*://*.amazon.de/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.amazon.de/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["libraries.json"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

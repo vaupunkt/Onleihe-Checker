@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onleihe Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            width: 320px;
+            font-family: 'Inter', sans-serif;
+            @apply bg-gray-100 text-gray-800 p-4;
+        }
+        .container {
+            @apply flex flex-col space-y-4;
+        }
+        select, button, input[type="text"] {
+            @apply w-full p-2 rounded-md border border-gray-300;
+        }
+        select, input[type="text"] {
+            @apply bg-white;
+        }
+        button {
+            @apply bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200;
+        }
+        .message-box {
+            @apply bg-blue-100 text-blue-800 p-3 rounded-md text-sm;
+        }
+        .warning-box {
+            @apply bg-yellow-100 text-yellow-800 p-3 rounded-md text-sm;
+        }
+        .info-box {
+            @apply bg-gray-200 text-gray-700 p-3 rounded-md text-sm;
+        }
+        .success-box {
+            @apply bg-green-100 text-green-800 p-3 rounded-md text-sm;
+        }
+        .error-box {
+            @apply bg-red-100 text-red-800 p-3 rounded-md text-sm;
+        }
+        /* Style für Optgroup-Header */
+        optgroup {
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-lg font-semibold text-center mb-2">Onleihe Checker</h1>
+
+        <div class="info-box">
+            Wähle deine Bibliothek aus oder suche danach und speichere sie.
+        </div>
+
+        <label for="search-input" class="block text-sm font-medium text-gray-700">Bibliothek suchen:</label>
+        <input type="text" id="search-input" placeholder="Nach Bibliothek suchen..." class="focus:ring-blue-500 focus:border-blue-500">
+
+        <label for="library-select" class="block text-sm font-medium text-gray-700">Bibliothek wählen:</label>
+        <select id="library-select" class="focus:ring-blue-500 focus:border-blue-500">
+            <!-- Optionen und Optgroups werden von JavaScript eingefügt -->
+        </select>
+
+        <button id="save-library-btn" class="save-button">Bibliothek speichern</button>
+        
+        <div id="message" class="message-box hidden"></div>
+
+        <hr class="border-t border-gray-300 my-4">
+
+        <div class="info-box">
+            Öffne eine Amazon.de Buchseite, um die Onleihe-Verfügbarkeit zu sehen.
+        </div>
+        <!-- Die Anzeige der Buchinfos und Onleihe-Prüfergebnisse erfolgt jetzt direkt auf der Amazon-Seite via content.js -->
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
