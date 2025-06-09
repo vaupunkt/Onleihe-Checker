@@ -220,6 +220,16 @@ cp libraries.json OnleiheChecker/
 
 > **Important**: The scraper currently only updates German libraries. International libraries in the extension database are maintained separately and may need manual updates.
 
+## 🔒 Security & Permissions
+
+The Chrome extension requires specific permissions to function properly. For a detailed explanation of each permission and why it's needed, see [PERMISSIONS.md](PERMISSIONS.md).
+
+**Key principles:**
+- Minimal permissions approach - only requests what's absolutely necessary
+- No data collection or external tracking
+- All processing happens locally in your browser
+- Transparent operation with public library data only
+
 ---
 
 **Made with ❤️ for German digital library users**

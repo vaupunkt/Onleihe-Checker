@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Onleihe Checker",
   "version": "1.0",
-  "description": "Check Amazon books availability in Onleihe libraries",
+  "description": "Check book availability in German digital libraries (Onleihe) while browsing Amazon.de",
   "permissions": [
     "storage",
     "activeTab",
@@ -14,7 +14,15 @@
     "https://amazon.de/*",
     "https://*.onleihe.de/*",
     "https://*.onleihe.net/*",
+    "https://*.onleihe.ch/*",
+    "https://*.onleihe.at/*",
+    "https://*.onleihe.be/*",
+    "https://*.onleihe.fr/*",
+    "https://*.onleihe.it/*",
+    "https://*.onleihe.lu/*",
+    "https://*.onleihe.li/*",
     "https://www.ostalb-onleihe.de/*",
+    "https://ostalb.onleihe.de/*",
     "https://www.metropolbib.de/*",
     "https://www.franken-onleihe.de/*",
     "https://www.leo-sued.de/*",
@@ -30,19 +38,23 @@
     "https://www.elbe-elster-bibnet.de/*",
     "https://hessen.onleihe.de/*",
     "https://voebb.onleihe.de/*",
-    "http://*.onleihe.de/*"
+    "https://oberlausitz.onleihe.de/*",
+    "https://www.onleihe-oberlausitz.de/*",
+    "http://*.onleihe.de/*",
+    "http://*.onleihe.net/*"
   ],
   "background": {
     "service_worker": "background.js"
   },
-    "action": {
+  "action": {
     "default_popup": "popup.html",
+    "default_title": "Onleihe Checker - Check book availability",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     }
-  },
+    },
   "content_scripts": [
     {
       "matches": [
@@ -50,8 +62,9 @@
         "https://amazon.de/*/dp/*",
         "https://www.amazon.de/gp/product/*",
         "https://amazon.de/gp/product/*"
-      ], "js": ["content.js"],
-     "run_at": "document_idle"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [
