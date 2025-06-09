@@ -38,9 +38,6 @@ title: Installation
 ### Installation
 
 ```bash
-# Repository klonen
-cd /Users/vaupunkt/Documents/Programmieren/onleihe-scraper
-
 # Pakete installieren
 pip install requests beautifulsoup4 selenium
 

@@ -39,9 +39,6 @@ A Python web scraper and Chrome extension for German digital library services (O
 ### 1. Web Scraper Setup
 
 ```bash
-# Clone the repository
-cd /Users/vaupunkt/Documents/Programmieren/onleihe-scraper
-
 # Install required packages
 pip install requests beautifulsoup4 selenium
 
