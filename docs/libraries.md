@@ -47,5 +47,3 @@ Die Extension unterstützt Bibliotheken aus mehreren Ländern:
 - `emedienbayern.de` - eMedien Bayern
 
 > **Hinweis**: Um internationale Bibliotheken zum Scraper hinzuzufügen, müsste das Skript erweitert werden, um die internationalen Bereiche der Onleihe-Hilfeseiten zu verarbeiten.
-
-[← Zurück zur Hauptseite](index.html)

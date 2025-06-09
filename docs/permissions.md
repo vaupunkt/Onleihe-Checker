@@ -49,5 +49,3 @@ title: Berechtigungen
 - ✅ **Keine externen Server**
 - ✅ **Lokale Verarbeitung**
 - ✅ **Transparenter Betrieb**
-
-[← Zurück zur Hauptseite](index.html)

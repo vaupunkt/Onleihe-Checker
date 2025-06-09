@@ -52,5 +52,3 @@ python scrape_onleihe.py && python clean_base_urls.py
 # Extension-Datenbank aktualisieren
 cp libraries.json OnleiheChecker/
 ```
-
-[← Zurück zur Hauptseite](index.html)

@@ -84,5 +84,3 @@ title: Release Notes
 **Download-Größe**: ~200KB  
 **Installationszeit**: < 1 Minute  
 **Setup-Komplexität**: Anfängerfreundlich
-
-[← Zurück zur Hauptseite](index.html)

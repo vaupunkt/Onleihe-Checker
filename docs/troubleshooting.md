@@ -54,5 +54,3 @@ service = Service('/usr/local/bin/chromedriver')
 - Lokale Bibliothek auswählen
 - Hauptbuchproduktseiten verwenden
 - Bevorzugte Sprache einstellen
-
-[← Zurück zur Hauptseite](index.html)

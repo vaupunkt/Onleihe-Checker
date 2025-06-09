@@ -12,3 +12,11 @@ plugins:
   - jekyll-sitemap
 
 lang: de
+
+# Custom settings
+defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"

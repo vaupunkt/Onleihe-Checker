@@ -7,7 +7,7 @@ title: Verwendung
 
 ## Chrome Extension
 
-![OnleiheChecker - PopUp Window](../assets/174_1x_shots_so.png)
+![OnleiheChecker - PopUp Window]({{ site.baseurl }}/assets/174_1x_shots_so.png)
 
 ### Bibliothek einrichten
 1. **Extension-Icon klicken** in der Chrome Toolbar
@@ -16,7 +16,7 @@ title: Verwendung
 4. **"Bibliothek speichern"** klicken
 
 ### Verfügbarkeit prüfen
-![Amazon Page Screenshot](../assets/175shots_so.png)
+![Amazon Page Screenshot]({{ site.baseurl }}/assets/175shots_so.png)
 
 1. **Amazon.de Buchseite** öffnen
 2. **Automatische Anzeige** der Onleihe-Verfügbarkeit
@@ -44,5 +44,3 @@ python clean_base_urls.py
 ```bash
 cp libraries.json OnleiheChecker/
 ```
-
-[← Zurück zur Hauptseite](index.html)

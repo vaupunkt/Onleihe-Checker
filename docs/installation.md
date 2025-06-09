@@ -62,5 +62,3 @@ python clean_base_urls.py
 # Daten zur Extension kopieren
 cp libraries.json OnleiheChecker/
 ```
-
-[← Zurück zur Hauptseite](index.html)
