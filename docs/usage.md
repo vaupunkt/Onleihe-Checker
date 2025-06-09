@@ -16,7 +16,12 @@ title: Verwendung
 4. **"Bibliothek speichern"** klicken
 
 ### Verfügbarkeit prüfen
+
+Die Extension funktioniert automatisch auf allen Amazon.de Buchseiten:
+
 ![Amazon Page Screenshot]({{ site.baseurl }}/assets/175shots_so.png)
+
+**So funktioniert es:**
 
 1. **Amazon.de Buchseite** öffnen
 2. **Automatische Anzeige** der Onleihe-Verfügbarkeit
