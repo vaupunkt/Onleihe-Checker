@@ -124,7 +124,6 @@ if (typeof window.OnleiheLocalesLoaded !== 'undefined') {
     function setLanguage(lang) {
         if (translations[lang]) {
             currentLanguage = lang;
-            console.log('Onleihe locales: Language set to', lang);
         }
     }
 
@@ -151,7 +150,6 @@ if (typeof window.OnleiheLocalesLoaded !== 'undefined') {
         // Ensure functions are available before dispatching event
         setTimeout(() => {
             if (typeof window.t === 'function') {
-                console.log('Onleihe locales: Dispatching ready event');
                 const event = new CustomEvent('onleiheLocalesReady');
                 window.dispatchEvent(event);
             } else {

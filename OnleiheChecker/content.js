@@ -44,12 +44,9 @@ function waitForElement(selector, timeout = 15000) {
     });
 }
 
-// Global flag to track if localization is loaded
-let localizationLoaded = false;
-let currentStatusField = null; // Store reference to current status field
-let currentStatusState = null; // Store current status state for language switching
+let currentStatusField = null;
+let currentStatusState = null;
 
-// Embedded translations to avoid loading issues
 const embeddedTranslations = {
     de: {
         'content.loading': 'Lade Onleihe-Informationen...',
@@ -149,14 +146,14 @@ async function injectOnleiheStatusField() {
     }
 
     if (!targetElement) {
-        console.error("Onleihe Checker: No suitable element found for injecting status field.");
+        console.error("Onleihe Checker: No suitable element found for injecting status field");
         return null;
     }
 
-    const onleiheStatusDiv = document.createElement('div');
-    onleiheStatusDiv.id = 'onleihe-checker-status';
-    onleiheStatusDiv.className = 'a-section a-spacing-small a-color-secondary';
-    onleiheStatusDiv.style.cssText = `
+    const statusDiv = document.createElement('div');
+    statusDiv.id = 'onleihe-checker-status';
+    statusDiv.className = 'a-section a-spacing-small a-color-secondary';
+    statusDiv.style.cssText = `
         margin-top: 15px;
         padding: 10px;
         border: 1px solid #ccc;
@@ -166,7 +163,7 @@ async function injectOnleiheStatusField() {
         color: #333;
     `;
     
-    onleiheStatusDiv.innerHTML = `
+    statusDiv.innerHTML = `
         <div style="display: flex; align-items: center;">
             <div id="onleihe-status-spinner" style="
                 border: 4px solid rgba(0, 0, 0, 0.1);
@@ -190,17 +187,17 @@ async function injectOnleiheStatusField() {
     try {
         if (targetElement.id === 'dp-container' || targetElement.id === 'dp' || targetElement.tagName === 'BODY') {
             if (targetElement.querySelector('h1')) { 
-                targetElement.querySelector('h1').after(onleiheStatusDiv);
+                targetElement.querySelector('h1').after(statusDiv);
             } else if (targetElement.firstChild) {
-                targetElement.insertBefore(onleiheStatusDiv, targetElement.firstChild);
+                targetElement.insertBefore(statusDiv, targetElement.firstChild);
             } else {
-                targetElement.appendChild(onleiheStatusDiv);
+                targetElement.appendChild(statusDiv);
             }
         } else {
-            targetElement.parentNode.insertBefore(onleiheStatusDiv, targetElement.nextSibling);
+            targetElement.parentNode.insertBefore(statusDiv, targetElement.nextSibling);
         }
-        currentStatusField = onleiheStatusDiv; // Store reference
-        return onleiheStatusDiv;
+        currentStatusField = statusDiv;
+        return statusDiv;
     } catch (e) {
         console.error("Onleihe Checker: Error injecting status field:", e);
         return null;
@@ -209,7 +206,6 @@ async function injectOnleiheStatusField() {
 
 // Function to update the status field
 function updateOnleiheStatus(statusDiv, message, type = 'info', onleiheUrl = null) {
-    // Store current state for language switching
     currentStatusState = {
         message: message,
         type: type,
@@ -217,7 +213,7 @@ function updateOnleiheStatus(statusDiv, message, type = 'info', onleiheUrl = nul
     };
 
     const spinner = statusDiv.querySelector('#onleihe-status-spinner');
-    const msgElement = statusDiv.querySelector('#onleihe-status-message');
+    const messageElement = statusDiv.querySelector('#onleihe-status-message');
 
     spinner.style.display = 'none';
     
@@ -227,35 +223,35 @@ function updateOnleiheStatus(statusDiv, message, type = 'info', onleiheUrl = nul
 
     if (type === 'loading') {
         spinner.style.display = 'block';
-        msgElement.innerHTML = message;
+        messageElement.innerHTML = message;
     } else if (type === 'success') {
         statusDiv.style.backgroundColor = '#e6ffe6';
         statusDiv.style.borderColor = '#66cc66';
         statusDiv.style.color = '#1f8b1f';
-        msgElement.innerHTML = `<strong>${message}</strong>`;
+        messageElement.innerHTML = `<strong>${message}</strong>`;
         if (onleiheUrl) {
-            msgElement.innerHTML += `<br><a href="${onleiheUrl}" target="_blank" style="color: #007bff; text-decoration: underline;">${safeT('content.view.catalog')}</a>`;
+            messageElement.innerHTML += `<br><a href="${onleiheUrl}" target="_blank" style="color: #007bff; text-decoration: underline;">${safeT('content.view.catalog')}</a>`;
         }
     } else if (type === 'not_found') {
         statusDiv.style.backgroundColor = '#ffe6e6';
         statusDiv.style.borderColor = '#ff6666';
         statusDiv.style.color = '#cc0000';
-        msgElement.innerHTML = `<strong>${message}</strong>`;
+        messageElement.innerHTML = `<strong>${message}</strong>`;
         if (onleiheUrl) {
-            msgElement.innerHTML += `<br><a href="${onleiheUrl}" target="_blank" style="color: #007bff; text-decoration: underline;">${safeT('content.search.directly')}</a>`;
+            messageElement.innerHTML += `<br><a href="${onleiheUrl}" target="_blank" style="color: #007bff; text-decoration: underline;">${safeT('content.search.directly')}</a>`;
         }
     } else if (type === 'error') {
         statusDiv.style.backgroundColor = '#fff0e6';
         statusDiv.style.borderColor = '#ff9933';
         statusDiv.style.color = '#e65c00';
-        msgElement.innerHTML = `<strong>${message}</strong>`;
+        messageElement.innerHTML = `<strong>${message}</strong>`;
     } else if (type === 'warning') {
         statusDiv.style.backgroundColor = '#fff4e6';
         statusDiv.style.borderColor = '#ff9933';
         statusDiv.style.color = '#b45309';
-        msgElement.innerHTML = `<strong>${message}</strong>`;
+        messageElement.innerHTML = `<strong>${message}</strong>`;
     } else {
-        msgElement.innerHTML = message;
+        messageElement.innerHTML = message;
     }
 }
 
@@ -276,7 +272,6 @@ function refreshStatusFieldLanguage() {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "language_changed") {
         currentLanguage = request.language;
-        console.log('Onleihe Checker: Language changed to', currentLanguage);
         
         // Also update window language if available
         if (typeof window.setLanguage === 'function') {
@@ -481,7 +476,7 @@ async function runOnleiheCheck() {
     try {
         statusField = await injectOnleiheStatusField();
         if (!statusField) {
-            console.error("Onleihe Checker: Status field could not be initialized.");
+            console.error("Onleihe Checker: Status field could not be initialized");
             return;
         }
     } catch (e) {
@@ -577,7 +572,7 @@ async function initializeOnleiheChecker() {
         }
     }
     
-    console.error("Onleihe Checker: All initialization attempts failed.");
+    console.error("Onleihe Checker: All initialization attempts failed");
 }
 
 // Load localization and initialize
@@ -587,7 +582,6 @@ async function loadLocalizationAndInit() {
         const result = await chrome.storage.local.get(['selectedLanguage']);
         if (result.selectedLanguage) {
             currentLanguage = result.selectedLanguage;
-            console.log('Onleihe Checker: Language preference loaded:', currentLanguage);
         }
     } catch (error) {
         console.warn('Onleihe Checker: Could not load language preference:', error);
@@ -597,7 +591,6 @@ async function loadLocalizationAndInit() {
     const tryLoadExternalLocalization = () => {
         // Check if localization is already loaded
         if (typeof window.t === 'function' && typeof window.OnleiheLocalesLoaded !== 'undefined') {
-            console.log('Onleihe Checker: External localization already available');
             if (typeof window.setLanguage === 'function') {
                 window.setLanguage(currentLanguage);
             }
@@ -607,17 +600,14 @@ async function loadLocalizationAndInit() {
         // Check if script is already being loaded
         const existingScript = document.querySelector('script[src*="locales.js"]');
         if (existingScript) {
-            console.log('Onleihe Checker: External locales script already exists');
             return;
         }
         
         // Try to load the locales script (non-blocking)
-        console.log('Onleihe Checker: Attempting to load external locales script...');
         const script = document.createElement('script');
         script.src = chrome.runtime.getURL('locales.js');
         
         script.onload = () => {
-            console.log('Onleihe Checker: External locales script loaded successfully');
             if (typeof window.setLanguage === 'function') {
                 window.setLanguage(currentLanguage);
             }
@@ -632,9 +622,7 @@ async function loadLocalizationAndInit() {
             document.head.appendChild(script);
         }
     };
-
-    // Start with embedded translations immediately
-    console.log('Onleihe Checker: Using embedded translations, starting initialization...');
+    
     
     // Try to load external localization in background
     setTimeout(tryLoadExternalLocalization, 100);

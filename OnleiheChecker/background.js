@@ -3,12 +3,10 @@
 // and performs Onleihe queries to bypass CORS issues.
 
 function normalizeUrl(url) {
-    // Ensure HTTPS protocol
     if (url.startsWith('http://')) {
         url = url.replace('http://', 'https://');
     }
     
-    // Remove double slashes in path
     url = url.replace(/([^:]\/)\/+/g, '$1');
     
     return url;
@@ -80,7 +78,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 sendResponse({ success: true, html: html, url: onleiheSearchURL });
             })
             .catch(error => {
-                console.error("[Background Service Worker] Iframe method failed:", error);
+                console.error("Background: Iframe method failed:", error);
                 
                 // Fallback to direct fetch (which will likely fail due to CORS)
                 fetch(onleiheSearchURL, {
@@ -101,7 +99,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     sendResponse({ success: true, html: html, url: onleiheSearchURL });
                 })
                 .catch(fetchError => {
-                    console.error("[Background Service Worker] All methods failed:", fetchError);
+                    console.error("Background: All methods failed:", fetchError);
                     sendResponse({ 
                         success: false, 
                         error: `All fetch methods failed. Iframe: ${error.message}. Direct: ${fetchError.message}`, 
