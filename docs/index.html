@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onleihe Checker - GitHub Pages</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        .nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .nav-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s;
+        }
+        .nav-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .nav-card h3 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📚 Onleihe Checker</h1>
+        <p>Chrome Extension für deutsche digitale Bibliotheken</p>
+        <p>Check book availability in German digital libraries while browsing Amazon.de</p>
+    </div>
+
+    <div class="nav">
+        <a href="installation.html" class="nav-card">
+            <h3>🛠 Installation</h3>
+            <p>Schritt-für-Schritt Anleitung zur Installation der Chrome Extension und des Web Scrapers.</p>
+        </a>
+
+        <a href="usage.html" class="nav-card">
+            <h3>🎯 Verwendung</h3>
+            <p>Wie du die Extension verwendest und deine Bibliothek einrichtest.</p>
+        </a>
+
+        <a href="technical.html" class="nav-card">
+            <h3>⚙️ Technische Details</h3>
+            <p>Projektstruktur, Konfiguration und Entwickler-Informationen.</p>
+        </a>
+
+        <a href="permissions.html" class="nav-card">
+            <h3>🔒 Berechtigungen</h3>
+            <p>Detaillierte Erklärung der Chrome Extension Berechtigungen und Sicherheit.</p>
+        </a>
+
+        <a href="libraries.html" class="nav-card">
+            <h3>🌍 Unterstützte Bibliotheken</h3>
+            <p>Übersicht über unterstützte deutsche und internationale Onleihe-Bibliotheken.</p>
+        </a>
+
+        <a href="troubleshooting.html" class="nav-card">
+            <h3>🐛 Problemlösung</h3>
+            <p>Häufige Probleme und deren Lösungen für Extension und Web Scraper.</p>
+        </a>
+
+        <a href="contributing.html" class="nav-card">
+            <h3>🤝 Mitarbeit</h3>
+            <p>Wie du zum Projekt beitragen kannst - Bug Reports, Features, Übersetzungen.</p>
+        </a>
+
+        <a href="release-notes.html" class="nav-card">
+            <h3>📋 Release Notes</h3>
+            <p>Versionshistorie und neue Features in jeder Version.</p>
+        </a>
+    </div>
+
+    <div class="footer">
+        <p><strong>Made with ❤️ for German digital library users</strong></p>
+        <p><a href="https://github.com/vaupunkt/onleihe-scraper">View on GitHub</a></p>
+    </div>
+</body>
+</html>
