@@ -1,6 +1,6 @@
 title: Onleihe Checker
 description: Chrome Extension für deutsche digitale Bibliotheken
-baseurl: "/onleihe-checker"
+baseurl: "/Onleihe-Checker"
 url: "https://vaupunkt.github.io"
 
 markdown: kramdown
