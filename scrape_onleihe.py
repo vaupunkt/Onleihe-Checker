@@ -6,45 +6,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
-import re
 import json
 import time
 from urllib.parse import urlparse
-
-def clean_base_url(url):
-    """
-    Clean baseURL by removing frontend paths and query parameters.
-    Keep only the base domain and main path segment.
-    """
-    if not url:
-        return url
-    
-    # Parse the URL
-    parsed = urlparse(url)
-    
-    # Start with the base URL (scheme + netloc)
-    clean_url = f"{parsed.scheme}://{parsed.netloc}"
-    
-    # Process the path
-    path_parts = [part for part in parsed.path.split('/') if part]
-    
-    # Keep only the main path segment (like 'thuebibnet', 'verbund_hessen', etc.)
-    # Remove 'frontend' and everything after it
-    clean_path_parts = []
-    for part in path_parts:
-        if part == 'frontend':
-            break
-        clean_path_parts.append(part)
-    
-    # Add the cleaned path
-    if clean_path_parts:
-        clean_url += '/' + '/'.join(clean_path_parts)
-    
-    # Ensure trailing slash for consistency
-    if not clean_url.endswith('/'):
-        clean_url += '/'
-    
-    return clean_url
 
 def get_libraries_and_save_to_json():
     url = "https://hilfe.onleihe.de/hilfe-onleihe-de/deine-onleihe-finden/c-3750"
@@ -173,20 +137,13 @@ def get_libraries_and_save_to_json():
                             name = a_tag.get_text(strip=True)
                             raw_baseURL = a_tag.get('href')
                             # Clean the baseURL to remove frontend paths and parameters
-                            baseURL = clean_base_url(raw_baseURL)
 
                             libraries.append({
                                 'name': name,
-                                'baseURL': baseURL,
+                                'baseURL': raw_baseURL,
                                 'country': current_country_code,
                             })
-                            # print(f"    -> Bibliothek hinzugefügt ({li_idx}): '{name}' ({baseURL})")
-                        # else:
-                            # print(f"    -> LI-Element {li_idx} ohne anklickbaren Link gefunden.")
-                # elif sibling.name == 'p': # Zeigt die Buchstaben-Header an
-                    # print(f"  [P-TAG GEFUNDEN] '{sibling.get_text(strip=True)}'")
-                # else:
-                    # print(f"  [ÜBERSPRINGE] Nicht-Listen-Element: <{sibling.name}>")
+
 
         if not found_any_library:
             print("\nDebugging-Info: Nach der Schleife wurden KEINE Bibliotheken gefunden.")

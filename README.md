@@ -1,4 +1,5 @@
 # Onleihe Scraper & Checker
+![OnleiheChecker - PopUp Window](assets/174_1x_shots_so.png)
 
 A Python web scraper and Chrome extension for German digital library services (Onleihe). This project consists of two main components:
 
@@ -8,15 +9,18 @@ A Python web scraper and Chrome extension for German digital library services (O
 ## 🚀 Features
 
 ### Web Scraper
-- Scrapes all German and international Onleihe libraries
+- Scrapes German Onleihe libraries from the official help pages
 - Handles cookie banners and dynamic content loading
 - Exports clean, structured library data to JSON
 - Automatic URL cleaning (removes frontend paths and parameters)
+- **Note**: Currently focuses on German libraries only
 
 ### Chrome Extension
 - Seamlessly integrates with Amazon.de product pages
 - Real-time availability checking in your selected library
 - Clean, responsive popup interface for library selection
+- Supports German libraries
+- Multilingual interface (German/English)
 - Automatic search using book title, author, and ISBN information
 
 ## 📋 Requirements
@@ -82,7 +86,7 @@ This will clean up URLs by removing:
 - Unnecessary path segments
 
 ### Chrome Extension
-
+![Amazon Page Screenshot](assets/175shots_so.png)
 1. **Setup**: Click the extension icon in Chrome toolbar
 2. **Select Library**: Search and select your local library from the dropdown
 3. **Save**: Click "Bibliothek speichern" to set as default
@@ -127,10 +131,17 @@ Libraries are automatically saved to Chrome's local storage. To reset:
 2. Go to Application → Local Storage
 3. Clear `selectedOnleiheLibraryURL` and `selectedOnleiheLibraryName`
 
-## 🌍 Supported Countries
+## 🌍 Supported Libraries
 
-The scraper automatically categorizes libraries by country:
+### Web Scraper Coverage
+The scraper currently extracts libraries from the German section of the Onleihe help pages:
+- 🇩🇪 **Deutschland (Germany)** - All German libraries and regional networks
+
+### Chrome Extension Support
+The extension supports libraries from multiple countries through its pre-built database:
 - 🇩🇪 Deutschland (Germany)
+
+Other libraries will be added soon:
 - 🇦🇹 Österreich (Austria)  
 - 🇨🇭 Schweiz (Switzerland)
 - 🇧🇪 Belgien (Belgium)
@@ -139,6 +150,8 @@ The scraper automatically categorizes libraries by country:
 - 🇱🇺 Luxemburg (Luxembourg)
 - 🇱🇮 Liechtenstein
 - 🌐 International (Goethe-Institut, WDA)
+
+> **Note**: To add international libraries to the scraper, the script would need to be extended to handle the international sections of the Onleihe help pages.
 
 ## 🐛 Troubleshooting
 
@@ -189,27 +202,23 @@ This project is for educational and personal use. Please respect the terms of se
 ## ⚠️ Disclaimer
 
 - This tool is not affiliated with Onleihe or Amazon
-- Use responsibly and respect rate limits
+- Use responsibly
 - Website structures may change, requiring code updates
 - Always verify availability directly on library websites
 
 ## 🔄 Maintenance
 
 ### Updating Library Data
-Run the scraper periodically to keep library information current:
+Run the scraper periodically to keep German library information current:
 ```bash
-# Update and clean in one go
+# Update and clean German libraries
 python scrape_onleihe.py && python clean_base_urls.py
 
 # Copy updated data to extension
 cp libraries.json OnleiheChecker/
 ```
 
-### Extension Updates
-After modifying extension files:
-1. Go to `chrome://extensions/`
-2. Click reload button for Onleihe Checker
-3. Test on an Amazon book page
+> **Important**: The scraper currently only updates German libraries. International libraries in the extension database are maintained separately and may need manual updates.
 
 ---
 
