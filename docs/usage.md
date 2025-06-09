@@ -7,7 +7,7 @@ title: Verwendung
 
 ## Chrome Extension
 
-![OnleiheChecker - PopUp Window]({{ site.baseurl }}/assets/174_1x_shots_so.png)
+![OnleiheChecker - PopUp Window](/assets/174_1x_shots_so.png)
 
 ### Bibliothek einrichten
 1. **Extension-Icon klicken** in der Chrome Toolbar
@@ -19,7 +19,7 @@ title: Verwendung
 
 Die Extension funktioniert automatisch auf allen Amazon.de Buchseiten:
 
-![Amazon Page Screenshot]({{ site.baseurl }}/assets/175shots_so.png)
+![Amazon Page Screenshot](/assets/175shots_so.png)
 
 **So funktioniert es:**
 
