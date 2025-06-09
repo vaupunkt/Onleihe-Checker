@@ -96,17 +96,18 @@ This will clean up URLs by removing:
 ## 📁 Project Structure
 
 ```
-onleihe-scraper/
-├── scrape_onleihe.py          # Main scraping script
-├── clean_base_urls.py         # URL cleaning utility
-├── libraries.json             # Scraped library database
-├── OnleiheChecker/           # Chrome extension
-│   ├── manifest.json         # Extension configuration
-│   ├── popup.html           # Extension popup interface
-│   ├── popup.js             # Popup functionality
-│   ├── content.js           # Amazon page integration
-│   ├── background.js        # Background service worker
-│   └── libraries.json       # Library database (copy)
+root/
+├── OnleiheScraper          # Onleihe Scraper
+│   ├── clean_base_urls.py         # URL-Bereinigung
+│   └── scrape_onleihe.py          # Haupt-Scraping-Skript
+├── OnleiheChecker/           # Chrome Extension
+│   ├── manifest.json         # Extension-Konfiguration
+│   ├── popup.html           # Popup-Interface
+│   ├── popup.js             # Popup-Funktionalität
+│   ├── content.js           # Amazon-Integration
+│   ├── background.js        # Service Worker
+│   └── libraries.json       # Bibliotheksdatenbank
+├── docs/                    # GitHub Pages
 └── README.md                # This file
 ```
 

@@ -8,10 +8,10 @@ title: Technische Details
 ## Projektstruktur
 
 ```
-onleihe-scraper/
-├── scrape_onleihe.py          # Haupt-Scraping-Skript
-├── clean_base_urls.py         # URL-Bereinigung
-├── libraries.json             # Bibliotheksdatenbank
+root/
+├── OnleiheScraper          # Onleihe Scraper
+│   ├── clean_base_urls.py         # URL-Bereinigung
+│   └── scrape_onleihe.py          # Haupt-Scraping-Skript
 ├── OnleiheChecker/           # Chrome Extension
 │   ├── manifest.json         # Extension-Konfiguration
 │   ├── popup.html           # Popup-Interface
