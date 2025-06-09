@@ -144,9 +144,7 @@ if (typeof window.OnleiheLocalesLoaded !== 'undefined') {
         window.getBrowserLanguage = getBrowserLanguage;
         window.getCurrentLanguage = getCurrentLanguage;
         window.setLanguage = setLanguage;
-        
-        console.log('Onleihe locales: All functions registered globally');
-        
+                
         // Ensure functions are available before dispatching event
         setTimeout(() => {
             if (typeof window.t === 'function') {
