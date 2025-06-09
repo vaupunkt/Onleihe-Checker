@@ -1,22 +1,42 @@
 {
   "manifest_version": 3,
   "name": "Onleihe Checker",
-  "version": "1.4",
-  "description": "Prüft, ob ein Buch auf Amazon.de in deiner Onleihe-Bibliothek verfügbar ist und zeigt Ergebnisse direkt an.",
+  "version": "1.0",
+  "description": "Check Amazon books availability in Onleihe libraries",
   "permissions": [
-    "activeTab",
     "storage",
-    "scripting",
-    "tabs"
+    "activeTab",
+    "tabs",
+    "scripting"
   ],
   "host_permissions": [
-    "*://*.onleihe.de/*",
-    "*://*.amazon.de/*"
+    "https://www.amazon.de/*",
+    "https://amazon.de/*",
+    "https://*.onleihe.de/*",
+    "https://*.onleihe.net/*",
+    "https://www.ostalb-onleihe.de/*",
+    "https://www.metropolbib.de/*",
+    "https://www.franken-onleihe.de/*",
+    "https://www.leo-sued.de/*",
+    "https://www.leo-nord.de/*",
+    "https://www.enio24.de/*",
+    "https://www.digibobb.de/*",
+    "https://www.biblioload.de/*",
+    "https://www.biblioplus-digital.de/*",
+    "https://www.e-medien-franken.de/*",
+    "https://www.e-ausleihe-franken.de/*",
+    "https://www.emedienbayern.de/*",
+    "https://www.ebook.baden.ch/*",
+    "https://www.elbe-elster-bibnet.de/*",
+    "https://hessen.onleihe.de/*",
+    "https://voebb.onleihe.de/*",
+    "http://*.onleihe.de/*",
+    "http://www.ostalb-onleihe.de/*"
   ],
   "background": {
     "service_worker": "background.js"
   },
-  "action": {
+    "action": {
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
@@ -26,9 +46,13 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://*.amazon.de/*"],
-      "js": ["content.js"],
-      "run_at": "document_idle"
+      "matches": [
+        "https://www.amazon.de/*/dp/*",
+        "https://amazon.de/*/dp/*",
+        "https://www.amazon.de/gp/product/*",
+        "https://amazon.de/gp/product/*"
+      ], "js": ["content.js"],
+     "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [

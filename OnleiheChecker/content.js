@@ -398,7 +398,9 @@ async function runOnleiheCheck() {
         return;
     }
 
-    const onleiheSearchURL = `${selectedLibraryBaseURL}/frontend/search,0-0-0-0-0-0-0-0-0-0-0.html?cmdId=703&sK=1000&pText=${encodeURIComponent(searchTerm)}&pMediaType=400001&Suchen=Suchen`;
+    // Ensure proper URL construction without double slashes
+    const baseURL = selectedLibraryBaseURL.endsWith('/') ? selectedLibraryBaseURL.slice(0, -1) : selectedLibraryBaseURL;
+    const onleiheSearchURL = `${baseURL}/frontend/search,0-0-0-0-0-0-0-0-0-0-0.html?cmdId=703&sK=1000&pText=${encodeURIComponent(searchTerm)}&pMediaType=400001&Suchen=Suchen`;
     
     try {
         const responseFromBackground = await chrome.runtime.sendMessage({ 
