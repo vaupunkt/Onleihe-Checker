@@ -34,6 +34,14 @@ def clean_base_url(url):
     # Ensure trailing slash for consistency
     if not clean_url.endswith('/'):
         clean_url += '/'
+
+        # Special rule for Oberlausitz URL transformation
+    if clean_url.startswith('https://www.onleihe-oberlausitz.de'):
+        clean_url = 'https://oberlausitz.onleihe.de/oberlausitz/'
+    
+    if clean_url.startswith('https://www.ostalb-onleihe.de/'):
+        clean_url = 'https://ostalb.onleihe.de/ostalb/'
+    
     
     return clean_url
 

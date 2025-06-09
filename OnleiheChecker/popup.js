@@ -1,8 +1,83 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    // Wait for localization to be available
+    const waitForLocalization = () => {
+        return new Promise((resolve) => {
+            if (typeof window.t === 'function') {
+                resolve();
+            } else {
+                setTimeout(() => waitForLocalization().then(resolve), 50);
+            }
+        });
+    };
+    
+    await waitForLocalization();
+    
+    // Load saved language preference and set it
+    const result = await chrome.storage.local.get(['selectedLanguage']);
+    if (result.selectedLanguage) {
+        window.setLanguage(result.selectedLanguage);
+    }
+    
+    // Apply localization to all elements with data-i18n attributes
+    const applyLocalization = () => {
+        document.querySelectorAll('[data-i18n]').forEach(element => {
+            const key = element.getAttribute('data-i18n');
+            element.textContent = t(key);
+        });
+        
+        // Apply localization to placeholder attributes
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+            const key = element.getAttribute('data-i18n-placeholder');
+            element.placeholder = t(key);
+        });
+    };
+    
+    applyLocalization();
+
+    const languageSelect = document.getElementById('language-select');
     const librarySearch = document.getElementById('library-search');
     const libraryDropdown = document.getElementById('library-dropdown');
     const saveLibraryBtn = document.getElementById('save-library-btn');
     const messageBox = document.getElementById('message');
+
+    // Set language selector to current language
+    languageSelect.value = window.getCurrentLanguage();
+
+    // Language switcher event listener
+    languageSelect.addEventListener('change', async (e) => {
+        const selectedLang = e.target.value;
+        window.setLanguage(selectedLang);
+        
+        // Save language preference
+        await chrome.storage.local.set({ selectedLanguage: selectedLang });
+        
+        // Re-apply localization
+        applyLocalization();
+        
+        // Re-render dropdown with new language
+        if (allLibraries.length > 0) {
+            renderDropdown(filteredLibraries);
+        }
+        
+        // Notify all tabs about language change
+        try {
+            const tabs = await chrome.tabs.query({});
+            for (const tab of tabs) {
+                if (tab.url && tab.url.includes('amazon.')) {
+                    chrome.tabs.sendMessage(tab.id, {
+                        action: "language_changed",
+                        language: selectedLang
+                    }).catch(() => {
+                        // Ignore errors for tabs that don't have the content script
+                    });
+                }
+            }
+        } catch (error) {
+            console.log('Could not notify tabs about language change:', error);
+        }
+        
+        showMessage(t('popup.language.changed'), 'success');
+    });
 
     let allLibraries = [];
     let filteredLibraries = [];
@@ -21,18 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Funktion zum Mappen von Länderkürzeln zu vollständigen Namen
     function getCountryFullName(code) {
-        switch (code) {
-            case 'de': return 'Deutschland';
-            case 'at': return 'Österreich';
-            case 'ch': return 'Schweiz';
-            case 'be': return 'Belgien';
-            case 'fr': return 'Frankreich';
-            case 'it': return 'Italien';
-            case 'lu': return 'Luxemburg';
-            case 'li': return 'Liechtenstein';
-            case 'other': return 'Sonstige (Goethe-Institut, WDA)';
-            default: return 'Unbekanntes Land';
-        }
+        return t(`country.${code}`);
     }
 
     // Funktion zum Rendern der Dropdown-Optionen
@@ -42,7 +106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (librariesToShow.length === 0) {
             const noResults = document.createElement('div');
             noResults.className = 'dropdown-item';
-            noResults.textContent = 'Keine Bibliotheken gefunden';
+            noResults.textContent = t('popup.no.libraries');
             noResults.style.fontStyle = 'italic';
             libraryDropdown.appendChild(noResults);
             return;
@@ -135,23 +199,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Gespeicherte Bibliothek laden
             chrome.storage.local.get(['selectedOnleiheLibraryURL', 'selectedOnleiheLibraryName'], (result) => {
-                if (result.selectedOnleiheLibraryURL) {
-                    const savedLibrary = allLibraries.find(lib => lib.baseURL === result.selectedOnleiheLibraryURL);
+                if (result.selectedOnleiheLibraryURL && result.selectedOnleiheLibraryName) {
+                    // Zuerst nach URL UND Name suchen für exakte Übereinstimmung
+                    let savedLibrary = allLibraries.find(lib => 
+                        lib.baseURL === result.selectedOnleiheLibraryURL && 
+                        lib.name === result.selectedOnleiheLibraryName
+                    );
+                    
+                    // Fallback: nur nach URL suchen, falls exakte Übereinstimmung nicht gefunden
+                    if (!savedLibrary) {
+                        savedLibrary = allLibraries.find(lib => lib.baseURL === result.selectedOnleiheLibraryURL);
+                    }
+                    
                     if (savedLibrary) {
                         selectedLibrary = savedLibrary;
                         librarySearch.value = savedLibrary.name;
-                        showMessage(`Deine Standardbibliothek ist: ${savedLibrary.name}`);
+                        showMessage(t('popup.current.library', savedLibrary.name));
                     }
                 } else {
-                    showMessage('Bitte wähle deine Bibliothek aus.');
+                    showMessage(t('popup.please.select'));
                 }
             });
         } else {
-            showMessage('Keine Bibliotheken gefunden.', 'error');
+            showMessage(t('popup.error.loading'), 'error');
         }
     } catch (error) {
         console.error('Fehler beim Laden der Bibliotheken:', error);
-        showMessage('Fehler beim Laden der Bibliotheken.', 'error');
+        showMessage(t('popup.error.loading'), 'error');
     }
 
     // Event Listener für das Suchfeld
@@ -186,7 +260,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Event Listener für "Bibliothek speichern" Button
     saveLibraryBtn.addEventListener('click', () => {
         if (!selectedLibrary) {
-            showMessage('Bitte wähle eine Bibliothek aus.', 'error');
+            showMessage(t('popup.error.select'), 'error');
             return;
         }
 
@@ -194,7 +268,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             selectedOnleiheLibraryURL: selectedLibrary.baseURL,
             selectedOnleiheLibraryName: selectedLibrary.name
         }, () => {
-            showMessage(`"${selectedLibrary.name}" wurde als Standardbibliothek gespeichert.`, 'success');
+            showMessage(t('popup.library.saved', selectedLibrary.name), 'success');
         });
     });
 });

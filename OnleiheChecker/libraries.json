@@ -1,12 +1,12 @@
 [
   {
     "name": "Aalen",
-    "baseURL": "https://www.ostalb-onleihe.de/",
+    "baseURL": "https://ostalb.onleihe.de/ostalb/",
     "country": "de"
   },
   {
     "name": "Abtsgmünd",
-    "baseURL": "https://www.ostalb-onleihe.de/",
+    "baseURL": "https://ostalb.onleihe.de/ostalb/",
     "country": "de"
   },
   {
@@ -231,7 +231,7 @@
   },
   {
     "name": "Böhmenkirch",
-    "baseURL": "https://www.ostalb-onleihe.de/",
+    "baseURL": "https://ostalb.onleihe.de/ostalb/",
     "country": "de"
   },
   {
@@ -411,7 +411,7 @@
   },
   {
     "name": "Ellwangen",
-    "baseURL": "https://www.ostalb-onleihe.de/",
+    "baseURL": "https://ostalb.onleihe.de/ostalb/",
     "country": "de"
   },
   {
@@ -566,7 +566,7 @@
   },
   {
     "name": "Gerstetten",
-    "baseURL": "https://www.ostalb-onleihe.de/",
+    "baseURL": "https://ostalb.onleihe.de/ostalb/",
     "country": "de"
   },
   {
@@ -576,7 +576,7 @@
   },
   {
     "name": "Giengen an der Brenz",
-    "baseURL": "https://www.ostalb-onleihe.de/",
+    "baseURL": "https://ostalb.onleihe.de/ostalb/",
     "country": "de"
   },
   {
@@ -681,12 +681,12 @@
   },
   {
     "name": "Heidenheim Stadtbibliothek",
-    "baseURL": "https://www.ostalb-onleihe.de/",
+    "baseURL": "https://ostalb.onleihe.de/ostalb/",
     "country": "de"
   },
   {
     "name": "Heidenheim Berufschulzentrum",
-    "baseURL": "https://www.ostalb-onleihe.de/",
+    "baseURL": "https://ostalb.onleihe.de/ostalb/",
     "country": "de"
   },
   {
@@ -716,7 +716,7 @@
   },
   {
     "name": "Herbrechtingen",
-    "baseURL": "https://www.ostalb-onleihe.de/",
+    "baseURL": "https://ostalb.onleihe.de/ostalb/",
     "country": "de"
   },
   {
@@ -731,7 +731,7 @@
   },
   {
     "name": "Heubach",
-    "baseURL": "https://www.ostalb-onleihe.de/",
+    "baseURL": "https://ostalb.onleihe.de/ostalb/",
     "country": "de"
   },
   {
@@ -1061,7 +1061,7 @@
   },
   {
     "name": "Lorch",
-    "baseURL": "https://www.ostalb-onleihe.de/",
+    "baseURL": "https://ostalb.onleihe.de/ostalb/",
     "country": "de"
   },
   {
@@ -1316,7 +1316,7 @@
   },
   {
     "name": "Oberkochen",
-    "baseURL": "https://www.ostalb-onleihe.de/",
+    "baseURL": "https://ostalb.onleihe.de/ostalb/",
     "country": "de"
   },
   {
@@ -1666,7 +1666,7 @@
   },
   {
     "name": "Schwäbisch Gmünd",
-    "baseURL": "https://www.ostalb-onleihe.de/",
+    "baseURL": "https://ostalb.onleihe.de/ostalb/",
     "country": "de"
   },
   {
@@ -1726,7 +1726,7 @@
   },
   {
     "name": "Sontheim an der Brenz",
-    "baseURL": "https://www.ostalb-onleihe.de/",
+    "baseURL": "https://ostalb.onleihe.de/ostalb/",
     "country": "de"
   },
   {
@@ -1746,7 +1746,7 @@
   },
   {
     "name": "Steinheim am Albuch",
-    "baseURL": "https://www.ostalb-onleihe.de/ostalb/",
+    "baseURL": "https://ostalb.onleihe.de/ostalb/ostalb/",
     "country": "de"
   },
   {
@@ -8451,12 +8451,12 @@
   },
   {
     "name": "Bautzen",
-    "baseURL": "https://www.onleihe-oberlausitz.de/",
+    "baseURL": "https://oberlausitz.onleihe.de/oberlausitz/",
     "country": "de"
   },
   {
     "name": "Bischofswerda",
-    "baseURL": "https://www.onleihe-oberlausitz.de/",
+    "baseURL": "https://oberlausitz.onleihe.de/oberlausitz/",
     "country": "de"
   },
   {
@@ -8536,7 +8536,7 @@
   },
   {
     "name": "Ebersbach-Neugersdorf",
-    "baseURL": "https://www.onleihe-oberlausitz.de/",
+    "baseURL": "https://oberlausitz.onleihe.de/oberlausitz/",
     "country": "de"
   },
   {
@@ -8586,7 +8586,7 @@
   },
   {
     "name": "Görlitz",
-    "baseURL": "https://www.onleihe-oberlausitz.de/",
+    "baseURL": "https://oberlausitz.onleihe.de/oberlausitz/",
     "country": "de"
   },
   {
@@ -8646,7 +8646,7 @@
   },
   {
     "name": "Hoyerswerda",
-    "baseURL": "https://www.onleihe-oberlausitz.de/",
+    "baseURL": "https://oberlausitz.onleihe.de/oberlausitz/",
     "country": "de"
   },
   {
@@ -8656,7 +8656,7 @@
   },
   {
     "name": "Kamenz",
-    "baseURL": "https://www.onleihe-oberlausitz.de/",
+    "baseURL": "https://oberlausitz.onleihe.de/oberlausitz/",
     "country": "de"
   },
   {
@@ -8701,7 +8701,7 @@
   },
   {
     "name": "Löbau",
-    "baseURL": "https://www.onleihe-oberlausitz.de/",
+    "baseURL": "https://oberlausitz.onleihe.de/oberlausitz/",
     "country": "de"
   },
   {
@@ -8761,7 +8761,7 @@
   },
   {
     "name": "Niesky",
-    "baseURL": "https://www.onleihe-oberlausitz.de/",
+    "baseURL": "https://oberlausitz.onleihe.de/oberlausitz/",
     "country": "de"
   },
   {
@@ -8791,7 +8791,7 @@
   },
   {
     "name": "Ottendorf-Okrilla",
-    "baseURL": "https://www.onleihe-oberlausitz.de/",
+    "baseURL": "https://oberlausitz.onleihe.de/oberlausitz/",
     "country": "de"
   },
   {
@@ -8811,12 +8811,12 @@
   },
   {
     "name": "Radeberg",
-    "baseURL": "https://www.onleihe-oberlausitz.de/",
+    "baseURL": "https://oberlausitz.onleihe.de/oberlausitz/",
     "country": "de"
   },
   {
     "name": "Radebeul",
-    "baseURL": "https://www.onleihe-oberlausitz.de/",
+    "baseURL": "https://oberlausitz.onleihe.de/oberlausitz/",
     "country": "de"
   },
   {
@@ -8846,7 +8846,7 @@
   },
   {
     "name": "Rothenburg",
-    "baseURL": "https://www.onleihe-oberlausitz.de/",
+    "baseURL": "https://oberlausitz.onleihe.de/oberlausitz/",
     "country": "de"
   },
   {
@@ -8926,7 +8926,7 @@
   },
   {
     "name": "Weißwasser",
-    "baseURL": "https://www.onleihe-oberlausitz.de/",
+    "baseURL": "https://oberlausitz.onleihe.de/oberlausitz/",
     "country": "de"
   },
   {
@@ -8946,7 +8946,7 @@
   },
   {
     "name": "Zittau",
-    "baseURL": "https://www.onleihe-oberlausitz.de/",
+    "baseURL": "https://oberlausitz.onleihe.de/oberlausitz/",
     "country": "de"
   },
   {

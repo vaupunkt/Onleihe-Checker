@@ -44,11 +44,89 @@ function waitForElement(selector, timeout = 15000) {
     });
 }
 
+// Global flag to track if localization is loaded
+let localizationLoaded = false;
+let currentStatusField = null; // Store reference to current status field
+let currentStatusState = null; // Store current status state for language switching
+
+// Embedded translations to avoid loading issues
+const embeddedTranslations = {
+    de: {
+        'content.loading': 'Lade Onleihe-Informationen...',
+        'content.checking': 'Prüfe Verfügbarkeit in "{0}"...',
+        'content.please.select.library': 'Bitte wähle deine Onleihe-Bibliothek in der Erweiterung aus.',
+        'content.no.book.info': 'Keine Buchinformationen (Titel, Autor oder ISBN) auf Amazon gefunden.',
+        'content.found.results': '{0} Ergebnisse im Onleihe-Katalog "{1}" gefunden!',
+        'content.no.results': 'Keine Ergebnisse im Onleihe-Katalog "{0}" gefunden.',
+        'content.view.catalog': 'Im Onleihe-Katalog anzeigen',
+        'content.search.directly': 'Direkt im Onleihe-Katalog suchen',
+        'content.error.retrieving': 'Fehler beim Abrufen der Onleihe-Daten: {0}',
+        'content.communication.error': 'Kommunikationsfehler: {0}'
+    },
+    en: {
+        'content.loading': 'Loading Onleihe information...',
+        'content.checking': 'Checking availability in "{0}"...',
+        'content.please.select.library': 'Please select your Onleihe library in the extension popup.',
+        'content.no.book.info': 'No book information (title, author or ISBN) found on Amazon.',
+        'content.found.results': 'Found {0} results in Onleihe catalog "{1}"!',
+        'content.no.results': 'No results found in Onleihe catalog "{0}".',
+        'content.view.catalog': 'View in Onleihe catalog',
+        'content.search.directly': 'Search directly in Onleihe catalog',
+        'content.error.retrieving': 'Error retrieving Onleihe data: {0}',
+        'content.communication.error': 'Communication error: {0}'
+    }
+};
+
+let currentLanguage = 'de'; // Default language
+
+// Embedded translation function
+function embeddedT(key, ...args) {
+    let text = embeddedTranslations[currentLanguage][key] || embeddedTranslations['en'][key] || key;
+    
+    // Replace placeholders {0}, {1}, etc. with arguments
+    args.forEach((arg, index) => {
+        text = text.replace(`{${index}}`, arg);
+    });
+    
+    return text;
+}
+
+/**
+ * Safe translation function that uses embedded translations as primary and window.t as fallback.
+ * @param {string} key - The translation key.
+ * @param  {...any} args - Arguments for string interpolation.
+ * @returns {string} The translated string or the key itself if not found.
+ */
+function safeT(key, ...args) {
+    // Try embedded translations first
+    if (embeddedTranslations[currentLanguage] && embeddedTranslations[currentLanguage][key]) {
+        return embeddedT(key, ...args);
+    }
+    
+    // Fallback to window.t if available
+    if (typeof window.t === 'function') {
+        return window.t(key, ...args);
+    }
+    
+    // Final fallback - try English embedded translations
+    if (embeddedTranslations['en'][key]) {
+        let text = embeddedTranslations['en'][key];
+        args.forEach((arg, index) => {
+            text = text.replace(`{${index}}`, arg);
+        });
+        return text;
+    }
+    
+    // Ultimate fallback - return the key
+    return key;
+}
+
 // Function to create and inject the Onleihe status field
 async function injectOnleiheStatusField() {
     // Check if field already exists to avoid duplicates
     if (document.getElementById('onleihe-checker-status')) {
-        return document.getElementById('onleihe-checker-status');
+        currentStatusField = document.getElementById('onleihe-checker-status');
+        return currentStatusField;
     }
 
     let targetElement = null;
@@ -100,7 +178,7 @@ async function injectOnleiheStatusField() {
                 margin-right: 10px;
                 display: none;
             "></div>
-            <p id="onleihe-status-message" style="margin: 0; font-size: 14px; color: inherit;">Loading Onleihe information...</p>
+            <p id="onleihe-status-message" style="margin: 0; font-size: 14px; color: inherit;">${safeT('content.loading')}</p>
         </div>
         <style>
             @keyframes spin {
@@ -121,6 +199,7 @@ async function injectOnleiheStatusField() {
         } else {
             targetElement.parentNode.insertBefore(onleiheStatusDiv, targetElement.nextSibling);
         }
+        currentStatusField = onleiheStatusDiv; // Store reference
         return onleiheStatusDiv;
     } catch (e) {
         console.error("Onleihe Checker: Error injecting status field:", e);
@@ -130,6 +209,13 @@ async function injectOnleiheStatusField() {
 
 // Function to update the status field
 function updateOnleiheStatus(statusDiv, message, type = 'info', onleiheUrl = null) {
+    // Store current state for language switching
+    currentStatusState = {
+        message: message,
+        type: type,
+        url: onleiheUrl
+    };
+
     const spinner = statusDiv.querySelector('#onleihe-status-spinner');
     const msgElement = statusDiv.querySelector('#onleihe-status-message');
 
@@ -148,7 +234,7 @@ function updateOnleiheStatus(statusDiv, message, type = 'info', onleiheUrl = nul
         statusDiv.style.color = '#1f8b1f';
         msgElement.innerHTML = `<strong>${message}</strong>`;
         if (onleiheUrl) {
-            msgElement.innerHTML += `<br><a href="${onleiheUrl}" target="_blank" style="color: #007bff; text-decoration: underline;">View in Onleihe catalog</a>`;
+            msgElement.innerHTML += `<br><a href="${onleiheUrl}" target="_blank" style="color: #007bff; text-decoration: underline;">${safeT('content.view.catalog')}</a>`;
         }
     } else if (type === 'not_found') {
         statusDiv.style.backgroundColor = '#ffe6e6';
@@ -156,17 +242,51 @@ function updateOnleiheStatus(statusDiv, message, type = 'info', onleiheUrl = nul
         statusDiv.style.color = '#cc0000';
         msgElement.innerHTML = `<strong>${message}</strong>`;
         if (onleiheUrl) {
-            msgElement.innerHTML += `<br><a href="${onleiheUrl}" target="_blank" style="color: #007bff; text-decoration: underline;">Search directly in Onleihe catalog</a>`;
+            msgElement.innerHTML += `<br><a href="${onleiheUrl}" target="_blank" style="color: #007bff; text-decoration: underline;">${safeT('content.search.directly')}</a>`;
         }
     } else if (type === 'error') {
         statusDiv.style.backgroundColor = '#fff0e6';
         statusDiv.style.borderColor = '#ff9933';
         statusDiv.style.color = '#e65c00';
         msgElement.innerHTML = `<strong>${message}</strong>`;
+    } else if (type === 'warning') {
+        statusDiv.style.backgroundColor = '#fff4e6';
+        statusDiv.style.borderColor = '#ff9933';
+        statusDiv.style.color = '#b45309';
+        msgElement.innerHTML = `<strong>${message}</strong>`;
     } else {
         msgElement.innerHTML = message;
     }
 }
+
+// Function to refresh status field with current language
+function refreshStatusFieldLanguage() {
+    if (currentStatusField && currentStatusState) {
+        // Re-render the status with the stored state but updated language
+        updateOnleiheStatus(
+            currentStatusField, 
+            currentStatusState.message, 
+            currentStatusState.type, 
+            currentStatusState.url
+        );
+    }
+}
+
+// Listen for language change messages from popup
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "language_changed") {
+        currentLanguage = request.language;
+        console.log('Onleihe Checker: Language changed to', currentLanguage);
+        
+        // Also update window language if available
+        if (typeof window.setLanguage === 'function') {
+            window.setLanguage(request.language);
+        }
+        
+        refreshStatusFieldLanguage();
+        sendResponse({ success: true });
+    }
+});
 
 // ==============================================================================
 // Extract book information from Amazon page
@@ -374,11 +494,11 @@ async function runOnleiheCheck() {
     const selectedLibraryName = result.selectedOnleiheLibraryName;
 
     if (!selectedLibraryBaseURL) {
-        updateOnleiheStatus(statusField, 'Please select your Onleihe library in the extension popup.', 'warning');
+        updateOnleiheStatus(statusField, safeT('content.please.select.library'), 'warning');
         return;
     }
     
-    updateOnleiheStatus(statusField, `Checking availability in "${selectedLibraryName}"...`, 'loading');
+    updateOnleiheStatus(statusField, safeT('content.checking', selectedLibraryName), 'loading');
 
     const bookInfo = getBookInfoFromAmazon();
     const amazonIsbn = bookInfo.isbn;
@@ -394,7 +514,7 @@ async function runOnleiheCheck() {
     } else if (amazonIsbn && amazonIsbn !== 'Not found') {
         searchTerm = amazonIsbn;
     } else {
-        updateOnleiheStatus(statusField, 'No book information (title, author or ISBN) found on Amazon.', 'not_found');
+        updateOnleiheStatus(statusField, safeT('content.no.book.info'), 'not_found');
         return;
     }
 
@@ -412,17 +532,17 @@ async function runOnleiheCheck() {
             const count = parseOnleiheHtmlForCount(responseFromBackground.html);
 
             if (count > 0) {
-                updateOnleiheStatus(statusField, `Found ${count} results in Onleihe catalog "${selectedLibraryName}"!`, 'success', onleiheSearchURL);
+                updateOnleiheStatus(statusField, safeT('content.found.results', count, selectedLibraryName), 'success', onleiheSearchURL);
             } else {
-                updateOnleiheStatus(statusField, `No results found in Onleihe catalog "${selectedLibraryName}".`, 'not_found', onleiheSearchURL);
+                updateOnleiheStatus(statusField, safeT('content.no.results', selectedLibraryName), 'not_found', onleiheSearchURL);
             }
         } else {
-            updateOnleiheStatus(statusField, `Error retrieving Onleihe data: ${responseFromBackground.error || 'Unknown error'}`, 'error');
+            updateOnleiheStatus(statusField, safeT('content.error.retrieving', responseFromBackground.error || 'Unknown error'), 'error');
             console.error(`Onleihe Checker: Error from background service worker: ${responseFromBackground.error}`);
         }
     } catch (error) {
         console.error("Onleihe Checker: Error communicating with service worker:", error);
-        updateOnleiheStatus(statusField, `Communication error: ${error.message}`, 'error');
+        updateOnleiheStatus(statusField, safeT('content.communication.error', error.message), 'error');
     }
 }
 
@@ -460,12 +580,83 @@ async function initializeOnleiheChecker() {
     console.error("Onleihe Checker: All initialization attempts failed.");
 }
 
-// Event listeners for different loading methods
-document.addEventListener('DOMContentLoaded', initializeOnleiheChecker);
-window.addEventListener('load', initializeOnleiheChecker);
+// Load localization and initialize
+async function loadLocalizationAndInit() {
+    // Load saved language preference first
+    try {
+        const result = await chrome.storage.local.get(['selectedLanguage']);
+        if (result.selectedLanguage) {
+            currentLanguage = result.selectedLanguage;
+            console.log('Onleihe Checker: Language preference loaded:', currentLanguage);
+        }
+    } catch (error) {
+        console.warn('Onleihe Checker: Could not load language preference:', error);
+    }
+
+    // Try to load external localization in the background (non-blocking)
+    const tryLoadExternalLocalization = () => {
+        // Check if localization is already loaded
+        if (typeof window.t === 'function' && typeof window.OnleiheLocalesLoaded !== 'undefined') {
+            console.log('Onleihe Checker: External localization already available');
+            if (typeof window.setLanguage === 'function') {
+                window.setLanguage(currentLanguage);
+            }
+            return;
+        }
+        
+        // Check if script is already being loaded
+        const existingScript = document.querySelector('script[src*="locales.js"]');
+        if (existingScript) {
+            console.log('Onleihe Checker: External locales script already exists');
+            return;
+        }
+        
+        // Try to load the locales script (non-blocking)
+        console.log('Onleihe Checker: Attempting to load external locales script...');
+        const script = document.createElement('script');
+        script.src = chrome.runtime.getURL('locales.js');
+        
+        script.onload = () => {
+            console.log('Onleihe Checker: External locales script loaded successfully');
+            if (typeof window.setLanguage === 'function') {
+                window.setLanguage(currentLanguage);
+            }
+        };
+        
+        script.onerror = () => {
+            console.warn('Onleihe Checker: Could not load external localization script, using embedded translations');
+        };
+        
+        // Add script to document
+        if (document.head) {
+            document.head.appendChild(script);
+        }
+    };
+
+    // Start with embedded translations immediately
+    console.log('Onleihe Checker: Using embedded translations, starting initialization...');
+    
+    // Try to load external localization in background
+    setTimeout(tryLoadExternalLocalization, 100);
+    
+    // Initialize immediately with embedded translations
+    setTimeout(initializeOnleiheChecker, 200);
+}
+
+// Event listeners for different loading methods - ensure single execution
+let initializationStarted = false;
+
+function startInitialization() {
+    if (initializationStarted) return;
+    initializationStarted = true;
+    loadLocalizationAndInit();
+}
+
+document.addEventListener('DOMContentLoaded', startInitialization);
+window.addEventListener('load', startInitialization);
 
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    initializeOnleiheChecker();
+    startInitialization();
 }
 
 // Observe URL changes for SPA navigation

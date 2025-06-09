@@ -187,6 +187,34 @@
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
+        /* Language switcher styles */
+        .language-switcher {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .language-switcher select {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .language-switcher select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .language-switcher label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 0;
+        }
+
         /* Subtle animations */
         .container > * {
             animation: fadeInUp 0.3s ease forwards;
@@ -208,36 +236,45 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📚 Onleihe Checker</h1>
+            <h1 data-i18n="popup.title">📚 Onleihe Checker</h1>
+        </div>
+
+        <div class="language-switcher">
+            <label for="language-select" data-i18n="popup.language.label">🌐 Language:</label>
+            <select id="language-select">
+                <option value="de">Deutsch</option>
+                <option value="en">English</option>
+            </select>
         </div>
 
         <div class="flex flex-col space-y-3">
-            <div class="info-box">
+            <div class="info-box" data-i18n="popup.search.info">
                 Suche und wähle deine Bibliothek aus.
             </div>
 
             <div>
-                <label for="library-search">🔍 Bibliothek suchen & auswählen:</label>
+                <label for="library-search" data-i18n="popup.search.label">🔍 Bibliothek suchen & auswählen:</label>
                 <div class="search-container">
-                    <input type="text" id="library-search" placeholder="Bibliothek suchen...">
+                    <input type="text" id="library-search" data-i18n-placeholder="popup.search.placeholder" placeholder="Bibliothek suchen...">
                     <div id="library-dropdown">
                         <!-- Dropdown-Optionen werden von JavaScript eingefügt -->
                     </div>
                 </div>
             </div>
 
-            <button id="save-library-btn">💾 Bibliothek speichern</button>
+            <button id="save-library-btn" data-i18n="popup.save.button">💾 Bibliothek speichern</button>
             
             <div id="message" class="message-box hidden"></div>
 
             <hr>
 
-            <div class="info-box">
+            <div class="info-box" data-i18n="popup.amazon.info">
                 🌐 Öffne eine Amazon.de Buchseite für die Verfügbarkeitsprüfung.
             </div>
         </div>
     </div>
 
+    <script src="locales.js"></script>
     <script src="popup.js"></script>
 </body>
 </html>

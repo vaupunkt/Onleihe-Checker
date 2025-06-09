@@ -30,8 +30,7 @@
     "https://www.elbe-elster-bibnet.de/*",
     "https://hessen.onleihe.de/*",
     "https://voebb.onleihe.de/*",
-    "http://*.onleihe.de/*",
-    "http://www.ostalb-onleihe.de/*"
+    "http://*.onleihe.de/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -57,7 +56,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["libraries.json"],
+      "resources": ["libraries.json", "locales.js"],
       "matches": ["<all_urls>"]
     }
   ]
