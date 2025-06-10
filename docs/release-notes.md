@@ -25,15 +25,12 @@ title: Release Notes
 
 #### Mehrsprachigkeit
 - ✅ Deutsche & englische Oberfläche
-- ✅ Dynamischer Sprachwechsel
 - ✅ Kontextuelle Übersetzungen
-- ✅ Browser-Spracherkennung
 
 #### Intelligente Suche
 - ✅ Multi-Feld-Suche (Titel, Autor, ISBN)
 - ✅ Fallback-Strategien
 - ✅ Genaue Ergebniszählung
-- ✅ Direkte Katalog-Links
 
 ### 🛠 Technische Highlights
 
@@ -57,9 +54,6 @@ title: Release Notes
 
 ### 📊 Enthaltene Komponenten
 - Chrome Extension (Ready-to-install)
-- Web Scraper (Python)
-- URL Cleaner (Utility)
-- Umfassende Dokumentation
 
 ### 🌍 Unterstützte Bibliotheken
 - **450+ deutsche Bibliotheken**
@@ -83,4 +77,3 @@ title: Release Notes
 
 **Download-Größe**: ~200KB  
 **Installationszeit**: < 1 Minute  
-**Setup-Komplexität**: Anfängerfreundlich

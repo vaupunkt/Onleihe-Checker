@@ -9,11 +9,11 @@ title: Technische Details
 
 ```
 root/
-├── OnleiheScraper          # Onleihe Scraper
-│   ├── clean_base_urls.py         # URL-Bereinigung
-│   └── scrape_onleihe.py          # Haupt-Scraping-Skript
-├── OnleiheChecker/           # Chrome Extension
-│   ├── manifest.json         # Extension-Konfiguration
+├── OnleiheScraper           # Onleihe Scraper
+│   ├── clean_base_urls.py   # URL-Bereinigung
+│   └── scrape_onleihe.py    # Haupt-Scraping-Skript
+├── OnleiheChecker/          # Chrome Extension
+│   ├── manifest.json        # Extension-Konfiguration
 │   ├── popup.html           # Popup-Interface
 │   ├── popup.js             # Popup-Funktionalität
 │   ├── content.js           # Amazon-Integration
