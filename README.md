@@ -6,6 +6,36 @@ A Python web scraper and Chrome extension for German digital library services (O
 1. **Web Scraper**: Extracts library information from official Onleihe help pages
 2. **Chrome Extension**: Checks book availability in your local Onleihe library while browsing Amazon
 
+## 📚 Table of Contents
+- [🚀 Features](#-features)
+    - [Web Scraper](#web-scraper)
+    - [Chrome Extension](#chrome-extension)
+- [📋 Requirements](#-requirements)
+    - [For Web Scraping](#for-web-scraping)
+    - [For Chrome Extension](#for-chrome-extension)
+- [🛠 Installation](#-installation)
+    - [1. Web Scraper Setup](#1-web-scraper-setup)
+    - [2. Chrome Extension Setup](#2-chrome-extension-setup)
+- [🎯 Usage](#-usage)
+    - [Web Scraping](#web-scraping)
+    - [Chrome Extension](#chrome-extension-1)
+- [📁 Project Structure](#-project-structure)
+- [🔧 Configuration](#-configuration)
+    - [Scraper Settings](#scraper-settings)
+    - [Extension Settings](#extension-settings)
+- [🌍 Supported Libraries](#-supported-libraries)
+    - [Web Scraper Coverage](#web-scraper-coverage)
+    - [Chrome Extension Support](#chrome-extension-support)
+- [🐛 Troubleshooting](#-troubleshooting)
+    - [Common Scraping Issues](#common-scraping-issues)
+    - [Extension Issues](#extension-issues)
+- [🤝 Contributing](#-contributing)
+- [📝 License](#-license)
+- [⚠️ Disclaimer](#️-disclaimer)
+- [🔄 Maintenance](#-maintenance)
+    - [Updating Library Data](#updating-library-data)
+- [🔒 Security & Permissions](#-security--permissions)
+
 ## 🚀 Features
 
 ### Web Scraper
