@@ -20,15 +20,12 @@ A Chrome extension that seamlessly integrates with Amazon.de to check book avail
 
 ### 🌍 Multilingual Experience
 - **German & English Interface**: Full localization support
-- **Dynamic Language Switching**: Change language without restarting
 - **Contextual Translations**: All messages and UI elements properly localized
-- **Browser Language Detection**: Automatically detects your preferred language
 
 ### 🔍 Intelligent Search
 - **Multi-field Search**: Uses title, author, and ISBN for best results
 - **Fallback Strategy**: Automatically tries different search terms if first attempt fails
 - **Result Counting**: Shows exact number of available titles
-- **Direct Links**: One-click access to library catalog for detailed view
 
 ### ⚙️ User-Friendly Setup
 - **Simple Configuration**: Easy library selection through searchable dropdown
@@ -60,9 +57,6 @@ A Chrome extension that seamlessly integrates with Amazon.de to check book avail
 
 ### Core Components
 - **Chrome Extension**: Ready-to-install browser extension
-- **Web Scraper**: Python tool for updating library database
-- **URL Cleaner**: Utility for maintaining clean library URLs
-- **Documentation**: Comprehensive setup and usage guides
 
 ### Library Database
 - **450+ Libraries**: Complete German Onleihe network coverage

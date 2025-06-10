@@ -8,6 +8,7 @@ title: Release Notes
 ## Version 1.0.0 - Initial Release
 
 🎉 **Erste stabile Version des Onleihe Checkers!**
+[Download v1.0.0](https://github.com/vaupunkt/Onleihe-Checker/releases/download/v1.0/onleiheExtension.zip)
 
 ### ✨ Neue Features
 
