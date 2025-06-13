@@ -5,7 +5,27 @@ title: Installation
 
 # 🛠 Installation
 
-## Chrome Extension Setup
+## 🚀 Option 1: Chrome Web Store (Empfohlen)
+
+**[📥 Direkt aus dem Chrome Web Store installieren](https://chromewebstore.google.com/detail/onleihe-checker/lbdbelkkmbogfjkeklmpfaijgpdnnncn?hl=de)**
+
+### Vorteile der Web Store Installation:
+- ✅ **Ein-Klick-Installation** - keine manuelle Konfiguration nötig
+- ✅ **Automatische Updates** - neue Features und Bugfixes werden automatisch installiert
+- ✅ **Verifizierte Sicherheit** - von Google geprüft und zertifiziert
+- ✅ **Einfache Verwaltung** - über Chrome Extension Manager
+
+### So gehts:
+1. **Link öffnen**: [Chrome Web Store](https://chromewebstore.google.com/detail/onleihe-checker/lbdbelkkmbogfjkeklmpfaijgpdnnncn?hl=de)
+2. **"Zu Chrome hinzufügen"** klicken
+3. **Bestätigen** in der Popup-Nachricht
+4. **Fertig!** - Extension ist sofort einsatzbereit
+
+---
+
+## 🔧 Option 2: Manuelle Installation (Entwickler)
+
+*Nur für Entwickler oder wenn du die neueste Entwicklungsversion testen möchtest.*
 
 ### Voraussetzungen
 - Chrome/Chromium Browser

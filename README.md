@@ -6,6 +6,16 @@ A Python web scraper and Chrome extension for German digital library services (O
 1. **Web Scraper**: Extracts library information from official Onleihe help pages
 2. **Chrome Extension**: Checks book availability in your local Onleihe library while browsing Amazon
 
+## 🚀 Quick Start
+
+### Chrome Extension (Recommended)
+**[📥 Install from Chrome Web Store](https://chromewebstore.google.com/detail/onleihe-checker/lbdbelkkmbogfjkeklmpfaijgpdnnncn?hl=de)**
+
+*The easiest way to get started - install directly from the Chrome Web Store with automatic updates.*
+
+### Manual Installation (Developers)
+For development or manual installation, see [Installation Guide](#-installation) below.
+
 ## 📚 Table of Contents
 - [🚀 Features](#-features)
     - [Web Scraper](#web-scraper)
@@ -66,7 +76,18 @@ A Python web scraper and Chrome extension for German digital library services (O
 
 ## 🛠 Installation
 
-### 1. Web Scraper Setup
+### Option 1: Chrome Web Store (Recommended)
+**[📥 Install from Chrome Web Store](https://chromewebstore.google.com/detail/onleihe-checker/lbdbelkkmbogfjkeklmpfaijgpdnnncn?hl=de)**
+
+This is the recommended installation method for most users:
+- Automatic updates
+- Verified security
+- One-click installation
+- No manual setup required
+
+### Option 2: Manual Installation (Developer Mode)
+
+#### 1. Web Scraper Setup
 
 ```bash
 # Install required packages
@@ -78,7 +99,7 @@ brew install chromedriver
 # Or download manually from https://chromedriver.chromium.org/
 ```
 
-### 2. Chrome Extension Setup
+#### 2. Chrome Extension Setup
 
 1. Open Chrome and navigate to `chrome://extensions/`
 2. Enable "Developer mode" (toggle in top right)
