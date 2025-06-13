@@ -5,126 +5,282 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Onleihe Checker</title>
     <style>
+        /* Base styles */
         body {
-            width: 350px;
-            padding: 15px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            width: 300px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            color: #2d3748;
+            padding: 0;
             margin: 0;
         }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            border-radius: 0 0 8px 8px;
         }
-        
-        .header h1 {
-            font-size: 18px;
-            margin: 0 0 5px 0;
-            color: #333;
+
+        /* Flexbox and spacing container */
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .flex.flex-col.space-y-3 { gap: 0.75rem; }
+
+        /* Form elements */
+        .search-container {
+            position: relative;
         }
-        
-        .header p {
-            font-size: 12px;
-            color: #666;
-            margin: 0;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            color: #333;
-        }
-        
-        input, select {
+
+        #library-search {
+            padding: 0.75rem 2.5rem 0.75rem 0.75rem;
+            border-radius: 6px;
+            border: 2px solid #e2e8f0;
+            background: #ffffff;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
             box-sizing: border-box;
         }
-        
-        input:focus, select:focus {
+
+        #library-search:focus {
             outline: none;
-            border-color: #4285f4;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
-        
+
+        #library-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .dropdown-item:hover {
+            background: #f8fafc;
+        }
+
+        .dropdown-item.selected {
+            background: #667eea;
+            color: white;
+        }
+
+        .dropdown-group {
+            font-weight: 600;
+            color: #4a5568;
+            background: #f7fafc;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Labels */
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Button styling */
         button {
             width: 100%;
-            padding: 10px;
-            background: #4285f4;
-            color: white;
+            padding: 0.75rem;
+            border-radius: 6px;
             border: none;
-            border-radius: 4px;
-            font-size: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
         }
-        
+
         button:hover {
-            background: #3367d6;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(102, 126, 234, 0.4);
         }
-        
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
+
+        button:active {
+            transform: translateY(0);
         }
-        
-        .status {
-            padding: 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            margin-top: 10px;
+
+        /* Sizing */
+        .hidden { display: none; }
+
+        /* Message boxes */
+        .message-box { 
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            border-left: 3px solid;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .info-box { 
+            background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%);
+            color: #2b6cb0;
+            border-left-color: #3182ce;
+        }
+
+        .warning-box { 
+            background: linear-gradient(135deg, #fffbeb 0%, #fef5e7 100%);
+            color: #b45309;
+            border-left-color: #d69e2e;
+        }
+
+        .success-box { 
+            background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+            color: #2f855a;
+            border-left-color: #38a169;
+        }
+
+        .error-box { 
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            color: #c53030;
+            border-left-color: #e53e3e;
+        }
+
+        /* Divider */
+        hr {
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+            margin: 0.5rem 0;
+        }
+
+        /* Header styling */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem;
+            margin: -1rem -1rem 1rem -1rem;
             text-align: center;
         }
-        
-        .status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+
+        .header h1 {
+            color: white;
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
-        .status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+
+        /* Language switcher styles */
+        .language-switcher {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 0.75rem;
         }
-        
-        .help-text {
-            font-size: 11px;
-            color: #666;
-            margin-top: 5px;
+
+        .language-switcher select {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .language-switcher select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .language-switcher label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 0;
+        }
+
+        /* Subtle animations */
+        .container > * {
+            animation: fadeInUp 0.3s ease forwards;
+            opacity: 0;
+        }
+
+        .container > *:nth-child(1) { animation-delay: 0.1s; }
+        .container > *:nth-child(2) { animation-delay: 0.2s; }
+        .container > *:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>📚 Onleihe Checker</h1>
-        <p>Bibliothek für die Verfügbarkeitsprüfung auswählen</p>
     </div>
-    
-    <div class="form-group">
-        <label for="librarySearch" data-i18n="popup.search.label">🔍 Bibliothek suchen:</label>
-        <input type="text" id="librarySearch" data-i18n-placeholder="popup.search.placeholder" placeholder="Name der Bibliothek eingeben...">
-        <div class="help-text">Geben Sie den Namen Ihrer Bibliothek ein</div>
+
+    <div class="container">
+        <div class="flex flex-col space-y-3">
+            <div class="language-switcher">
+                <label for="language-select">🌐</label>
+                <select id="language-select">
+                    <option value="de">Deutsch</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+
+            <div class="info-box" data-i18n="popup.info">
+                Suche und wähle deine Bibliothek aus.
+            </div>
+
+            <div>
+                <label for="library-search" data-i18n="popup.search.label">🔍 Bibliothek suchen & auswählen:</label>
+                <div class="search-container">
+                    <input type="text" id="library-search" data-i18n-placeholder="popup.search.placeholder" placeholder="Bibliothek suchen...">
+                    <div id="library-dropdown">
+                        <!-- Dropdown-Optionen werden von JavaScript eingefügt -->
+                    </div>
+                </div>
+            </div>
+
+            <button id="save-library-btn" data-i18n="popup.save.button">💾 Bibliothek speichern</button>
+            
+            <div id="message" class="message-box hidden"></div>
+
+            <hr>
+
+            <div class="info-box" data-i18n="popup.amazon.info">
+                🌐 Öffne eine Amazon.de Buchseite für die Verfügbarkeitsprüfung.
+            </div>
+        </div>
     </div>
-    
-    <div class="form-group">
-        <label for="librarySelect">Bibliothek auswählen:</label>
-        <select id="librarySelect">
-            <option value="">Laden...</option>
-        </select>
-    </div>
-    
-    <button id="saveLibrary" data-i18n="popup.save.button">💾 Bibliothek speichern</button>
-    
-    <div id="status" class="status" style="display: none;"></div>
-    
+
     <script src="locales.js"></script>
     <script src="popup.js"></script>
 </body>
