@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onleihe Checker</title>
+    <style>
+        body {
+            width: 350px;
+            padding: 15px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        
+        .header p {
+            font-size: 12px;
+            color: #666;
+            margin: 0;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4285f4;
+        }
+        
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #3367d6;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .help-text {
+            font-size: 11px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📚 Onleihe Checker</h1>
+        <p>Bibliothek für die Verfügbarkeitsprüfung auswählen</p>
+    </div>
+    
+    <div class="form-group">
+        <label for="librarySearch" data-i18n="popup.search.label">🔍 Bibliothek suchen:</label>
+        <input type="text" id="librarySearch" data-i18n-placeholder="popup.search.placeholder" placeholder="Name der Bibliothek eingeben...">
+        <div class="help-text">Geben Sie den Namen Ihrer Bibliothek ein</div>
+    </div>
+    
+    <div class="form-group">
+        <label for="librarySelect">Bibliothek auswählen:</label>
+        <select id="librarySelect">
+            <option value="">Laden...</option>
+        </select>
+    </div>
+    
+    <button id="saveLibrary" data-i18n="popup.save.button">💾 Bibliothek speichern</button>
+    
+    <div id="status" class="status" style="display: none;"></div>
+    
+    <script src="locales.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>
