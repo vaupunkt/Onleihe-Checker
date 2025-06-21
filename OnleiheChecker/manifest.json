@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Onleihe Checker",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Check book availability in German digital libraries (Onleihe) while browsing Amazon.de and Goodreads",
   "permissions": [
     "storage",

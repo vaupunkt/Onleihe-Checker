@@ -52,7 +52,7 @@ const embeddedTranslations = {
         'content.loading': 'Lade Onleihe-Informationen...',
         'content.checking': 'Prüfe Verfügbarkeit in "{0}"...',
         'content.please.select.library': 'Bitte wähle deine Onleihe-Bibliothek in der Erweiterung aus.',
-        'content.no.book.info': 'Keine Buchinformationen (Titel, Autor oder ISBN) auf Amazon gefunden.',
+        'content.no.book.info': 'Keine Buchinformationen (Titel, Autor oder ISBN) gefunden.',
         'content.found.results': '{0} Ergebnisse im Onleihe-Katalog "{1}" gefunden!',
         'content.no.results': 'Keine Ergebnisse im Onleihe-Katalog "{0}" gefunden.',
         'content.view.catalog': 'Im Onleihe-Katalog anzeigen',
@@ -64,7 +64,7 @@ const embeddedTranslations = {
         'content.loading': 'Loading Onleihe information...',
         'content.checking': 'Checking availability in "{0}"...',
         'content.please.select.library': 'Please select your Onleihe library in the extension popup.',
-        'content.no.book.info': 'No book information (title, author or ISBN) found on Amazon.',
+        'content.no.book.info': 'No book information (title, author or ISBN) found.',
         'content.found.results': 'Found {0} results in Onleihe catalog "{1}"!',
         'content.no.results': 'No results found in Onleihe catalog "{0}".',
         'content.view.catalog': 'View in Onleihe catalog',
@@ -675,7 +675,7 @@ function parseOnleiheHtmlForCount(html) {
 }
 
 // ==============================================================================
-// Main logic executed when Amazon page loads
+// Main logic executed when page loads
 // ==============================================================================
 async function runOnleiheCheck() {
     // Check if we're on a supported page
@@ -715,18 +715,18 @@ async function runOnleiheCheck() {
     updateOnleiheStatus(statusField, safeT('content.checking', selectedLibraryName), 'loading');
 
     const bookInfo = getBookInfoFromPage();
-    const amazonIsbn = bookInfo.isbn;
-    const amazonTitle = bookInfo.title;
-    const amazonAuthor = bookInfo.author;
+    const bookIsbn = bookInfo.isbn;
+    const bookTitle = bookInfo.title;
+    const bookAuthor = bookInfo.author;
 
     let searchTerm = '';
-    if (amazonTitle && amazonTitle !== 'Not found') {
-        searchTerm = amazonTitle;
-        if (amazonAuthor && amazonAuthor !== 'Not found') {
-            searchTerm = `${amazonTitle} ${amazonAuthor}`;
+    if (bookTitle && bookTitle !== 'Not found') {
+        searchTerm = bookTitle;
+        if (bookAuthor && bookAuthor !== 'Not found') {
+            searchTerm = `${bookTitle} ${bookAuthor}`;
         }
-    } else if (amazonIsbn && amazonIsbn !== 'Not found') {
-        searchTerm = amazonIsbn;
+    } else if (bookIsbn && bookIsbn !== 'Not found') {
+        searchTerm = bookIsbn;
     } else {
         updateOnleiheStatus(statusField, safeT('content.no.book.info'), 'not_found');
         return;
@@ -737,25 +737,44 @@ async function runOnleiheCheck() {
     const onleiheSearchURL = `${baseURL}/frontend/search,0-0-0-0-0-0-0-0-0-0-0.html?cmdId=703&sK=1000&pText=${encodeURIComponent(searchTerm)}&pMediaType=400001&Suchen=Suchen`;
     
     try {
-        const responseFromBackground = await chrome.runtime.sendMessage({ 
-            action: "fetch_onleihe_results", 
-            url: onleiheSearchURL 
+        console.log("Onleihe Checker: Sending search request to background script");
+        
+        const responseFromBackground = await new Promise((resolve, reject) => {
+            chrome.runtime.sendMessage({ 
+                action: "search_onleihe", 
+                searchUrl: onleiheSearchURL 
+            }, (response) => {
+                if (chrome.runtime.lastError) {
+                    reject(new Error(chrome.runtime.lastError.message));
+                    return;
+                }
+                
+                if (!response) {
+                    reject(new Error("No response received from background script"));
+                    return;
+                }
+                
+                resolve(response);
+            });
         });
-
-        if (responseFromBackground && responseFromBackground.success && responseFromBackground.html) {
-            const count = parseOnleiheHtmlForCount(responseFromBackground.html);
-
-            if (count > 0) {
-                updateOnleiheStatus(statusField, safeT('content.found.results', count, selectedLibraryName), 'success', onleiheSearchURL);
+        
+        console.log("Onleihe Checker: Received response from background script:", responseFromBackground);
+        
+        if (responseFromBackground && responseFromBackground.success) {
+            const htmlData = responseFromBackground.data || responseFromBackground.html;
+            const resultsCount = parseOnleiheHtmlForCount(htmlData);
+            
+            if (resultsCount > 0) {
+                updateOnleiheStatus(statusField, safeT('content.found.results', resultsCount, selectedLibraryName), 'success', onleiheSearchURL);
             } else {
                 updateOnleiheStatus(statusField, safeT('content.no.results', selectedLibraryName), 'not_found', onleiheSearchURL);
             }
         } else {
-            updateOnleiheStatus(statusField, safeT('content.error.retrieving', responseFromBackground.error || 'Unknown error'), 'error');
-            console.error(`Onleihe Checker: Error from background service worker: ${responseFromBackground.error}`);
+            const errorMessage = responseFromBackground ? responseFromBackground.error : "Unknown error occurred";
+            updateOnleiheStatus(statusField, safeT('content.error.retrieving', errorMessage), 'error');
         }
     } catch (error) {
-        console.error("Onleihe Checker: Error communicating with service worker:", error);
+        console.error("Onleihe Checker: Communication error:", error);
         updateOnleiheStatus(statusField, safeT('content.communication.error', error.message), 'error');
     }
 }
