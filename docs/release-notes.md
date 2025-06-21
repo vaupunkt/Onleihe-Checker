@@ -5,34 +5,7 @@ title: Release Notes
 
 # 📋 Release Notes
 
-## Version 1.1.0 - Goodreads Support
-
-🎉 **Großes Update: Goodreads-Unterstützung hinzugefügt!**
-
-### ✨ Neue Features
-
-#### Goodreads.com Integration
-- ✅ **Vollständige Goodreads-Unterstützung** - Funktioniert auf allen Buchdetailseiten
-- ✅ **Intelligente Bucherkennung** - Titel, Autor und ISBN-Extraktion von Goodreads
-- ✅ **Nahtlose Integration** - Gleiches Look & Feel wie auf Amazon.de
-- ✅ **Automatische Erkennung** - Kein manuelles Umschalten zwischen Websites nötig
-
-#### Erweiterte Kompatibilität
-- ✅ **Multi-Site-Support** - Amazon.de und Goodreads gleichzeitig unterstützt
-- ✅ **Verbesserte Selektoren** - Robustere Buchinformations-Extraktion
-- ✅ **Site-spezifische Optimierungen** - Angepasst für jede Website-Struktur
-
-### 🛠 Technische Verbesserungen
-- ✅ **Erweiterte Manifest-Berechtigungen** für Goodreads-Domains
-- ✅ **Site-Detection-Logik** für automatische Website-Erkennung
-- ✅ **Unified Status Field System** für konsistente UI auf beiden Websites
-- ✅ **Robustere Error-Handling** für verschiedene Seitenstrukturen
-
-### 🌐 Unterstützte Websites
-- ✅ **Amazon.de** - Alle Buchproduktseiten (`/dp/`, `/gp/product/`)
-- ✅ **Goodreads.com** - Alle Buchdetailseiten (`/book/show/`)
-- ✅ **450+ deutsche Bibliotheken** weiterhin unterstützt
-
+#git
 ---
 
 ## Version 1.0.0 - Initial Release
