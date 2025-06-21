@@ -17,21 +17,34 @@ title: Verwendung
 
 ### Verfügbarkeit prüfen
 
-Die Extension funktioniert automatisch auf allen Amazon.de Buchseiten:
+Die Extension funktioniert automatisch auf **Amazon.de** und **Goodreads** Buchseiten:
 
 ![Amazon Page Screenshot](/assets/175shots_so.png)
 
 **So funktioniert es:**
 
-1. **Amazon.de Buchseite** öffnen
+#### Amazon.de
+1. **Amazon.de Buchseite** öffnen (Product-Seiten mit `/dp/` oder `/gp/product/`)
 2. **Automatische Anzeige** der Onleihe-Verfügbarkeit
 3. **Direkt zum Katalog** per Link springen
+
+#### Goodreads
+1. **Goodreads.com Buchseite** öffnen (Book-Seiten mit `/book/show/`)
+2. **Automatische Erkennung** von Titel, Autor und ISBN
+3. **Echtzeit-Verfügbarkeitsprüfung** in deiner Bibliothek
+4. **Direkter Link** zum Onleihe-Katalog
+
+### Unterstützte Websites
+- ✅ **Amazon.de** - Alle Buchproduktseiten
+- ✅ **Goodreads.com** - Alle Buchdetailseiten
+- ✅ **Automatische Erkennung** - Kein manuelles Umschalten nötig
 
 ### Features
 - ✅ Automatische Bucherkennung (Titel, Autor, ISBN)
 - ✅ Echtzeit-Verfügbarkeitsprüfung
-- ✅ Mehrsprachige Oberfläche
+- ✅ Mehrsprachige Oberfläche (Deutsch/English)
 - ✅ Persistente Bibliotheksauswahl
+- ✅ **Neu**: Vollständige Goodreads-Unterstützung
 
 ## Web Scraper
 
