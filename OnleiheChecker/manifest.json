@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Onleihe Checker",
   "version": "1.0",
-  "description": "Check book availability in German digital libraries (Onleihe) while browsing Amazon.de",
+  "description": "Check book availability in German digital libraries (Onleihe) while browsing Amazon.de and Goodreads",
   "permissions": [
     "storage",
     "activeTab",
@@ -12,6 +12,8 @@
   "host_permissions": [
     "https://www.amazon.de/*",
     "https://amazon.de/*",
+    "https://www.goodreads.com/*",
+    "https://goodreads.com/*",
     "https://*.onleihe.de/*",
     "https://*.onleihe.net/*",
     "https://*.onleihe.ch/*",
@@ -62,7 +64,9 @@
         "https://www.amazon.de/*/dp/*",
         "https://amazon.de/*/dp/*",
         "https://www.amazon.de/gp/product/*",
-        "https://amazon.de/gp/product/*"
+        "https://amazon.de/gp/product/*",
+        "https://www.goodreads.com/book/show/*",
+        "https://goodreads.com/book/show/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle"
