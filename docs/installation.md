@@ -14,12 +14,13 @@ title: Installation
 - ✅ **Automatische Updates** - neue Features und Bugfixes werden automatisch installiert
 - ✅ **Verifizierte Sicherheit** - von Google geprüft und zertifiziert
 - ✅ **Einfache Verwaltung** - über Chrome Extension Manager
+- ✅ **Sofortige Verfügbarkeit** - funktioniert auf Amazon.de und Goodreads
 
 ### So gehts:
 1. **Link öffnen**: [Chrome Web Store](https://chromewebstore.google.com/detail/onleihe-checker/lbdbelkkmbogfjkeklmpfaijgpdnnncn?hl=de)
 2. **"Zu Chrome hinzufügen"** klicken
 3. **Bestätigen** in der Popup-Nachricht
-4. **Fertig!** - Extension ist sofort einsatzbereit
+4. **Fertig!** - Extension ist sofort auf Amazon.de und Goodreads einsatzbereit
 
 ---
 
@@ -45,8 +46,12 @@ title: Installation
    - Klicke "Bibliothek speichern"
 
 3. **Testen**
-   - Besuche eine Amazon.de Buchseite
+   - Besuche eine **Amazon.de Buchseite** oder **Goodreads Buchseite**
    - Die Extension zeigt automatisch die Onleihe-Verfügbarkeit an
+
+### Unterstützte Seiten nach Installation
+- ✅ Amazon.de - Alle Buchproduktseiten (`/dp/`, `/gp/product/`)
+- ✅ Goodreads.com - Alle Buchdetailseiten (`/book/show/`)
 
 ## Web Scraper Setup
 

@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const tabs = await chrome.tabs.query({});
             for (const tab of tabs) {
-                if (tab.url && tab.url.includes('amazon.')) {
+                if (tab.url && (tab.url.includes('amazon.') || tab.url.includes('goodreads.'))) {
                     chrome.tabs.sendMessage(tab.id, {
                         action: "language_changed",
                         language: selectedLanguage

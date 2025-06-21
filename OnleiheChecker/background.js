@@ -66,8 +66,9 @@ async function fetchViaIframe(url) {
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "fetch_onleihe_results") {
-        let onleiheSearchURL = normalizeUrl(request.url);
+    // Support both old and new action names for compatibility
+    if (request.action === "fetch_onleihe_results" || request.action === "search_onleihe") {
+        let onleiheSearchURL = normalizeUrl(request.url || request.searchUrl);
         
         console.log("[Background Service Worker] Attempting to fetch:", onleiheSearchURL);
         
@@ -75,7 +76,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         fetchViaIframe(onleiheSearchURL)
             .then(html => {
                 console.log("[Background Service Worker] Successfully fetched content via iframe");
-                sendResponse({ success: true, html: html, url: onleiheSearchURL });
+                sendResponse({ success: true, html: html, data: html, url: onleiheSearchURL });
             })
             .catch(error => {
                 console.error("Background: Iframe method failed:", error);
@@ -96,7 +97,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 })
                 .then(html => {
                     console.log("[Background Service Worker] Direct fetch succeeded");
-                    sendResponse({ success: true, html: html, url: onleiheSearchURL });
+                    sendResponse({ success: true, html: html, data: html, url: onleiheSearchURL });
                 })
                 .catch(fetchError => {
                     console.error("Background: All methods failed:", fetchError);
