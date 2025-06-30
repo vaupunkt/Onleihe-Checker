@@ -119,7 +119,7 @@ function safeT(key, ...args) {
 }
 
 // ==============================================================================
-// Detect current site
+// Detect current site and page validity
 // ==============================================================================
 function getCurrentSite() {
     const hostname = window.location.hostname;
@@ -131,15 +131,73 @@ function getCurrentSite() {
     return 'unknown';
 }
 
+/**
+ * Unified function to detect if we're on a supported page
+ * @returns {Object} { site: string, isValid: boolean, pageType: string }
+ */
+function detectSupportedPage() {
+    const site = getCurrentSite();
+    const url = window.location.href;
+    
+    if (site === 'amazon') {
+        const isProductPage = url.includes('/dp/') || url.includes('/gp/product/');
+        if (!isProductPage) {
+            return { site, isValid: false, pageType: 'not-product' };
+        }
+        
+        const booksNavElement = document.querySelector('#nav-subnav[data-category="books-catalog"]');
+        return { 
+            site, 
+            isValid: !!booksNavElement, 
+            pageType: booksNavElement ? 'book-page' : 'non-book-product' 
+        };
+    } else if (site === 'goodreads') {
+        const isBookPage = url.includes('/book/show/');
+        return { 
+            site, 
+            isValid: isBookPage, 
+            pageType: isBookPage ? 'book-page' : 'other' 
+        };
+    }
+    
+    return { site: 'unknown', isValid: false, pageType: 'unsupported' };
+}
+
+// ==============================================================================
+// Helper functions for book information extraction
+// ==============================================================================
+function cleanTitle(fullTitle) {
+    if (!fullTitle) return null;
+    
+    const separators = [':', '|', '(', '[', '—', ' - ', '.'];
+    let cleanedTitle = fullTitle.trim();
+    
+    for (const sep of separators) {
+        const index = cleanedTitle.indexOf(sep);
+        if (index !== -1) {
+            cleanedTitle = cleanedTitle.substring(0, index).trim();
+        }
+    }
+    
+    return cleanedTitle;
+}
+
+function extractLastName(fullAuthorName) {
+    if (!fullAuthorName) return null;
+    
+    const nameParts = fullAuthorName.trim().split(' ');
+    return nameParts.length > 0 ? nameParts[nameParts.length - 1] : fullAuthorName.trim();
+}
+
 // ==============================================================================
 // Extract book information from current page
 // ==============================================================================
 function getBookInfoFromPage() {
-    const currentSite = getCurrentSite();
+    const pageInfo = detectSupportedPage();
     
-    if (currentSite === 'amazon') {
+    if (pageInfo.site === 'amazon') {
         return getBookInfoFromAmazon();
-    } else if (currentSite === 'goodreads') {
+    } else if (pageInfo.site === 'goodreads') {
         return getBookInfoFromGoodreads();
     }
     
@@ -161,15 +219,7 @@ function getBookInfoFromGoodreads() {
                         document.querySelector('h1 .Text .Text__title1');
     
     if (titleElement) {
-        title = titleElement.textContent.trim();
-        // Clean title from series information
-        const separators = ['(', '[', '—', ' - '];
-        for (const sep of separators) {
-            const index = title.indexOf(sep);
-            if (index !== -1) {
-                title = title.substring(0, index).trim();
-            }
-        }
+        title = cleanTitle(titleElement.textContent);
     }
 
     // Extract author
@@ -179,11 +229,7 @@ function getBookInfoFromGoodreads() {
                          document.querySelector('a.authorName');
     
     if (authorElement) {
-        const fullAuthorName = authorElement.textContent.trim();
-        const nameParts = fullAuthorName.split(' ');
-        if (nameParts.length > 0) {
-            author = nameParts[nameParts.length - 1]; // Last name only
-        }
+        author = extractLastName(authorElement.textContent);
     }
 
     // Extract ISBN from book details
@@ -223,43 +269,32 @@ function getBookInfoFromGoodreads() {
 }
 
 // ==============================================================================
-// Inject Onleihe status field - site-specific
+// Inject Onleihe status field - unified approach
 // ==============================================================================
 async function injectOnleiheStatusField() {
-    const currentSite = getCurrentSite();
-    
-    if (currentSite === 'amazon') {
-        return await injectOnleiheStatusFieldAmazon();
-    } else if (currentSite === 'goodreads') {
-        return await injectOnleiheStatusFieldGoodreads();
-    }
-    
-    return null;
-}
-
-async function injectOnleiheStatusFieldAmazon() {
     // Check if field already exists to avoid duplicates
     if (document.getElementById('onleihe-checker-status')) {
         currentStatusField = document.getElementById('onleihe-checker-status');
         return currentStatusField;
     }
 
-    let targetElement = null;
-    const selectors = [
-        '#productTitle',
-        '#detailBulletsWrapper_feature_div',
-        '#corePriceDisplay_desktop_feature_div',
-        '#dp',
-        '#dp-container',
-        'body'
-    ];
+    const pageInfo = detectSupportedPage();
+    if (!pageInfo.isValid) {
+        return null;
+    }
 
-    for (const selector of selectors) {
-        try {
-            targetElement = await waitForElement(selector, 8000);
-            if (targetElement) break;
-        } catch (error) {
-            // Continue to next selector
+    const statusDiv = createStatusDiv();
+    let targetElement = null;
+
+    if (pageInfo.site === 'amazon') {
+        targetElement = await findAmazonTargetElement();
+        if (targetElement) {
+            insertStatusDivAmazon(statusDiv, targetElement);
+        }
+    } else if (pageInfo.site === 'goodreads') {
+        targetElement = await findGoodreadsTargetElement();
+        if (targetElement) {
+            insertStatusDivGoodreads(statusDiv, targetElement);
         }
     }
 
@@ -268,77 +303,11 @@ async function injectOnleiheStatusFieldAmazon() {
         return null;
     }
 
-    const statusDiv = document.createElement('div');
-    statusDiv.id = 'onleihe-checker-status';
-    statusDiv.className = 'a-section a-spacing-small a-color-secondary';
-    statusDiv.style.cssText = `
-        margin-top: 15px;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        background-color: #f7f7f7;
-        font-family: 'Inter', sans-serif;
-        color: #333;
-    `;
-    
-    statusDiv.innerHTML = `
-        <div style="display: flex; align-items: center;">
-            <div id="onleihe-status-spinner" style="
-                border: 4px solid rgba(0, 0, 0, 0.1);
-                border-left-color: #2563eb;
-                border-radius: 50%;
-                width: 20px;
-                height: 20px;
-                animation: spin 1s linear infinite;
-                margin-right: 10px;
-                display: none;
-            "></div>
-            <p id="onleihe-status-message" style="margin: 0; font-size: 14px; color: inherit;">${safeT('content.loading')}</p>
-        </div>
-        <style>
-            @keyframes spin {
-                to { transform: rotate(360deg); }
-            }
-        </style>
-    `;
-    
-    try {
-        if (targetElement.id === 'dp-container' || targetElement.id === 'dp' || targetElement.tagName === 'BODY') {
-            if (targetElement.querySelector('h1')) { 
-                targetElement.querySelector('h1').after(statusDiv);
-            } else if (targetElement.firstChild) {
-                targetElement.insertBefore(statusDiv, targetElement.firstChild);
-            } else {
-                targetElement.appendChild(statusDiv);
-            }
-        } else {
-            targetElement.parentNode.insertBefore(statusDiv, targetElement.nextSibling);
-        }
-        currentStatusField = statusDiv;
-        return statusDiv;
-    } catch (e) {
-        console.error("Onleihe Checker: Error injecting status field:", e);
-        return null;
-    }
+    currentStatusField = statusDiv;
+    return statusDiv;
 }
 
-async function injectOnleiheStatusFieldGoodreads() {
-    // Check if field already exists to avoid duplicates
-    if (document.getElementById('onleihe-checker-status')) {
-        currentStatusField = document.getElementById('onleihe-checker-status');
-        return currentStatusField;
-    }
-
-    const targetElement = await waitForElement(
-        '[data-testid="bookDetails"], .BookDetails, .rightContainer, .bookMeta, #details, .LeftContainer, .BookPageMetadataSection'
-    );
-    
-    if (!targetElement) {
-        console.error("Onleihe Checker: Could not find suitable element to inject status field on Goodreads");
-        return null;
-    }
-
-    // Create status field with same structure as Amazon version
+function createStatusDiv() {
     const statusDiv = document.createElement('div');
     statusDiv.id = 'onleihe-checker-status';
     statusDiv.className = 'onleihe-status-field';
@@ -354,7 +323,6 @@ async function injectOnleiheStatusFieldGoodreads() {
         color: #333;
     `;
     
-    // Create same internal structure as Amazon version
     statusDiv.innerHTML = `
         <div style="display: flex; align-items: center;">
             <div id="onleihe-status-spinner" style="
@@ -376,19 +344,74 @@ async function injectOnleiheStatusFieldGoodreads() {
         </style>
     `;
     
+    return statusDiv;
+}
+
+async function findAmazonTargetElement() {
+    const selectors = [
+        '#productTitle',
+        '#detailBulletsWrapper_feature_div',
+        '#corePriceDisplay_desktop_feature_div',
+        '#dp',
+        '#dp-container',
+        'body'
+    ];
+
+    for (const selector of selectors) {
+        try {
+            const element = await waitForElement(selector, 8000);
+            if (element) return element;
+        } catch (error) {
+            // Continue to next selector
+        }
+    }
+    return null;
+}
+
+async function findGoodreadsTargetElement() {
     try {
-        // Insert at the beginning of the target element or after it
+        return await waitForElement(
+            '[data-testid="bookDetails"], .BookDetails, .rightContainer, .bookMeta, #details, .LeftContainer, .BookPageMetadataSection'
+        );
+    } catch (error) {
+        console.error("Onleihe Checker: Could not find suitable element to inject status field on Goodreads");
+        return null;
+    }
+}
+
+function insertStatusDivAmazon(statusDiv, targetElement) {
+    // Add Amazon-specific styling
+    statusDiv.className = 'a-section a-spacing-small a-color-secondary';
+    statusDiv.style.fontFamily = "'Inter', sans-serif";
+    statusDiv.style.marginTop = '15px';
+    statusDiv.style.padding = '10px';
+    
+    try {
+        if (targetElement.id === 'dp-container' || targetElement.id === 'dp' || targetElement.tagName === 'BODY') {
+            if (targetElement.querySelector('h1')) { 
+                targetElement.querySelector('h1').after(statusDiv);
+            } else if (targetElement.firstChild) {
+                targetElement.insertBefore(statusDiv, targetElement.firstChild);
+            } else {
+                targetElement.appendChild(statusDiv);
+            }
+        } else {
+            targetElement.parentNode.insertBefore(statusDiv, targetElement.nextSibling);
+        }
+    } catch (e) {
+        console.error("Onleihe Checker: Error injecting status field on Amazon:", e);
+    }
+}
+
+function insertStatusDivGoodreads(statusDiv, targetElement) {
+    try {
         if (targetElement.children.length > 0) {
             targetElement.insertBefore(statusDiv, targetElement.firstChild);
         } else {
             targetElement.appendChild(statusDiv);
         }
-        
-        currentStatusField = statusDiv;
-        return statusDiv;
     } catch (e) {
         console.error("Onleihe Checker: Error injecting status field on Goodreads:", e);
-        return null;
     }
 }
 
@@ -500,34 +523,18 @@ function getBookInfoFromAmazon() {
     // Extract and clean title
     const titleElement = document.getElementById('productTitle');
     if (titleElement) {
-        let fullTitle = titleElement.textContent.trim();
-        const separators = [':', '|', '(', '[', '—', ' - ','.'];
-        for (const sep of separators) {
-            const index = fullTitle.indexOf(sep);
-            if (index !== -1) {
-                fullTitle = fullTitle.substring(0, index).trim();
-            }
-        }
-        title = fullTitle;
+        title = cleanTitle(titleElement.textContent);
     } else {
         const fallbackTitleElement = document.querySelector('h1 span.a-text-bold, h1 span#ebooksProductTitle');
         if (fallbackTitleElement) {
-            let fullTitle = fallbackTitleElement.textContent.trim();
-            const separators = [':', '|', '(', '[', '—', ' - ', '.'];
-            for (const sep of separators) {
-                const index = fullTitle.indexOf(sep);
-                if (index !== -1) {
-                    fullTitle = fullTitle.substring(0, index).trim();
-                }
-            }
-            title = fullTitle;
+            title = cleanTitle(fallbackTitleElement.textContent);
         }
     }
 
     // Extract author (last name only)
-    const authorElement = document.querySelector('.author a.a-link-normal, .contributorNameID a.a-link-normal');
     let fullAuthorName = null;
-
+    const authorElement = document.querySelector('.author a.a-link-normal, .contributorNameID a.a-link-normal');
+    
     if (authorElement) {
         fullAuthorName = authorElement.textContent.trim();
     } else {
@@ -547,12 +554,7 @@ function getBookInfoFromAmazon() {
     }
 
     if (fullAuthorName) {
-        const nameParts = fullAuthorName.split(' ');
-        if (nameParts.length > 0) {
-            author = nameParts[nameParts.length - 1];
-        } else {
-            author = fullAuthorName;
-        }
+        author = extractLastName(fullAuthorName);
     }
 
     // Extract ISBN
@@ -675,37 +677,12 @@ function parseOnleiheHtmlForCount(html) {
 }
 
 // ==============================================================================
-// Check if we're on an Amazon book page by looking for the books navigation
-// ==============================================================================
-function isAmazonBookPage() {
-    const currentSite = getCurrentSite();
-    if (currentSite !== 'amazon') {
-        return false;
-    }
-    
-    // Check if we're on a product page
-    const isProductPage = window.location.href.includes('/dp/') || 
-                         window.location.href.includes('/gp/product/');
-    
-    if (!isProductPage) {
-        return false;
-    }
-    
-    // Check for the books navigation element
-    const booksNavElement = document.querySelector('#nav-subnav[data-category="books-catalog"]');
-    return !!booksNavElement;
-}
-
-// ==============================================================================
 // Main logic executed when page loads
 // ==============================================================================
 async function runOnleiheCheck() {
     // Check if we're on a supported page
-    const isAmazonBookPageValid = isAmazonBookPage();
-    const isGoodreadsBookPage = getCurrentSite() === 'goodreads' && 
-        window.location.href.includes('/book/show/');
-    
-    if (!isAmazonBookPageValid && !isGoodreadsBookPage) {
+    const pageInfo = detectSupportedPage();
+    if (!pageInfo.isValid) {
         return;
     }
 
@@ -801,11 +778,8 @@ async function runOnleiheCheck() {
 // Initialization function with retry mechanism
 // ==============================================================================
 async function initializeOnleiheChecker() {
-    const isAmazonBookPageValid = isAmazonBookPage();
-    const isGoodreadsBookPage = getCurrentSite() === 'goodreads' && 
-        window.location.href.includes('/book/show/');
-    
-    if (!isAmazonBookPageValid && !isGoodreadsBookPage) {
+    const pageInfo = detectSupportedPage();
+    if (!pageInfo.isValid) {
         return;
     }
     
