@@ -675,19 +675,37 @@ function parseOnleiheHtmlForCount(html) {
 }
 
 // ==============================================================================
+// Check if we're on an Amazon book page by looking for the books navigation
+// ==============================================================================
+function isAmazonBookPage() {
+    const currentSite = getCurrentSite();
+    if (currentSite !== 'amazon') {
+        return false;
+    }
+    
+    // Check if we're on a product page
+    const isProductPage = window.location.href.includes('/dp/') || 
+                         window.location.href.includes('/gp/product/');
+    
+    if (!isProductPage) {
+        return false;
+    }
+    
+    // Check for the books navigation element
+    const booksNavElement = document.querySelector('#nav-subnav[data-category="books-catalog"]');
+    return !!booksNavElement;
+}
+
+// ==============================================================================
 // Main logic executed when page loads
 // ==============================================================================
 async function runOnleiheCheck() {
     // Check if we're on a supported page
-    const currentSite = getCurrentSite();
-    const isAmazonProductPage = currentSite === 'amazon' && (
-        window.location.href.includes('/dp/') || 
-        window.location.href.includes('/gp/product/')
-    );
-    const isGoodreadsBookPage = currentSite === 'goodreads' && 
+    const isAmazonBookPageValid = isAmazonBookPage();
+    const isGoodreadsBookPage = getCurrentSite() === 'goodreads' && 
         window.location.href.includes('/book/show/');
     
-    if (!isAmazonProductPage && !isGoodreadsBookPage) {
+    if (!isAmazonBookPageValid && !isGoodreadsBookPage) {
         return;
     }
 
@@ -783,15 +801,11 @@ async function runOnleiheCheck() {
 // Initialization function with retry mechanism
 // ==============================================================================
 async function initializeOnleiheChecker() {
-    const currentSite = getCurrentSite();
-    const isAmazonProductPage = currentSite === 'amazon' && (
-        window.location.href.includes('/dp/') || 
-        window.location.href.includes('/gp/product/')
-    );
-    const isGoodreadsBookPage = currentSite === 'goodreads' && 
+    const isAmazonBookPageValid = isAmazonBookPage();
+    const isGoodreadsBookPage = getCurrentSite() === 'goodreads' && 
         window.location.href.includes('/book/show/');
     
-    if (!isAmazonProductPage && !isGoodreadsBookPage) {
+    if (!isAmazonBookPageValid && !isGoodreadsBookPage) {
         return;
     }
     
