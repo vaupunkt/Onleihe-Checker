@@ -752,9 +752,7 @@ async function runOnleiheCheck() {
                 resolve(response);
             });
         });
-        
-        console.log("Onleihe Checker: Received response from background script:", responseFromBackground);
-        
+                
         if (responseFromBackground && responseFromBackground.success) {
             const htmlData = responseFromBackground.data || responseFromBackground.html;
             const resultsCount = parseOnleiheHtmlForCount(htmlData);

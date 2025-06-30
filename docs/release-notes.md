@@ -5,7 +5,59 @@ title: Release Notes
 
 # 📋 Release Notes
 
-#git
+---
+
+## Version 1.2.0 - Enhanced Release
+
+🎉 **Verbesserte Version mit besserer Performance und Benutzererfahrung!**
+[Download v1.2.0](https://github.com/vaupunkt/Onleihe-Checker/releases/download/v1.2/onleiheExtension1.2.zip)
+
+### 🆕 Neue Features in v1.2
+
+#### 🔧 Code-Optimierung
+- ✅ **Refactorierte Architektur**: Komplette Code-Umstrukturierung für bessere Lesbarkeit und Wartbarkeit
+- ✅ **Reduzierte Duplikation**: Redundanter Code eliminiert und Funktionsorganisation verbessert
+- ✅ **Verbesserte Modularität**: Bessere Trennung der Verantwortlichkeiten in allen Komponenten
+
+#### 🎯 Intelligente Seitenerkennung
+- ✅ **Präzise Zielerfassung**: Extension aktiviert sich nur auf echten Amazon-Buchseiten
+- ✅ **Buchnavigations-Verifikation**: Erkennt Amazons Buchnavigationselement zur Seitenvalidierung
+- ✅ **Ressourcen-Optimierung**: Keine unnötige Aktivierung auf Nicht-Buch-Seiten (Elektronik, Kleidung, etc.)
+
+#### 🎨 Visuelle Verbesserungen
+- ✅ **Professionelles Icon**: Charakteristisches Thumbnail-Icon für einfache Identifikation im Chrome Extension Manager
+- ✅ **Bessere Markenerkennung**: Klare visuelle Identität in Browser-Toolbar und Extension-Liste
+
+---
+
+## Version 1.1.0 - Goodreads Support
+
+🎉 **Großes Update: Goodreads-Unterstützung hinzugefügt!**
+
+### ✨ Neue Features
+
+#### Goodreads.com Integration
+- ✅ **Vollständige Goodreads-Unterstützung** - Funktioniert auf allen Buchdetailseiten
+- ✅ **Intelligente Bucherkennung** - Titel, Autor und ISBN-Extraktion von Goodreads
+- ✅ **Nahtlose Integration** - Gleiches Look & Feel wie auf Amazon.de
+- ✅ **Automatische Erkennung** - Kein manuelles Umschalten zwischen Websites nötig
+
+#### Erweiterte Kompatibilität
+- ✅ **Multi-Site-Support** - Amazon.de und Goodreads gleichzeitig unterstützt
+- ✅ **Verbesserte Selektoren** - Robustere Buchinformations-Extraktion
+- ✅ **Site-spezifische Optimierungen** - Angepasst für jede Website-Struktur
+
+### 🛠 Technische Verbesserungen
+- ✅ **Erweiterte Manifest-Berechtigungen** für Goodreads-Domains
+- ✅ **Site-Detection-Logik** für automatische Website-Erkennung
+- ✅ **Unified Status Field System** für konsistente UI auf beiden Websites
+- ✅ **Robustere Error-Handling** für verschiedene Seitenstrukturen
+
+### 🌐 Unterstützte Websites
+- ✅ **Amazon.de** - Alle Buchproduktseiten (`/dp/`, `/gp/product/`)
+- ✅ **Goodreads.com** - Alle Buchdetailseiten (`/book/show/`)
+- ✅ **450+ deutsche Bibliotheken** weiterhin unterstützt
+
 ---
 
 ## Version 1.0.0 - Initial Release
@@ -16,6 +68,7 @@ title: Release Notes
 ### ✨ Neue Features
 
 #### Amazon.de Integration
+- ✅ **Intelligente Seitenerkennung**: Aktiviert sich nur auf echten Amazon.de Buchseiten (verifiziert durch Buchnavigationselement)
 - ✅ Automatische Erkennung auf allen Buchproduktseiten
 - ✅ Smart Book Recognition (Titel, Autor, ISBN)
 - ✅ Echtzeit-Statusanzeige
@@ -39,6 +92,8 @@ title: Release Notes
 ### 🛠 Technische Highlights
 
 #### Performance & Zuverlässigkeit
+- ✅ **Optimierte Code-Architektur**: Deutlich refactorierte Codebasis für bessere Wartbarkeit und Performance
+- ✅ **Gezielte Aktivierung**: Extension läuft nur auf echten Buchseiten, reduziert unnötige Ressourcennutzung
 - ✅ Background Processing
 - ✅ CORS-Bypass-Lösung
 - ✅ Retry-Logik
@@ -79,5 +134,11 @@ title: Release Notes
 
 ---
 
-**Download-Größe**: ~200KB  
+**Version 1.2.0 Download-Größe**: ~200KB  
+**Installationszeit**: < 1 Minute  
+**Verbesserungen**: Code-Optimierung, Smart Page Detection, Professionelles Icon
+
+---
+
+**Version 1.0.0 Download-Größe**: ~200KB  
 **Installationszeit**: < 1 Minute
