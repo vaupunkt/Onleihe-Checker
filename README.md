@@ -4,7 +4,7 @@
 A Python web scraper and Chrome extension for German digital library services (Onleihe). This project consists of two main components:
 
 1. **Web Scraper**: Extracts library information from official Onleihe help pages
-2. **Chrome Extension**: Checks book availability in your local Onleihe library while browsing Amazon
+2. **Chrome Extension**: Checks book availability in your local Onleihe library while browsing Amazon.de and Goodreads
 
 ## 🚀 Quick Start
 
@@ -56,12 +56,13 @@ For development or manual installation, see [Installation Guide](#-installation)
 - **Note**: Currently focuses on German libraries only
 
 ### Chrome Extension
-- Seamlessly integrates with Amazon.de product pages
+- Seamlessly integrates with **Amazon.de** and **Goodreads** book pages
 - Real-time availability checking in your selected library
 - Clean, responsive popup interface for library selection
 - Supports German libraries
 - Multilingual interface (German/English)
 - Automatic search using book title, author, and ISBN information
+- **New**: Full Goodreads.com support alongside Amazon.de
 
 ## 📋 Requirements
 
@@ -138,8 +139,17 @@ This will clean up URLs by removing:
 1. **Setup**: Click the extension icon in Chrome toolbar
 2. **Select Library**: Search and select your local library from the dropdown
 3. **Save**: Click "Bibliothek speichern" to set as default
-4. **Browse**: Visit any Amazon.de book page
+4. **Browse**: Visit any **Amazon.de book page** or **Goodreads book page**
 5. **Check**: The extension automatically displays Onleihe availability
+
+#### Supported Websites
+- ✅ **Amazon.de** - All book product pages (`/dp/` and `/gp/product/`)
+- ✅ **Goodreads.com** - All book detail pages (`/book/show/`)
+
+#### How it works
+- **Amazon.de**: Extracts book information from product pages and displays availability status
+- **Goodreads**: Reads book details from book pages and checks your library's catalog
+- **Automatic Detection**: No manual switching needed - works seamlessly on both platforms
 
 ## 📁 Project Structure
 

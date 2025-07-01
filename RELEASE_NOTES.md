@@ -1,12 +1,29 @@
-# Onleihe Checker v1.0 - Initial Release
+# Onleihe Checker v1.2 - Enhanced Release
 
-🎉 **First stable release of Onleihe Checker!**
+🎉 **Improved release with better performance and user experience!**
 
 A Chrome extension that seamlessly integrates with Amazon.de to check book availability in German digital libraries (Onleihe) while you browse.
 
-## 🌟 Key Features
+## 🌟 What's New in v1.2
+
+### 🔧 Code Optimization
+- **Refactored Architecture**: Complete code restructure for better readability and maintainability
+- **Reduced Duplication**: Eliminated redundant code and improved function organization
+- **Enhanced Modularity**: Better separation of concerns across all components
+
+### 🎯 Smart Page Detection
+- **Precise Targeting**: Extension now only activates on actual Amazon book pages
+- **Book Navigation Verification**: Detects Amazon's book navigation element to ensure we're on a book page
+- **Resource Optimization**: No unnecessary activation on non-book Amazon pages (electronics, clothing, etc.)
+
+### 🎨 Visual Improvements
+- **Professional Icon**: Added distinctive thumbnail icon for easy identification in Chrome extension manager
+- **Better Brand Recognition**: Clear visual identity in browser toolbar and extension list
+
+### 🌟 Key Features
 
 ### ✅ Amazon.de Integration
+- **Smart Page Detection**: Only activates on actual Amazon.de book pages (verified by book navigation element)
 - **Automatic Detection**: Works on all Amazon.de book product pages (`/dp/` and `/gp/product/`)
 - **Smart Book Recognition**: Extracts title, author, and ISBN information automatically
 - **Real-time Status**: Shows availability results directly on the Amazon page
@@ -28,6 +45,7 @@ A Chrome extension that seamlessly integrates with Amazon.de to check book avail
 - **Result Counting**: Shows exact number of available titles
 
 ### ⚙️ User-Friendly Setup
+- **Visual Identity**: Professional thumbnail icon for easy identification in Chrome extensions
 - **Simple Configuration**: Easy library selection through searchable dropdown
 - **Persistent Settings**: Remembers your library choice across browser sessions
 - **Visual Feedback**: Clear status messages and loading indicators
@@ -36,6 +54,8 @@ A Chrome extension that seamlessly integrates with Amazon.de to check book avail
 ## 🛠 Technical Highlights
 
 ### Performance & Reliability
+- **Optimized Code Architecture**: Significantly refactored codebase for better maintainability and performance
+- **Targeted Activation**: Extension only runs on actual book pages, reducing unnecessary resource usage
 - **Background Processing**: Non-blocking search requests don't slow down browsing
 - **CORS Bypass**: Innovative solution to access library data despite restrictions
 - **Retry Logic**: Automatic retry mechanism for failed requests
@@ -149,8 +169,8 @@ We welcome contributions! See our repository for:
 
 ## 🏷️ Version Information
 
-- **Version**: 1.0.0
-- **Release Date**: [Current Date]
+- **Version**: 1.2.0
+- **Release Date**: 30. Juni 2025
 - **Compatibility**: Chrome 88+, Manifest V3
 - **File Size**: ~200KB
 - **Languages**: German, English
