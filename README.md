@@ -13,6 +13,11 @@ A Python web scraper and Chrome extension for German digital library services (O
 
 *The easiest way to get started - install directly from the Chrome Web Store with automatic updates.*
 
+### Firefox Add-on (Recommended)
+**[📥 Install from Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/onleihechecker/)**
+
+*Also available for Firefox users - install directly from Mozilla Add-ons with automatic updates.*
+
 ### Manual Installation (Developers)
 For development or manual installation, see [Installation Guide](#-installation) below.
 
@@ -75,10 +80,19 @@ For development or manual installation, see [Installation Guide](#-installation)
 - Chrome/Chromium browser
 - Developer mode enabled for extension installation
 
+### For Firefox Add-on
+- Firefox 60+ browser
+- Add-on installation permissions
+
 ## 🛠 Installation
 
-### Option 1: Chrome Web Store (Recommended)
+### Option 1: Browser Extensions (Recommended)
+
+#### Chrome Web Store
 **[📥 Install from Chrome Web Store](https://chromewebstore.google.com/detail/onleihe-checker/lbdbelkkmbogfjkeklmpfaijgpdnnncn?hl=de)**
+
+#### Firefox Add-ons
+**[📥 Install from Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/onleihechecker/)**
 
 This is the recommended installation method for most users:
 - Automatic updates
@@ -106,6 +120,12 @@ brew install chromedriver
 2. Enable "Developer mode" (toggle in top right)
 3. Click "Load unpacked"
 4. Select the `OnleiheChecker` folder
+
+#### 3. Firefox Add-on Setup
+
+1. Open Firefox and navigate to `about:debugging`
+2. Click "This Firefox" → "Load Temporary Add-on"
+3. Select the `manifest.json` file in the `OnleiheChecker_firefox` folder
 
 ## 🎯 Usage
 
@@ -141,6 +161,14 @@ This will clean up URLs by removing:
 3. **Save**: Click "Bibliothek speichern" to set as default
 4. **Browse**: Visit any **Amazon.de book page** or **Goodreads book page**
 5. **Check**: The extension automatically displays Onleihe availability
+
+### Firefox Add-on
+The Firefox add-on works identically to the Chrome extension:
+1. **Setup**: Click the add-on icon in Firefox toolbar
+2. **Select Library**: Search and select your local library from the dropdown
+3. **Save**: Click "Bibliothek speichern" to set as default
+4. **Browse**: Visit any **Amazon.de book page** or **Goodreads book page**
+5. **Check**: The add-on automatically displays Onleihe availability
 
 #### Supported Websites
 - ✅ **Amazon.de** - All book product pages (`/dp/` and `/gp/product/`)

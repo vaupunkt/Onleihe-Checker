@@ -321,26 +321,43 @@ function createStatusDiv() {
         color: #333;
     `;
     
-    statusDiv.innerHTML = `
-        <div style="display: flex; align-items: center;">
-            <div id="onleihe-status-spinner" style="
-                border: 4px solid rgba(0, 0, 0, 0.1);
-                border-left-color: #2563eb;
-                border-radius: 50%;
-                width: 20px;
-                height: 20px;
-                animation: spin 1s linear infinite;
-                margin-right: 10px;
-                display: none;
-            "></div>
-            <p id="onleihe-status-message" style="margin: 0; font-size: 14px; color: inherit;">${safeT('content.loading')}</p>
-        </div>
-        <style>
-            @keyframes spin {
-                to { transform: rotate(360deg); }
-            }
-        </style>
+    // Create container div
+    const containerDiv = document.createElement('div');
+    containerDiv.style.cssText = 'display: flex; align-items: center;';
+    
+    // Create spinner
+    const spinner = document.createElement('div');
+    spinner.id = 'onleihe-status-spinner';
+    spinner.style.cssText = `
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-left-color: #2563eb;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+        margin-right: 10px;
+        display: none;
     `;
+    
+    // Create message paragraph
+    const messagePara = document.createElement('p');
+    messagePara.id = 'onleihe-status-message';
+    messagePara.style.cssText = 'margin: 0; font-size: 14px; color: inherit;';
+    messagePara.textContent = safeT('content.loading');
+    
+    // Create style element for keyframes
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    `;
+    
+    // Assemble the structure
+    containerDiv.appendChild(spinner);
+    containerDiv.appendChild(messagePara);
+    statusDiv.appendChild(containerDiv);
+    statusDiv.appendChild(style);
     
     return statusDiv;
 }
@@ -414,6 +431,40 @@ function insertStatusDivGoodreads(statusDiv, targetElement) {
 }
 
 // ==============================================================================
+// Helper function for safe DOM manipulation
+// ==============================================================================
+function setElementContent(element, content, allowLink = false, linkUrl = null, linkText = null) {
+    // Clear existing content
+    element.textContent = '';
+    
+    if (allowLink && linkUrl && linkText) {
+        // Create strong element for message
+        const strongElement = document.createElement('strong');
+        strongElement.textContent = content;
+        element.appendChild(strongElement);
+        
+        // Add line break
+        element.appendChild(document.createElement('br'));
+        
+        // Create link element
+        const linkElement = document.createElement('a');
+        linkElement.href = linkUrl;
+        linkElement.target = '_blank';
+        linkElement.style.cssText = 'color: #007bff; text-decoration: underline;';
+        linkElement.textContent = linkText;
+        element.appendChild(linkElement);
+    } else if (content.includes('<strong>') || content.includes('</strong>')) {
+        // Handle strong formatting
+        const strongElement = document.createElement('strong');
+        strongElement.textContent = content.replace(/<\/?strong>/g, '');
+        element.appendChild(strongElement);
+    } else {
+        // Plain text
+        element.textContent = content;
+    }
+}
+
+// ==============================================================================
 // Function to update the status field (make it more robust)
 // ==============================================================================
 function updateOnleiheStatus(statusDiv, message, type = 'info', onleiheUrl = null) {
@@ -450,35 +501,39 @@ function updateOnleiheStatus(statusDiv, message, type = 'info', onleiheUrl = nul
         if (spinner) {
             spinner.style.display = 'block';
         }
-        messageElement.innerHTML = message;
+        setElementContent(messageElement, message);
     } else if (type === 'success') {
         statusDiv.style.backgroundColor = '#e6ffe6';
         statusDiv.style.borderColor = '#66cc66';
         statusDiv.style.color = '#1f8b1f';
-        messageElement.innerHTML = `<strong>${message}</strong>`;
+        
         if (onleiheUrl) {
-            messageElement.innerHTML += `<br><a href="${onleiheUrl}" target="_blank" style="color: #007bff; text-decoration: underline;">${safeT('content.view.catalog')}</a>`;
+            setElementContent(messageElement, message, true, onleiheUrl, safeT('content.view.catalog'));
+        } else {
+            setElementContent(messageElement, `<strong>${message}</strong>`);
         }
     } else if (type === 'not_found') {
         statusDiv.style.backgroundColor = '#ffe6e6';
         statusDiv.style.borderColor = '#ff6666';
         statusDiv.style.color = '#cc0000';
-        messageElement.innerHTML = `<strong>${message}</strong>`;
+        
         if (onleiheUrl) {
-            messageElement.innerHTML += `<br><a href="${onleiheUrl}" target="_blank" style="color: #007bff; text-decoration: underline;">${safeT('content.search.directly')}</a>`;
+            setElementContent(messageElement, message, true, onleiheUrl, safeT('content.search.directly'));
+        } else {
+            setElementContent(messageElement, `<strong>${message}</strong>`);
         }
     } else if (type === 'error') {
         statusDiv.style.backgroundColor = '#fff0e6';
         statusDiv.style.borderColor = '#ff9933';
         statusDiv.style.color = '#e65c00';
-        messageElement.innerHTML = `<strong>${message}</strong>`;
+        setElementContent(messageElement, `<strong>${message}</strong>`);
     } else if (type === 'warning') {
         statusDiv.style.backgroundColor = '#fff4e6';
         statusDiv.style.borderColor = '#ff9933';
         statusDiv.style.color = '#b45309';
-        messageElement.innerHTML = `<strong>${message}</strong>`;
+        setElementContent(messageElement, `<strong>${message}</strong>`);
     } else {
-        messageElement.innerHTML = message;
+        setElementContent(messageElement, message);
     }
 }
 

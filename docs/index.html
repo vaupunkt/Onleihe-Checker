@@ -76,11 +76,19 @@
             margin-bottom: 2rem;
         }
 
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
         .cta-card {
             background: var(--cta-gradient);
             padding: 1.5rem;
             border-radius: 8px;
-            margin-bottom: 1rem;
+            flex: 0 1 auto;
         }
 
         .cta-button {
@@ -93,11 +101,20 @@
             display: inline-block;
             transition: all 0.3s;
             box-shadow: 0 4px 8px rgba(66, 133, 244, 0.3);
+            min-width: 160px;
+        }
+
+        .cta-button.firefox {
+            color: #ff6611;
         }
 
         .cta-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(66, 133, 244, 0.4);
+        }
+
+        .cta-button.firefox:hover {
+            box-shadow: 0 6px 12px rgba(255, 102, 17, 0.4);
         }
 
         [data-theme="dark"] .cta-button {
@@ -202,11 +219,19 @@
     </div>
 
     <div class="cta-section">
-        <div class="cta-card">
-            <a href="https://chromewebstore.google.com/detail/onleihe-checker/lbdbelkkmbogfjkeklmpfaijgpdnnncn?hl=de" 
-               class="cta-button">
-                📥 Jetzt im Chrome Web Store installieren
-            </a>
+        <div class="cta-buttons">
+            <div class="cta-card">
+                <a href="https://chromewebstore.google.com/detail/onleihe-checker/lbdbelkkmbogfjkeklmpfaijgpdnnncn?hl=de" 
+                   class="cta-button chrome">
+                    📥 Chrome Web Store
+                </a>
+            </div>
+            <div class="cta-card">
+                <a href="https://addons.mozilla.org/en-US/firefox/addon/onleihechecker/" 
+                   class="cta-button firefox">
+                    🦊 Firefox Add-ons
+                </a>
+            </div>
         </div>
         <p class="cta-subtitle">
             Funktioniert auf Amazon.de und Goodreads • Automatische Updates • Verifizierte Sicherheit
@@ -215,13 +240,18 @@
 
     <div class="nav">
         <a href="https://chromewebstore.google.com/detail/onleihe-checker/lbdbelkkmbogfjkeklmpfaijgpdnnncn?hl=de" class="nav-card featured">
-            <h3>🚀 Schnell-Installation</h3>
+            <h3>🚀 Chrome Installation</h3>
             <p>Direkt aus dem Chrome Web Store installieren - ein Klick und fertig!</p>
         </a>
 
+        <a href="https://addons.mozilla.org/en-US/firefox/addon/onleihechecker/" class="nav-card featured">
+            <h3>🦊 Firefox Installation</h3>
+            <p>Auch für Firefox verfügbar - direkt aus dem Mozilla Add-ons Store!</p>
+        </a>
+
         <a href="installation.html" class="nav-card">
-            <h3>🛠 Installation</h3>
-            <p>Schritt-für-Schritt Anleitung zur Installation der Chrome Extension und des Web Scrapers.</p>
+            <h3>🛠 Manuelle Installation</h3>
+            <p>Schritt-für-Schritt Anleitung zur manuellen Installation für Entwickler.</p>
         </a>
 
         <a href="usage.html" class="nav-card">

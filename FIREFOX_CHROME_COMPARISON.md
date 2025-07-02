@@ -120,12 +120,12 @@ chrome.tabs.executeScript(tabId, {
 ## Installation und Distribution
 
 ### Chrome
-- Chrome Web Store
+- **[📥 Chrome Web Store](https://chromewebstore.google.com/detail/onleihe-checker/lbdbelkkmbogfjkeklmpfaijgpdnnncn?hl=de)** (Empfohlen)
 - Developer Mode (unpacked extension)
 - .crx package
 
 ### Firefox
-- Firefox Add-ons (AMO)
+- **[📥 Firefox Add-ons (AMO)](https://addons.mozilla.org/en-US/firefox/addon/onleihechecker/)** (Empfohlen)
 - about:debugging (temporary add-on)
 - .xpi package
 
