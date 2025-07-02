@@ -70,6 +70,8 @@
       "matches": [
         "https://www.amazon.de/*/dp/*",
         "https://amazon.de/*/dp/*",
+        "https://amazon.de/dp/*",
+        "https://www.amazon.de/dp/*",
         "https://www.amazon.de/gp/product/*",
         "https://amazon.de/gp/product/*",
         "https://www.goodreads.com/book/show/*",

@@ -138,13 +138,11 @@ function getCurrentSite() {
 function detectSupportedPage() {
     const site = getCurrentSite();
     const url = window.location.href;
-    
     if (site === 'amazon') {
         const isProductPage = url.includes('/dp/') || url.includes('/gp/product/');
         if (!isProductPage) {
             return { site, isValid: false, pageType: 'not-product' };
         }
-        
         const booksNavElement = document.querySelector('#nav-subnav[data-category="books-catalog"]');
         return { 
             site, 

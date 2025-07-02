@@ -1,5 +1,4 @@
 // content.js
-// This script runs on Amazon.de pages.
 
 // ==============================================================================
 // Helper functions for DOM manipulation and waiting for elements
