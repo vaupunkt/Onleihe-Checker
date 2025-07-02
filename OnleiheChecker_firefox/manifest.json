@@ -1,5 +1,5 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
   "name": "Onleihe Checker",
   "version": "1.2",
   "description": "Check book availability in German digital libraries (Onleihe) while browsing Amazon.de and Goodreads",
@@ -12,11 +12,9 @@
   "author": "Veliko Kardziev",
   "permissions": [
     "storage",
-    "activeTab",
+    "activeTab", 
     "tabs",
-    "scripting"
-  ],
-  "host_permissions": [
+    "webNavigation",
     "https://www.amazon.de/*",
     "https://amazon.de/*",
     "https://www.goodreads.com/*",
@@ -53,9 +51,10 @@
     "http://*.onleihe.net/*"
   ],
   "background": {
-    "service_worker": "background.js"
+    "scripts": ["background.js"],
+    "persistent": false
   },
-  "action": {
+  "browser_action": {
     "default_popup": "popup.html",
     "default_title": "Onleihe Checker - Check book availability",
     "default_icon": {
@@ -64,7 +63,7 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     }
-    },
+  },
   "content_scripts": [
     {
       "matches": [
@@ -81,10 +80,5 @@
       "run_at": "document_idle"
     }
   ],
-  "web_accessible_resources": [
-    {
-      "resources": ["libraries.json", "locales.js"],
-      "matches": ["<all_urls>"]
-    }
-  ]
+  "web_accessible_resources": ["libraries.json", "locales.js"]
 }
