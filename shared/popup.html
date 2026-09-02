@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onleihe Checker</title>
+    <style>
+        body {
+            width: 320px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            color: #2d3748;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 1rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem;
+            margin: -1rem -1rem 1rem -1rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .stack { display: flex; flex-direction: column; gap: 0.75rem; }
+
+        .language-switcher {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .language-switcher label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 0;
+        }
+
+        .language-switcher select {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-container { position: relative; }
+
+        #library-search {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: 2px solid #e2e8f0;
+            background: #ffffff;
+            font-size: 0.875rem;
+        }
+
+        #library-search:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        #library-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            max-height: 220px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .dropdown-item:hover { background: #f8fafc; }
+
+        .dropdown-item-name { font-size: 0.875rem; }
+
+        .dropdown-item-location {
+            font-size: 0.75rem;
+            color: #718096;
+        }
+
+        .dropdown-group {
+            font-weight: 600;
+            color: #4a5568;
+            background: #f7fafc;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        button:hover { opacity: 0.94; }
+
+        .hidden { display: none; }
+
+        .message-box {
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            border-left: 3px solid transparent;
+        }
+
+        .info-box {
+            color: #2b6cb0;
+            border-left-color: #4299e1;
+        }
+
+        .warning-box {
+            color: #b45309;
+            border-left-color: #d69e2e;
+        }
+
+        .success-box {
+            background: #f0fff4;
+            color: #2f855a;
+            border-left-color: #38a169;
+        }
+
+        .error-box {
+            background: #fff5f5;
+            color: #c53030;
+            border-left-color: #e53e3e;
+        }
+
+        hr {
+            border: none;
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 data-i18n="popup.title">📚 Onleihe Checker</h1>
+        </div>
+
+        <div class="language-switcher">
+            <label for="language-select" data-i18n="popup.language.label">🌐 Sprache:</label>
+            <select id="language-select">
+                <option value="de">Deutsch</option>
+                <option value="en">English</option>
+            </select>
+        </div>
+
+        <div class="stack">
+            <div class="info-box message-box" data-i18n="popup.search.info">
+                Suche und wähle deine Bibliothek aus.
+            </div>
+
+            <div>
+                <label for="library-search" data-i18n="popup.search.label">🔍 Bibliothek suchen &amp; auswählen:</label>
+                <div class="search-container">
+                    <input type="text" id="library-search" autocomplete="off"
+                           data-i18n-placeholder="popup.search.placeholder"
+                           placeholder="Bibliothek oder Ort suchen...">
+                    <div id="library-dropdown"></div>
+                </div>
+            </div>
+
+            <button id="save-library-btn" data-i18n="popup.save.button">💾 Bibliothek speichern</button>
+
+            <div id="message" class="message-box hidden"></div>
+
+            <hr>
+
+            <div class="info-box message-box" data-i18n="popup.sites.info">
+                🌐 Öffne eine Amazon.de- oder Goodreads-Buchseite für die Verfügbarkeitsprüfung.
+            </div>
+        </div>
+    </div>
+
+    <script src="browser-api.js"></script>
+    <script src="i18n.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>

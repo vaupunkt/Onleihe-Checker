@@ -7,6 +7,60 @@ title: Release Notes
 
 ---
 
+## Version 2.0.0 – Onleihe 3.0
+
+⚠️ **Pflicht-Update.** Onleihe hat auf „Onleihe 3.0" umgestellt, eine React-Anwendung. Die
+Suchseite liefert kein Ergebnis-Markup mehr, aus dem sich die Trefferzahl lesen ließe – Version 1.2
+zeigte deshalb bei **jeder** Bibliothek „Keine Ergebnisse gefunden". Version 2.0 spricht die
+JSON-API der neuen Web-App an.
+
+### Neu
+
+- **Echte Verfügbarkeit statt Trefferzahl**: „Sofort ausleihbar" oder „verliehen – vormerkbar",
+  nicht mehr bloß „8 Ergebnisse gefunden".
+- **Österreich, Schweiz und Luxemburg** erstmals dabei. Die alte Liste war rein deutsch, weil der
+  Scraper den Abschnitt „Onleihen international" übersprang.
+- **2232 Bibliotheken** aus dem offiziellen Verzeichnis-Endpunkt der API statt aus einer
+  gescrapten Hilfeseite.
+- **Suche nach Ort**: „Stuttgart" findet die Stadtbibliothek. Jeder Eintrag zeigt PLZ und Ort,
+  damit gleichnamige Bibliotheken unterscheidbar sind.
+- **Hörbücher** werden mitgezählt; vorher schränkte die Abfrage stillschweigend auf E-Books ein.
+- Kein Bibliothekskonto nötig – die Abfrage nutzt ein anonymes Gast-Token.
+
+### Behoben
+
+- **Kein aufblitzender Tab mehr.** Die alte Fassung öffnete für jede Prüfung einen echten Tab und
+  las dessen HTML aus. Jetzt genügt eine JSON-Anfrage.
+- **25 von 66 Bibliotheks-Domains** hatten überhaupt keine Host-Berechtigung; für diese
+  Bibliotheken schlug die Prüfung schon vor der Migration fehl.
+- **„Dr. Jekyll and Mr. Hyde" wurde zum Suchbegriff „Dr" verkürzt** – die Titelbereinigung schnitt
+  an jedem Trennzeichen, auch am Punkt.
+- **Firefox**: die gespeicherte Bibliothek wurde beim Öffnen des Popups nie ins Suchfeld
+  zurückgeladen und die „gespeichert"-Meldung erschien nie – `browser.*` ist Promise-basiert, die
+  Callbacks liefen ins Leere. Statusmeldungen blieben zudem ungestylt.
+- **Firefox**: der Hintergrund-Tab wurde gelöscht, *bevor* sein Inhalt gelesen wurde.
+- **Sprachwechsel** übersetzt die sichtbare Meldung jetzt wirklich neu; vorher blieb der alte Text
+  stehen.
+- Fehler und „nichts gefunden" werden unterschieden – vorher sah beides gleich aus.
+
+### Technisch
+
+- **Berechtigungen von 39 auf 4 reduziert**: `storage` plus drei Host-Berechtigungen.
+  `activeTab`, `tabs`, `scripting`, `webNavigation` und 35 Bibliotheks-Domains entfallen.
+- **Firefox auf Manifest V3**; beide Browser nutzen jetzt dasselbe Manifest-Schema.
+- **Eine gemeinsame Quelle** für beide Builds (`shared/`) statt zweier Ordner mit ~830 doppelten
+  Codezeilen. `tools/build.sh` baut und packt beide Ziele.
+- **Tests und CI**: 31 Unit- und DOM-Tests, dazu ein wöchentlicher Lauf gegen die echte API über
+  alle Verbünde. Vorher gab es keine Tests und keine CI – genau deshalb blieb der Ausfall unbemerkt.
+- Das Statusfeld wird ohne `innerHTML` aufgebaut; Fremddaten können kein Markup einbringen.
+
+### Hinweis
+
+Die gespeicherte Bibliothek muss **einmal neu gewählt** werden: die Erweiterung adressiert
+Bibliotheken jetzt über `onleiheId`/`libraryId` statt über eine Katalog-Adresse.
+
+---
+
 ## Version 1.2.0 - Enhanced Release
 
 🎉 **Verbesserte Version mit besserer Performance und Benutzererfahrung!**

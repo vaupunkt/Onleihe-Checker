@@ -1,0 +1,18 @@
+{
+  "name": "onleihe-checker",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Browser-Erweiterung, die die Verfügbarkeit von Büchern in der Onleihe prüft",
+  "scripts": {
+    "build": "tools/build.sh",
+    "test": "node --test tools/test_shared.mjs tools/test_content.mjs",
+    "lint:firefox": "web-ext lint --source-dir dist/firefox",
+    "smoke": "python3 tools/smoke_api.py",
+    "libraries": "python3 tools/build_libraries.py"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.1",
+    "web-ext": "^8.3.0"
+  },
+  "license": "MIT"
+}

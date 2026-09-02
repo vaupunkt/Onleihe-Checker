@@ -1,4 +1,15 @@
-*.DS_STORE
-/venv
-/chromedriver*
+# macOS
+.DS_Store
+
+# Build-Ausgaben
+/dist/
 *.zip
+*.xpi
+
+# Python
+/venv/
+__pycache__/
+*.pyc
+
+# Node
+/node_modules/

@@ -1,322 +1,134 @@
-# Onleihe Scraper & Checker
+# Onleihe Checker
+
 ![OnleiheChecker - PopUp Window](assets/174_1x_shots_so.png)
 
-A Python web scraper and Chrome extension for German digital library services (Onleihe). This project consists of two main components:
+Browser-Erweiterung für Chrome und Firefox: zeigt beim Stöbern auf **Amazon.de** und
+**Goodreads** direkt auf der Buchseite an, ob der Titel in deiner **Onleihe** verfügbar ist.
 
-1. **Web Scraper**: Extracts library information from official Onleihe help pages
-2. **Chrome Extension**: Checks book availability in your local Onleihe library while browsing Amazon.de and Goodreads
+Nicht nur, *ob* er im Katalog steht – sondern ob er **gerade ausleihbar** oder **verliehen und
+vormerkbar** ist.
 
-## 🚀 Quick Start
+## Installation
 
-### Chrome Extension (Recommended)
-**[📥 Install from Chrome Web Store](https://chromewebstore.google.com/detail/onleihe-checker/lbdbelkkmbogfjkeklmpfaijgpdnnncn?hl=de)**
+| Browser | Store |
+|---|---|
+| Chrome | [Chrome Web Store](https://chromewebstore.google.com/detail/onleihe-checker/lbdbelkkmbogfjkeklmpfaijgpdnnncn?hl=de) |
+| Firefox | [Firefox Add-ons](https://addons.mozilla.org/de/firefox/addon/onleihechecker/) |
 
-*The easiest way to get started - install directly from the Chrome Web Store with automatic updates.*
+Nach der Installation einmal auf das Symbol klicken, die eigene Bibliothek suchen und speichern.
+Es stehen **2232 Bibliotheken** in Deutschland, Österreich, der Schweiz und Luxemburg zur Wahl.
 
-### Firefox Add-on (Recommended)
-**[📥 Install from Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/onleihechecker/)**
+## Wie es funktioniert
 
-*Also available for Firefox users - install directly from Mozilla Add-ons with automatic updates.*
+```
+Amazon-/Goodreads-Buchseite
+        │  Titel + Autor auslesen
+        ▼
+content.js ──► background.js ──► api.onleihe.de
+        │                          Gast-Token + Suche
+        ◄──────────────────────────┘
+        │  Treffer + Verfügbarkeit
+        ▼
+   Statusfeld auf der Seite
+```
 
-### Manual Installation (Developers)
-For development or manual installation, see [Installation Guide](#-installation) below.
+Die Erweiterung nutzt die JSON-API von Onleihe 3.0. Ein **Gast-Token** genügt – es ist **kein
+Bibliothekskonto und keine Anmeldung** nötig, und es werden keine Zugangsdaten verarbeitet.
 
-## 📚 Table of Contents
-- [🚀 Features](#-features)
-    - [Web Scraper](#web-scraper)
-    - [Chrome Extension](#chrome-extension)
-- [📋 Requirements](#-requirements)
-    - [For Web Scraping](#for-web-scraping)
-    - [For Chrome Extension](#for-chrome-extension)
-- [🛠 Installation](#-installation)
-    - [1. Web Scraper Setup](#1-web-scraper-setup)
-    - [2. Chrome Extension Setup](#2-chrome-extension-setup)
-- [🎯 Usage](#-usage)
-    - [Web Scraping](#web-scraping)
-    - [Chrome Extension](#chrome-extension-1)
-- [📁 Project Structure](#-project-structure)
-- [🔧 Configuration](#-configuration)
-    - [Scraper Settings](#scraper-settings)
-    - [Extension Settings](#extension-settings)
-- [🌍 Supported Libraries](#-supported-libraries)
-    - [Web Scraper Coverage](#web-scraper-coverage)
-    - [Chrome Extension Support](#chrome-extension-support)
-- [🐛 Troubleshooting](#-troubleshooting)
-    - [Common Scraping Issues](#common-scraping-issues)
-    - [Extension Issues](#extension-issues)
-- [🤝 Contributing](#-contributing)
-- [📝 License](#-license)
-- [⚠️ Disclaimer](#️-disclaimer)
-- [🔄 Maintenance](#-maintenance)
-    - [Updating Library Data](#updating-library-data)
-- [🔒 Security & Permissions](#-security--permissions)
+Verwendete Endpunkte:
 
-## 🚀 Features
+| Zweck | Aufruf |
+|---|---|
+| Gast-Token | `POST /user-application/v1/auth/login` mit `{onleiheId, libraryId}` |
+| Suche | `POST /ui/v1/onleihe/{onleiheId}/search?libraryId=…` |
+| Bibliotheksverzeichnis (nur im Build) | `GET /user-application/v2/auth/libraries` |
 
-### Web Scraper
-- Scrapes German Onleihe libraries from the official help pages
-- Handles cookie banners and dynamic content loading
-- Exports clean, structured library data to JSON
-- Automatic URL cleaning (removes frontend paths and parameters)
-- **Note**: Currently focuses on German libraries only
+`onleiheId` und `libraryId` müssen zwischen Token und Suchanfrage zusammenpassen – ein Token ohne
+`libraryId`, dessen `?libraryId=` an der Suche mitgeschickt wird, wird mit `401` abgelehnt.
 
-### Chrome Extension
-- Seamlessly integrates with **Amazon.de** and **Goodreads** book pages
-- Real-time availability checking in your selected library
-- Clean, responsive popup interface for library selection
-- Supports German libraries
-- Multilingual interface (German/English)
-- Automatic search using book title, author, and ISBN information
-- **New**: Full Goodreads.com support alongside Amazon.de
+## Berechtigungen
 
-## 📋 Requirements
+Bewusst knapp gehalten:
 
-### For Web Scraping
-- Python 3.7+
-- Chrome/Chromium browser
-- ChromeDriver (compatible with your Chrome version)
+| Berechtigung | Wofür |
+|---|---|
+| `storage` | gewählte Bibliothek und Sprache lokal merken |
+| `https://api.onleihe.de/*` | die Verfügbarkeitsabfrage |
+| `https://*.amazon.de/*`, `https://*.goodreads.com/*` | Buchdaten auf der Seite lesen und das Statusfeld einfügen |
 
-### For Chrome Extension
-- Chrome/Chromium browser
-- Developer mode enabled for extension installation
+Das Content-Script läuft **nur auf Buchseiten** (`/dp/`, `/gp/product/`, `/book/show/`), nicht auf
+allen Seiten dieser Domains. Es werden keine Daten an Dritte außer Onleihe gesendet; übertragen wird
+allein der Suchbegriff aus Titel und Autor.
 
-### For Firefox Add-on
-- Firefox 60+ browser
-- Add-on installation permissions
-
-## 🛠 Installation
-
-### Option 1: Browser Extensions (Recommended)
-
-#### Chrome Web Store
-**[📥 Install from Chrome Web Store](https://chromewebstore.google.com/detail/onleihe-checker/lbdbelkkmbogfjkeklmpfaijgpdnnncn?hl=de)**
-
-#### Firefox Add-ons
-**[📥 Install from Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/onleihechecker/)**
-
-This is the recommended installation method for most users:
-- Automatic updates
-- Verified security
-- One-click installation
-- No manual setup required
-
-### Option 2: Manual Installation (Developer Mode)
-
-#### 1. Web Scraper Setup
+## Entwicklung
 
 ```bash
-# Install required packages
-pip install requests beautifulsoup4 selenium
-
-# Install ChromeDriver (macOS with Homebrew)
-brew install chromedriver
-
-# Or download manually from https://chromedriver.chromium.org/
+npm install
+npm run build          # -> dist/chrome/, dist/firefox/ + Archive
+npm test               # Unit- und DOM-Integrationstests
+npm run smoke          # prüft die echte Onleihe-API (alle Verbünde)
+npm run lint:firefox   # web-ext lint
 ```
 
-#### 2. Chrome Extension Setup
+Laden zum Testen: in Chrome `chrome://extensions` → *Entpackte Erweiterung laden* → `dist/chrome`.
+In Firefox `npx web-ext run --source-dir dist/firefox`.
 
-1. Open Chrome and navigate to `chrome://extensions/`
-2. Enable "Developer mode" (toggle in top right)
-3. Click "Load unpacked"
-4. Select the `OnleiheChecker` folder
+### Aufbau
 
-#### 3. Firefox Add-on Setup
+```
+shared/       gemeinsamer Quellcode beider Builds
+  browser-api.js   wählt den Promise-Namespace (chrome.* / browser.*)
+  i18n.js          Übersetzungen, DE/EN, zur Laufzeit umschaltbar
+  onleihe-api.js   Zugriff auf die Onleihe-3.0-API
+  background.js    vermittelt die Abfrage
+  content.js       liest die Buchseite, zeigt das Statusfeld
+  popup.js/.html   Bibliothekswahl
+  libraries.json   erzeugt, nicht von Hand pflegen
+platform/     manifest.chrome.json (MV3), manifest.firefox.json (MV3)
+tools/        Build, Datenaufbau, Tests
+dist/         Build-Ausgabe (nicht eingecheckt)
+```
 
-1. Open Firefox and navigate to `about:debugging`
-2. Click "This Firefox" → "Load Temporary Add-on"
-3. Select the `manifest.json` file in the `OnleiheChecker_firefox` folder
+Chrome und Firefox teilen denselben Code; nur die Manifeste unterscheiden sich. Änderungen also
+immer in `shared/` – nie in `dist/`.
 
-## 🎯 Usage
+Immer über `OnleiheBrowser` auf die Erweiterungs-APIs zugreifen, nie direkt über `chrome.*` oder
+`browser.*`: in Firefox ist `chrome.*` callback-basiert, ein `await` darauf liefert stillschweigend
+`undefined`.
 
-### Web Scraping
+### Bibliotheksdaten aktualisieren
 
-#### Initial Library Data Collection
 ```bash
-python scrape_onleihe.py
+npm run libraries      # python3 tools/build_libraries.py
 ```
 
-This will:
-- Launch a Chrome browser instance
-- Navigate to the official Onleihe library directory
-- Handle cookie consent automatically
-- Extract all library information
-- Save results to `libraries.json`
+Holt das Verzeichnis von der API, verwirft interne Test-Mandanten und ordnet jedem Verbund den
+Katalog-Host zu (für den „Im Katalog anzeigen"-Link). Der Host ist aus der `onleiheId` nicht
+rückwärts auflösbar, deshalb löst das Skript die alten Onleihe-2.x-Adressen aus
+`tools/legacy_base_urls.json` über deren Redirects auf und ergänzt Kandidaten aus Bibliotheks- und
+Ortsnamen. Verbünde ohne bekannten Host funktionieren weiterhin – nur der Deep-Link entfällt.
 
-#### Clean Existing URLs
-If you have existing library data with messy URLs:
-```bash
-python clean_base_urls.py
-```
+### Version anheben
 
-This will clean up URLs by removing:
-- `/frontend/welcome,51-0-0-100-0-0-1-0-0-0-0.html` suffixes
-- Query parameters
-- Unnecessary path segments
+Die Version steht in `platform/manifest.chrome.json`, `platform/manifest.firefox.json` und
+`package.json`. Die Archivnamen leitet `tools/build.sh` daraus ab.
 
-### Chrome Extension
-![Amazon Page Screenshot](assets/175shots_so.png)
-1. **Setup**: Click the extension icon in Chrome toolbar
-2. **Select Library**: Search and select your local library from the dropdown
-3. **Save**: Click "Bibliothek speichern" to set as default
-4. **Browse**: Visit any **Amazon.de book page** or **Goodreads book page**
-5. **Check**: The extension automatically displays Onleihe availability
+## Fehlersuche
 
-### Firefox Add-on
-The Firefox add-on works identically to the Chrome extension:
-1. **Setup**: Click the add-on icon in Firefox toolbar
-2. **Select Library**: Search and select your local library from the dropdown
-3. **Save**: Click "Bibliothek speichern" to set as default
-4. **Browse**: Visit any **Amazon.de book page** or **Goodreads book page**
-5. **Check**: The add-on automatically displays Onleihe availability
+| Symptom | Ursache |
+|---|---|
+| Kein Statusfeld auf einer Amazon-Seite | Es ist keine Buchseite – die Erweiterung prüft die Kategorie-Navigation (`books-catalog`). |
+| „Bitte wähle deine Onleihe-Bibliothek" | Im Popup noch keine Bibliothek gespeichert. |
+| „Nicht im Onleihe-Katalog vorhanden" | Echte Katalog-Lücke, kein Fehler. Kleinere Verbünde haben viele Titel nicht. |
+| „Onleihe-Abfrage fehlgeschlagen" | API-Problem – Statuscode steht in der Meldung. `npm run smoke` prüft alle Verbünde. |
+| Kein „Im Katalog anzeigen"-Link | Für diesen Verbund ist kein Host bekannt; die Prüfung selbst funktioniert. |
 
-#### Supported Websites
-- ✅ **Amazon.de** - All book product pages (`/dp/` and `/gp/product/`)
-- ✅ **Goodreads.com** - All book detail pages (`/book/show/`)
+## Lizenz
 
-#### How it works
-- **Amazon.de**: Extracts book information from product pages and displays availability status
-- **Goodreads**: Reads book details from book pages and checks your library's catalog
-- **Automatic Detection**: No manual switching needed - works seamlessly on both platforms
+MIT
 
-## 📁 Project Structure
+## Haftungsausschluss
 
-```
-root/
-├── OnleiheScraper           # Onleihe Scraper
-│   ├── clean_base_urls.py   # URL-Bereinigung
-│   └── scrape_onleihe.py    # Haupt-Scraping-Skript
-├── OnleiheChecker/          # Chrome Extension
-│   ├── manifest.json        # Extension-Konfiguration
-│   ├── popup.html           # Popup-Interface
-│   ├── popup.js             # Popup-Funktionalität
-│   ├── content.js           # Amazon-Integration
-│   ├── background.js        # Service Worker
-│   └── libraries.json       # Bibliotheksdatenbank
-├── docs/                    # GitHub Pages
-└── README.md                # This file
-```
-
-## 🔧 Configuration
-
-### Scraper Settings
-
-Edit `scrape_onleihe.py` to modify:
-
-```python
-# Enable/disable headless mode for debugging
-chrome_options.add_argument('--headless')  # Comment out to see browser
-
-# Adjust timeouts
-WebDriverWait(driver, 20)  # Increase for slower connections
-```
-
-### Extension Settings
-
-Libraries are automatically saved to Chrome's local storage. To reset:
-1. Right-click extension icon → "Inspect popup"
-2. Go to Application → Local Storage
-3. Clear `selectedOnleiheLibraryURL` and `selectedOnleiheLibraryName`
-
-## 🌍 Supported Libraries
-
-### Web Scraper Coverage
-The scraper currently extracts libraries from the German section of the Onleihe help pages:
-- 🇩🇪 **Deutschland (Germany)** - All German libraries and regional networks
-
-### Chrome Extension Support
-The extension supports libraries from multiple countries through its pre-built database:
-- 🇩🇪 Deutschland (Germany)
-
-Other libraries will be added soon:
-- 🇦🇹 Österreich (Austria)  
-- 🇨🇭 Schweiz (Switzerland)
-- 🇧🇪 Belgien (Belgium)
-- 🇫🇷 Frankreich (France)
-- 🇮🇹 Italien (Italy)
-- 🇱🇺 Luxemburg (Luxembourg)
-- 🇱🇮 Liechtenstein
-- 🌐 International (Goethe-Institut, WDA)
-
-> **Note**: To add international libraries to the scraper, the script would need to be extended to handle the international sections of the Onleihe help pages.
-
-## 🐛 Troubleshooting
-
-### Common Scraping Issues
-
-**ChromeDriver not found:**
-```bash
-# macOS
-brew install chromedriver
-# Or set explicit path in script:
-service = Service('/usr/local/bin/chromedriver')
-```
-
-**Cookie banner not dismissed:**
-- Uncomment headless mode to see what's happening
-- Check if the cookie button ID has changed
-- Increase wait timeouts
-
-**No libraries found:**
-- Website structure may have changed
-- Check if selectors need updating
-- Verify internet connection
-
-### Extension Issues
-
-**Extension not loading:**
-- Ensure Developer mode is enabled
-- Check for errors in `chrome://extensions/`
-- Reload the extension after changes
-
-**No results on Amazon:**
-- Verify library is selected in popup
-- Check browser console for errors
-- Ensure you're on a book product page (`/dp/` or `/gp/product/`)
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is for educational and personal use. Please respect the terms of service of the websites being scraped.
-
-## ⚠️ Disclaimer
-
-- This tool is not affiliated with Onleihe or Amazon
-- Use responsibly
-- Website structures may change, requiring code updates
-- Always verify availability directly on library websites
-
-## 🔄 Maintenance
-
-### Updating Library Data
-Run the scraper periodically to keep German library information current:
-```bash
-# Update and clean German libraries
-python scrape_onleihe.py && python clean_base_urls.py
-
-# Copy updated data to extension
-cp libraries.json OnleiheChecker/
-```
-
-> **Important**: The scraper currently only updates German libraries. International libraries in the extension database are maintained separately and may need manual updates.
-
-## 🔒 Security & Permissions
-
-The Chrome extension requires specific permissions to function properly. For a detailed explanation of each permission and why it's needed, see [PERMISSIONS.md](PERMISSIONS.md).
-
-**Key principles:**
-- Minimal permissions approach - only requests what's absolutely necessary
-- No data collection or external tracking
-- All processing happens locally in your browser
-- Transparent operation with public library data only
-
----
-
-**Made with ❤️ for German digital library users**
+Unabhängiges Projekt, weder von der divibib GmbH noch von Amazon oder Goodreads unterstützt oder
+geprüft. „Onleihe" ist eine Marke der divibib GmbH. Die Erweiterung nutzt die öffentlich
+erreichbare API der Onleihe-Web-App im Rahmen des normalen Katalogzugriffs.

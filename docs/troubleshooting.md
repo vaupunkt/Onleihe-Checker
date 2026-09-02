@@ -5,52 +5,57 @@ title: Problemlösung
 
 # 🐛 Problemlösung
 
-## Scraper-Probleme
+## Nutzung
 
-### ChromeDriver nicht gefunden
+### Kein Statusfeld auf einer Amazon-Seite
+Die Erweiterung prüft, ob es sich wirklich um ein Buch handelt – sie sieht dafür die
+Kategorie-Navigation an (`books-catalog`). Auf Nicht-Buch-Produkten erscheint absichtlich nichts.
+Außerdem muss die Adresse `/dp/` oder `/gp/product/` enthalten, bei Goodreads `/book/show/`.
+
+### „Bitte wähle deine Onleihe-Bibliothek"
+Im Popup ist noch keine Bibliothek gespeichert. Symbol anklicken, Bibliothek suchen, **speichern**.
+Das Auswählen allein genügt nicht.
+
+### „Nicht im Onleihe-Katalog vorhanden"
+Das ist meist keine Störung, sondern eine echte Katalog-Lücke: kleinere Verbünde führen viele Titel
+nicht. Kontrolle über den Link „Direkt im Onleihe-Katalog suchen".
+
+Möglich ist auch ein zu enger Suchbegriff – gesucht wird mit Titel und Autor-Nachname, und die
+Onleihe verknüpft mehrere Wörter mit UND. Bei Sammelbänden oder abweichenden Ausgabetiteln kann das
+ins Leere laufen.
+
+### „Onleihe-Abfrage fehlgeschlagen"
+Ein tatsächlicher Fehler; der Statuscode steht in der Meldung. Zum Nachprüfen:
+
 ```bash
-# macOS
-brew install chromedriver
-
-# Oder expliziten Pfad setzen:
-service = Service('/usr/local/bin/chromedriver')
+npm run smoke
 ```
 
-### Cookie-Banner nicht geschlossen
-- Headless-Modus deaktivieren zum Debuggen
-- Cookie-Button-ID auf Änderungen prüfen
-- Timeouts erhöhen
+Das prüft Gast-Token und Suche gegen jeden Verbund. Schlägt es flächendeckend fehl, hat sich die
+Onleihe-API geändert.
 
-### Keine Bibliotheken gefunden
-- Website-Struktur könnte sich geändert haben
-- Selektoren auf Updates prüfen
-- Internetverbindung verifizieren
+### Kein „Im Katalog anzeigen"-Link
+Für diesen Verbund ist kein Katalog-Host bekannt. Die Verfügbarkeitsprüfung funktioniert trotzdem,
+nur der Deep-Link entfällt. `npm run libraries` kann die Zuordnung neu ermitteln.
 
-## Extension-Probleme
+### Falsche Sprache
+Ohne gespeicherte Auswahl folgt die Erweiterung der Browsersprache. Im Popup lässt sie sich
+umstellen; offene Buchseiten übernehmen den Wechsel sofort.
 
-### Extension lädt nicht
-- Developer-Modus aktiviert?
-- Fehler in `chrome://extensions/` prüfen
-- Extension nach Änderungen neu laden
+## Entwicklung
 
-### Keine Ergebnisse auf Amazon
-- Bibliothek im Popup ausgewählt?
-- Browser-Konsole auf Fehler prüfen
-- Auf Buchproduktseite (`/dp/` oder `/gp/product/`)?
+### Erweiterung lädt nicht
+- Chrome: `chrome://extensions` → Entwicklermodus → *Entpackte Erweiterung laden* → `dist/chrome`
+- Firefox: `npx web-ext run --source-dir dist/firefox`
+- Nach Änderungen in `shared/` erst `npm run build` – geladen wird `dist/`, nicht `shared/`.
 
-### Verfügbarkeitsstatus wird nicht angezeigt
-- Internetverbindung prüfen
-- Bibliotheks-URL in Einstellungen validieren
-- Content-Script-Fehler in Entwicklertools prüfen
+### Änderungen wirken nicht
+Bearbeite `shared/`, nicht `dist/`. Letzteres wird bei jedem Build überschrieben.
 
-## Allgemeine Tipps
+### `undefined` aus einem API-Aufruf in Firefox
+Immer `OnleiheBrowser` verwenden, nicht `chrome.*`. In Firefox ist der `chrome`-Namespace
+callback-basiert; ein `await` darauf liefert stillschweigend `undefined`.
 
-### Performance optimieren
-- Stabile Internetverbindung
-- Browser-Cache leeren
-- Extension nach Updates neu laden
-
-### Beste Ergebnisse erzielen
-- Lokale Bibliothek auswählen
-- Hauptbuchproduktseiten verwenden
-- Bevorzugte Sprache einstellen
+### Tests hängen
+`content.js` beobachtet per Intervall die Adresse. Im Testharness muss das Fenster nach dem
+Auslesen geschlossen werden, sonst halten dessen Timer die Eventloop offen.

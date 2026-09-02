@@ -51,17 +51,19 @@ title: Installation
 ### Schritt-für-Schritt Anleitung für Chrome
 
 1. **Extension laden**
+   - Zuerst `npm install && npm run build` ausführen (erzeugt `dist/chrome`)
    - Öffne Chrome und navigiere zu `chrome://extensions/`
    - Aktiviere "Developer mode" (Toggle oben rechts)
    - Klicke "Load unpacked"
-   - Wähle den `OnleiheChecker` Ordner aus
+   - Wähle den Ordner `dist/chrome` aus
 
 ### Schritt-für-Schritt Anleitung für Firefox
 
 1. **Add-on laden**
-   - Öffne Firefox und navigiere zu `about:debugging`
-   - Klicke "This Firefox" → "Load Temporary Add-on"
-   - Wähle die `manifest.json` Datei im `OnleiheChecker_firefox` Ordner aus
+   - Zuerst `npm install && npm run build` ausführen (erzeugt `dist/firefox`)
+   - Bequemer Weg: `npx web-ext run --source-dir dist/firefox`
+   - Oder manuell: `about:debugging` → "This Firefox" → "Load Temporary Add-on"
+     → `dist/firefox/manifest.json` auswählen
 
 ### Konfiguration (beide Browser)
 
@@ -78,34 +80,41 @@ title: Installation
 - ✅ Amazon.de - Alle Buchproduktseiten (`/dp/`, `/gp/product/`)
 - ✅ Goodreads.com - Alle Buchdetailseiten (`/book/show/`)
 
-## Web Scraper Setup
+## Entwicklung
 
 ### Voraussetzungen
-- Python 3.7+
-- Chrome/Chromium Browser
-- ChromeDriver
+- Node.js 20+ (Build und Tests)
+- Python 3.9+ (nur zum Aktualisieren der Bibliotheksdaten)
 
-### Installation
+Selenium und ein ChromeDriver sind seit Version 2.0 nicht mehr nötig: die Bibliotheksliste kommt
+aus dem Verzeichnis-Endpunkt der Onleihe-API statt aus einer gescrapten Hilfeseite.
 
-```bash
-# Pakete installieren
-pip install requests beautifulsoup4 selenium
-
-# ChromeDriver installieren (macOS mit Homebrew)
-brew install chromedriver
-
-# Oder manuell herunterladen von https://chromedriver.chromium.org/
-```
-
-### Erste Verwendung
+### Aufsetzen
 
 ```bash
-# Bibliotheksdaten sammeln
-python scrape_onleihe.py
-
-# URLs bereinigen
-python clean_base_urls.py
-
-# Daten zur Extension kopieren
-cp libraries.json OnleiheChecker/
+git clone https://github.com/vaupunkt/Onleihe-Checker.git
+cd Onleihe-Checker
+npm install
+npm run build
 ```
+
+Danach liegen die entpackten Erweiterungen in `dist/chrome` und `dist/firefox`, dazu die
+Archive fuer die Stores.
+
+### Zum Testen laden
+
+```bash
+# Chrome: chrome://extensions -> Entwicklermodus -> Entpackte Erweiterung laden -> dist/chrome
+# Firefox:
+npx web-ext run --source-dir dist/firefox
+```
+
+Nach Änderungen in `shared/` erneut `npm run build` ausführen – geladen wird `dist/`.
+
+### Bibliotheksdaten aktualisieren
+
+```bash
+npm run libraries
+```
+
+Mehr dazu in den [technischen Details](technical.md).

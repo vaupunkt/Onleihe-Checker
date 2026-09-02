@@ -1,0 +1,56 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_extensionName__",
+  "description": "__MSG_extensionDescription__",
+  "version": "2.0.0",
+  "default_locale": "de",
+  "author": "Veliko Kardziev",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://api.onleihe.de/*",
+    "https://*.amazon.de/*",
+    "https://*.goodreads.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "__MSG_actionTitle__",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.amazon.de/*/dp/*",
+        "https://www.amazon.de/dp/*",
+        "https://www.amazon.de/gp/product/*",
+        "https://amazon.de/*/dp/*",
+        "https://amazon.de/dp/*",
+        "https://amazon.de/gp/product/*",
+        "https://www.goodreads.com/book/show/*",
+        "https://goodreads.com/book/show/*"
+      ],
+      "js": [
+        "browser-api.js",
+        "i18n.js",
+        "onleihe-api.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Wöchentlich gegen die echte Onleihe-API prüfen. Die Migration auf
+    # Onleihe 3.0 hat die Erweiterung unbemerkt lahmgelegt - dieser Lauf
+    # schlägt an, wenn sich die API wieder ändert.
+    - cron: '17 5 * * 1'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Erweiterung bauen
+        run: npm run build
+
+      - name: Tests
+        run: npm test
+
+      - name: Firefox-Paket prüfen
+        run: npx web-ext lint --source-dir dist/firefox
+
+      - name: Artefakte hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-packages
+          path: |
+            dist/*.zip
+            dist/*.xpi
+
+  api-smoke:
+    # Prüft die Onleihe-API selbst und ist deshalb von deren Verfügbarkeit
+    # abhängig - läuft nicht bei Pull Requests, um sie nicht zu blockieren.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Onleihe-API gegen alle Verbünde prüfen
+        run: python tools/smoke_api.py

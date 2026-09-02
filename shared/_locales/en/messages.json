@@ -1,0 +1,14 @@
+{
+  "extensionName": {
+    "message": "Onleihe Checker",
+    "description": "Name of the extension"
+  },
+  "extensionDescription": {
+    "message": "Checks whether a book is available in your Onleihe library while you browse Amazon.de and Goodreads.",
+    "description": "Store and extension listing description"
+  },
+  "actionTitle": {
+    "message": "Onleihe Checker – choose library",
+    "description": "Toolbar icon tooltip"
+  }
+}

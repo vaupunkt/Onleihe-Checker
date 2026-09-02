@@ -46,19 +46,23 @@ Die Extension funktioniert automatisch auf **Amazon.de** und **Goodreads** Buchs
 - ✅ Persistente Bibliotheksauswahl
 - ✅ **Neu**: Vollständige Goodreads-Unterstützung
 
-## Web Scraper
+## Was das Statusfeld sagt
 
-### Bibliotheksdaten aktualisieren
+| Anzeige | Bedeutung |
+|---|---|
+| **Sofort ausleihbar** (grün) | mindestens ein Exemplar ist frei |
+| **Alle Exemplare verliehen – vormerkbar** (orange) | im Katalog, aber gerade vergeben |
+| **Nicht im Onleihe-Katalog vorhanden** (rot) | der Verbund führt den Titel nicht |
+| **Onleihe-Abfrage fehlgeschlagen** | technischer Fehler, Statuscode in der Meldung |
+
+Die letzten beiden sind ausdrücklich zwei verschiedene Dinge: „nicht vorhanden" ist eine Auskunft,
+„fehlgeschlagen" ein Fehler.
+
+## Bibliotheksdaten aktualisieren
+
 ```bash
-python scrape_onleihe.py
+npm run libraries
 ```
 
-### URL-Bereinigung
-```bash
-python clean_base_urls.py
-```
-
-### Extension-Datenbank aktualisieren
-```bash
-cp libraries.json OnleiheChecker/
-```
+Erzeugt `shared/libraries.json` aus der Onleihe-API. Details in den
+[technischen Details](technical.md).

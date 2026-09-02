@@ -5,45 +5,41 @@ title: Unterstützte Bibliotheken
 
 # 🌍 Unterstützte Bibliotheken
 
-## Web Scraper Abdeckung
-Der Scraper extrahiert aktuell Bibliotheken aus dem deutschen Bereich:
-- 🇩🇪 **Deutschland** - Alle deutschen Bibliotheken und regionale Netzwerke
+Die Erweiterung kennt **2232 Bibliotheken**. Sie stammen aus dem offiziellen
+Verzeichnis-Endpunkt der Onleihe-API und sind damit vollständig, statt aus einer Hilfeseite
+zusammengetragen.
 
-## Chrome Extension Unterstützung
-Die Extension unterstützt Bibliotheken aus mehreren Ländern:
+## Abdeckung
 
-### Aktuell verfügbar
-- 🇩🇪 **Deutschland** (450+ Bibliotheken)
-  - LEO-SUED, LEO-NORD
-  - Franken-Onleihe
-  - VOEBB (Berlin)
-  - MetropolBib
-  - DigiBobb
-  - BiblioLoad
-  - Und viele mehr...
+| Land | |
+|---|---|
+| 🇩🇪 Deutschland | alle Onleihe-Bibliotheken und regionalen Verbünde |
+| 🇦🇹 Österreich | u. a. Salzburg Land, Vorarlberg, Bezirk Liezen |
+| 🇨🇭 Schweiz | u. a. Aargauer Kantonsbibliothek, Bibliothek Oberaargau |
+| 🇱🇺 Luxemburg | Onleihe Luxembourg |
 
-### Geplant für zukünftige Versionen
-- 🇦🇹 Österreich
-- 🇨🇭 Schweiz  
-- 🇧🇪 Belgien
-- 🇫🇷 Frankreich
-- 🇮🇹 Italien
-- 🇱🇺 Luxemburg
-- 🇱🇮 Liechtenstein
-- 🌐 International (Goethe-Institut, WDA)
+Bis Version 1.2 enthielt die Liste ausschließlich deutsche Bibliotheken: die Daten kamen aus einem
+Scraper, der den Abschnitt „Onleihen international" der Hilfeseite übersprang. Österreich, die
+Schweiz und Luxemburg sind seit Version 2.0 dabei.
 
-## Besondere Domains
+## Verbünde
 
-### Regionale Netzwerke
-- `leo-sued.de` - LEO-SUED Bibliotheksverbund
-- `leo-nord.de` - LEO-NORD Bibliotheksverbund
-- `franken-onleihe.de` - Franken-Onleihe
-- `voebb.onleihe.de` - Verbund der Öffentlichen Bibliotheken Berlins
+Die 2232 Bibliotheken verteilen sich auf rund **120 Verbünde**. Viele Gemeinden teilen sich einen
+gemeinsamen Katalog – etwa `metropolbib` oder `libell-e-sued` mit jeweils Dutzenden Mitgliedern.
+Die Abfrage erfolgt gegen den Verbund; die Verfügbarkeit gilt für die gewählte Bibliothek.
 
-### Spezielle Bibliotheken
-- `metropolbib.de` - MetropolBib
-- `digibobb.de` - DigiBobb
-- `biblioload.de` - BiblioLoad
-- `emedienbayern.de` - eMedien Bayern
+## Bibliothek finden
 
-> **Hinweis**: Um internationale Bibliotheken zum Scraper hinzuzufügen, müsste das Skript erweitert werden, um die internationalen Bereiche der Onleihe-Hilfeseiten zu verarbeiten.
+Im Popup lässt sich nach **Name und Ort** suchen – „Stuttgart" findet also auch die
+Stadtbibliothek. Jeder Eintrag zeigt Postleitzahl und Ort, damit gleichnamige Bibliotheken
+unterscheidbar sind: Namen wie „Birkenfeld", „Brühl" oder „Münster" kommen mehrfach vor und
+gehören zu verschiedenen Verbünden.
+
+## Daten aktualisieren
+
+```bash
+npm run libraries
+```
+
+Details in den [technischen Details](technical.md). Die Datei `shared/libraries.json` wird
+erzeugt und sollte nicht von Hand bearbeitet werden.
