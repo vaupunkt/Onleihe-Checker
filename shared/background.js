@@ -4,16 +4,6 @@
 // Der Umweg über das Background-Script ist nötig, weil das Content-Script auf
 // amazon.de/goodreads.com läuft und von dort keine Cross-Origin-Anfrage an
 // Onleihe stellen darf - hier greift die Host-Permission.
-//
-// Die frühere Fassung öffnete für jede Prüfung einen echten Tab, wartete auf
-// status === 'complete' und las document.documentElement.outerHTML per
-// executeScript aus. Das war nur nötig, um HTML zu parsen; mit der JSON-API
-// genügt ein fetch. Damit entfallen der sichtbare Tab, der Listener-Leak im
-// Timeout-Pfad und die Möglichkeit, beliebige URLs abzurufen.
-
-// Chrome lädt genau eine Service-Worker-Datei, hier muss die API-Schicht
-// nachgezogen werden. Firefox MV3 nutzt background.scripts, wo onleihe-api.js
-// bereits vor dieser Datei geladen wurde - dort gibt es kein importScripts.
 if (!self.OnleiheApi && typeof importScripts === 'function') {
     importScripts('browser-api.js', 'onleihe-api.js');
 }

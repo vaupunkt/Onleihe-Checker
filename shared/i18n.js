@@ -1,16 +1,3 @@
-// i18n.js - eine gemeinsame Übersetzungsquelle für Popup und Content-Script.
-//
-// Wird über das content_scripts.js-Array bzw. per <script> im Popup geladen und
-// läuft damit in derselben isolierten Welt wie content.js. Früher wurde diese
-// Datei als <script> in den Seitenkontext injiziert - dort war das gesetzte
-// window.t für das Content-Script unsichtbar, weshalb es eine zweite, eingebettete
-// Kopie aller Strings brauchte.
-//
-// chrome.i18n kommt hier absichtlich nicht zum Einsatz: es folgt der
-// Browser-Sprache und lässt sich zur Laufzeit nicht umschalten, der
-// Sprachwähler im Popup würde damit wirkungslos. _locales/ deckt nur die
-// Manifest-Strings ab, die ohnehin nicht umschaltbar sind.
-
 (() => {
     'use strict';
 
@@ -119,10 +106,6 @@
         return currentLanguage;
     }
 
-    /**
-     * Übersetzt einen Key und ersetzt {0}, {1}, ... durch die Argumente.
-     * Fällt auf Deutsch und zuletzt auf den Key selbst zurück.
-     */
     function t(key, ...args) {
         const table = MESSAGES[currentLanguage] || MESSAGES[DEFAULT_LANGUAGE];
         let text = table[key] ?? MESSAGES[DEFAULT_LANGUAGE][key] ?? key;

@@ -1,5 +1,0 @@
-# Die Skripte in tools/ nutzen nur die Standardbibliothek (urllib, json,
-# concurrent.futures). Selenium, BeautifulSoup und ein chromedriver sind seit
-# der Umstellung auf die Onleihe-API nicht mehr nötig.
-#
-# Python 3.9 oder neuer genügt; keine Installation erforderlich.

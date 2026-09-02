@@ -1,18 +1,3 @@
-// onleihe-api.js - Zugriff auf die JSON-API von Onleihe 3.0.
-//
-// Ersetzt das frühere Abrufen und Parsen der Such-HTML-Seite. Onleihe 3.0 ist eine
-// React-SPA, deren Suchseite kein Ergebnis-Markup mehr ausliefert; die Trefferzahl
-// aus dem HTML zu lesen ist seit der Migration unmöglich.
-//
-// Drei Endpunkte, alle ohne Nutzerkonto:
-//   POST /user-application/v1/auth/login   {onleiheId, libraryId} -> accessToken
-//   POST /ui/v1/onleihe/{onleiheId}/search?libraryId=...          -> Treffer
-//   GET  /user-application/v2/auth/libraries                      -> Verzeichnis (nur im Build)
-//
-// Wichtig: onleiheId und libraryId müssen zwischen Token und Suchanfrage
-// zusammenpassen. Ein Token ohne libraryId, dessen ?libraryId= an der Suche
-// mitgeschickt wird, wird mit 401 abgelehnt.
-
 (() => {
     'use strict';
 
@@ -118,11 +103,7 @@
         return url.toString();
     }
 
-    /**
-     * Freitextsuche. Mehrere Wörter werden serverseitig UND-verknüpft, ein
-     * "Titel Autor"-Begriff verengt also sinnvoll. Feldgebundene Queries
-     * (fields: ["title"]) liefern leere Antworten und werden nicht verwendet.
-     */
+    /** Freitextsuche */
     function buildSearchBody(searchTerm, size) {
         return {
             query: [{ query: searchTerm, fields: [] }],
@@ -217,11 +198,6 @@
         };
     }
 
-    // Routen der Onleihe-3.0-SPA. Die Parameternamen stammen aus der
-    // React-Navigation-Linking-Konfiguration der App:
-    //   Screen "Search"        -> route.params.searchTerm
-    //   Screen "SearchDetails" -> route.params.productId, Pfad search/mediadetail
-    /** Deep-Link auf die Trefferliste. Ohne bekannten Host gibt es keinen Link. */
     function buildCatalogUrl(host, searchTerm) {
         if (!host) {
             return null;
@@ -229,7 +205,6 @@
         return `https://${host}/search?searchTerm=${encodeURIComponent(searchTerm)}`;
     }
 
-    /** Deep-Link direkt auf einen Titel. */
     function buildProductUrl(host, productId) {
         if (!host || !productId) {
             return null;

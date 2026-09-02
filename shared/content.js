@@ -1,9 +1,3 @@
-// content.js - läuft auf Amazon- und Goodreads-Buchseiten.
-//
-// Liest Titel und Autor aus der Seite, lässt das Background-Script die
-// Verfügbarkeit in der gewählten Onleihe prüfen und blendet das Ergebnis
-// oberhalb der Produktdetails ein.
-
 (() => {
     'use strict';
 
@@ -17,9 +11,7 @@
     const MAX_ATTEMPTS = 3;
     const RETRY_DELAY = 2000;
 
-    // Nur diese Trennzeichen leiten einen Untertitel ein. Punkt und " - " sind
-    // absichtlich nicht dabei: die frühere Fassung schnitt an jedem Separator
-    // und machte aus "Dr. Jekyll and Mr. Hyde" den Suchbegriff "Dr".
+    // Nur diese Trennzeichen leiten einen Untertitel ein
     const SUBTITLE_SEPARATORS = [':', '|', '(', '[', '—', '–'];
     const MIN_TITLE_LENGTH = 3;
 
@@ -189,11 +181,7 @@
         return { title, author: extractLastName(fullAuthorName) };
     }
 
-    /**
-     * ISBN nur bei Bedarf lesen - sie dient allein als Rückfallebene, wenn kein
-     * Titel erkennbar ist. Die frühere Fassung extrahierte sie bei jedem
-     * Seitenaufruf, obwohl das Ergebnis fast nie verwendet wurde.
-     */
+    /** ISBN nur bei Bedarf lesen */
     function getIsbnFromPage(site) {
         const pattern = /(\d{13}|\d{10}|\d{9}[Xx])/;
 
@@ -332,11 +320,6 @@
         warning: { background: '#fff4e6', border: '#ff9933', color: '#b45309' }
     };
 
-    /**
-     * Rendert das Statusfeld.
-     * @param {Object} state {type, key, args, linkUrl, linkKey} - der Key wird
-     *   gespeichert, nicht der übersetzte Text, damit ein Sprachwechsel wirkt.
-     */
     function renderStatus(state) {
         statusState = state;
         if (!statusField) {
@@ -467,7 +450,6 @@
 
             const catalogUrl = buildCatalogUrl(library.host, searchTerm);
 
-            // Fehler und "nichts gefunden" sind zwei verschiedene Ergebnisse.
             if (!response.success) {
                 renderStatus({
                     type: 'error',
@@ -538,12 +520,6 @@
         return false;
     });
 
-    /**
-     * Amazon und Goodreads wechseln Buchseiten teils ohne Reload. Ein
-     * Intervall auf location.href reicht dafür - die frühere Fassung hängte
-     * einen MutationObserver mit subtree:true an document.body und feuerte
-     * damit bei jeder DOM-Änderung der Seite, nur um einen String zu vergleichen.
-     */
     function watchForNavigation() {
         let lastUrl = window.location.href;
         const onNavigated = () => {

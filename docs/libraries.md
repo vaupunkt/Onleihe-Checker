@@ -18,8 +18,7 @@ zusammengetragen.
 | 🇨🇭 Schweiz | u. a. Aargauer Kantonsbibliothek, Bibliothek Oberaargau |
 | 🇱🇺 Luxemburg | Onleihe Luxembourg |
 
-Bis Version 1.2 enthielt die Liste ausschließlich deutsche Bibliotheken: die Daten kamen aus einem
-Scraper, der den Abschnitt „Onleihen international" der Hilfeseite übersprang. Österreich, die
+Bis Version 1.2 enthielt die Liste ausschließlich deutsche Bibliotheken.
 Schweiz und Luxemburg sind seit Version 2.0 dabei.
 
 ## Verbünde
