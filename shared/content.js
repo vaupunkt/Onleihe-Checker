@@ -76,6 +76,48 @@
         return 'unknown';
     }
 
+    // Amazon serves books under the same /dp/ structure as everything else, so a
+    // page has to be classified from its content. Several independent signals are
+    // checked rather than one: the category navigation alone is not enough -
+    // "books-catalog" only covers print editions, Kindle editions carry
+    // "digital-text", and Amazon drops #nav-subnav entirely on some layouts.
+    const AMAZON_BOOK_CATEGORIES = ['books-catalog', 'digital-text', 'books', 'audible'];
+
+    /** Category navigation, where Amazon still renders it. */
+    function hasBookCategoryNav() {
+        const nav = document.querySelector('#nav-subnav');
+        const category = nav?.dataset?.category;
+        return Boolean(category && AMAZON_BOOK_CATEGORIES.includes(category));
+    }
+
+    /** Book-specific fields in the product details. */
+    function hasBookDetails() {
+        const details = document.querySelector(
+            '#detailBullets_feature_div, #productDetails_techSpec_section_1, ' +
+            '#productDetailsTable, #rich_product_information, #detailBulletsWrapper_feature_div'
+        );
+        if (!details?.textContent) {
+            return false;
+        }
+        return /\b(ISBN|Seitenzahl|Print-Länge|Verlag|Herausgeber|Taschenbuch|Gebundene Ausgabe|Hörbuch)\b/i
+            .test(details.textContent);
+    }
+
+    /** Kindle store pages carry their own title element. */
+    function hasKindleTitle() {
+        return Boolean(document.querySelector('#ebooksProductTitle, #ebooksTitle'));
+    }
+
+    /** Breadcrumb pointing into the book or Kindle store. */
+    function hasBookBreadcrumb() {
+        const crumbs = document.querySelector('#wayfinding-breadcrumbs_feature_div');
+        return /\b(Bücher|Kindle-Shop|Hörbücher)\b/i.test(crumbs?.textContent || '');
+    }
+
+    function looksLikeAmazonBookPage() {
+        return hasBookCategoryNav() || hasKindleTitle() || hasBookBreadcrumb() || hasBookDetails();
+    }
+
     /**
      * Checks whether the current page is a supported book page.
      * Called once per run and passed along.
@@ -86,13 +128,7 @@
 
         if (site === 'amazon') {
             const isProductPage = url.includes('/dp/') || url.includes('/gp/product/');
-            if (!isProductPage) {
-                return { site, isValid: false };
-            }
-            // Amazon serves books under the same /dp/ structure as everything
-            // else; the category navigation is what tells them apart.
-            const booksNav = document.querySelector('#nav-subnav[data-category="books-catalog"]');
-            return { site, isValid: Boolean(booksNav) };
+            return { site, isValid: isProductPage && looksLikeAmazonBookPage() };
         }
 
         if (site === 'goodreads') {
@@ -100,6 +136,19 @@
         }
 
         return { site: 'unknown', isValid: false };
+    }
+
+    /**
+     * Amazon fills parts of the product details in late. Waits briefly for one of
+     * the book signals before giving up, instead of deciding on the first look.
+     * @returns {Promise<boolean>}
+     */
+    async function confirmAmazonBookPage() {
+        if (looksLikeAmazonBookPage()) {
+            return true;
+        }
+        await waitForElement('#detailBullets_feature_div, #wayfinding-breadcrumbs_feature_div, #nav-subnav');
+        return looksLikeAmazonBookPage();
     }
 
     // ==========================================================================
@@ -141,8 +190,10 @@
     }
 
     function getBookInfoFromAmazon() {
+        // Bare id selectors on purpose: requiring an h1 ancestor made the Kindle
+        // title invisible whenever Amazon rendered it outside a heading.
         const title = cleanTitle(
-            firstText(['#productTitle', 'h1 span#ebooksProductTitle', 'h1 span.a-text-bold'])
+            firstText(['#productTitle', '#ebooksProductTitle', '#title', 'h1 span.a-text-bold'])
         );
 
         let fullAuthorName = firstText([
@@ -272,8 +323,28 @@
         return container;
     }
 
+    // Ordered by preference. #ebooksProductTitle matters for Kindle editions,
+    // which do not carry #productTitle - without it the field found no anchor
+    // even once the page had been recognised as a book.
+    const AMAZON_ANCHORS = [
+        '#productTitle',
+        '#ebooksProductTitle',
+        '#title',
+        '#detailBulletsWrapper_feature_div',
+        '#detailBullets_feature_div',
+        '#dp-container'
+    ];
+
     async function findAmazonAnchor() {
-        for (const selector of ['#productTitle', '#detailBulletsWrapper_feature_div', '#dp-container']) {
+        // First pass without waiting, so a later selector is not blocked by the
+        // timeout of an earlier one that will never appear on this layout.
+        for (const selector of AMAZON_ANCHORS) {
+            const element = document.querySelector(selector);
+            if (element) {
+                return element;
+            }
+        }
+        for (const selector of AMAZON_ANCHORS) {
             const element = await waitForElement(selector);
             if (element) {
                 return element;
@@ -405,8 +476,24 @@
     }
 
     async function runCheck() {
-        const page = detectSupportedPage();
-        if (!page.isValid || checkInProgress) {
+        const site = getCurrentSite();
+        const url = window.location.href;
+
+        if (checkInProgress) {
+            return;
+        }
+
+        // Confirm this is a book page before doing anything visible. On Amazon
+        // that means waiting briefly for the details, which arrive late.
+        let page;
+        if (site === 'amazon') {
+            const isProductPage = url.includes('/dp/') || url.includes('/gp/product/');
+            page = { site, isValid: isProductPage && (await confirmAmazonBookPage()) };
+        } else {
+            page = detectSupportedPage();
+        }
+
+        if (!page.isValid) {
             return;
         }
         checkInProgress = true;

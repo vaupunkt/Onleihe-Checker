@@ -35,8 +35,14 @@ REPO = Path(__file__).resolve().parent.parent
 OUT = REPO / "shared" / "libraries.json"
 
 
+# Identify this tool in every request instead of posing as a browser, so the
+# operator can attribute and, if they wish, block the traffic. Note that
+# api.onleihe.de serves "User-agent: * / Disallow: /" - see README.
+USER_AGENT = "onleihe-checker-build (+https://github.com/vaupunkt/Onleihe-Checker)"
+
+
 def get_json(url):
-    req = urllib.request.Request(url, headers={"Accept": "application/json"})
+    req = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": USER_AGENT})
     try:
         with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
             return json.load(resp)
@@ -74,7 +80,7 @@ def resolve_final_host(url):
     <slug>.onleihe.de and drops the path along the way.
     """
     try:
-        req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "onleihe-checker-build"})
+        req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": USER_AGENT})
         with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
             return urlparse(resp.url).netloc
     except urllib.error.HTTPError as e:

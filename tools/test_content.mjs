@@ -34,9 +34,32 @@ function amazonBookPage({ title = 'Der Steppenwolf: Roman', author = 'Hermann He
         ${isBook ? '<div id="nav-subnav" data-category="books-catalog"></div>' : '<div id="nav-subnav" data-category="kitchen"></div>'}
         <span id="productTitle">${title}</span>
         <div id="bylineInfo"><a class="a-link-normal" data-action="contributor-action">${author}</a></div>
-        <div id="detailBullets_feature_div"><ul><li><span class="a-list-item">
+        ${isBook ? `<div id="detailBullets_feature_div"><ul><li><span class="a-list-item">
             <span class="a-text-bold">ISBN-13</span><span>978-3518463284</span>
+        </span></li></ul></div>` : `<div id="detailBullets_feature_div"><ul><li><span class="a-list-item">
+            <span class="a-text-bold">Material</span><span>Edelstahl</span>
+        </span></li></ul></div>`}
+    </body></html>`;
+}
+
+/** Kindle edition: no books-catalog category, its own title element instead. */
+function amazonKindlePage({ title = 'Der Steppenwolf', author = 'Hermann Hesse' } = {}) {
+    return `<!DOCTYPE html><html lang="de"><body>
+        <div id="nav-subnav" data-category="digital-text"></div>
+        <span id="ebooksProductTitle">${title}</span>
+        <div id="bylineInfo"><a class="a-link-normal" data-action="contributor-action">${author}</a></div>
+        <div id="detailBullets_feature_div"><ul><li><span class="a-list-item">
+            <span class="a-text-bold">Verlag</span><span>Suhrkamp</span>
         </span></li></ul></div>
+    </body></html>`;
+}
+
+/** Print book on a layout where Amazon renders no #nav-subnav at all. */
+function amazonBookPageWithoutNav({ title = 'Der Steppenwolf', author = 'Hermann Hesse' } = {}) {
+    return `<!DOCTYPE html><html lang="de"><body>
+        <div id="wayfinding-breadcrumbs_feature_div">Bücher › Literatur &amp; Fiktion</div>
+        <span id="productTitle">${title}</span>
+        <div id="bylineInfo"><a class="a-link-normal" data-action="contributor-action">${author}</a></div>
     </body></html>`;
 }
 
@@ -250,6 +273,30 @@ test('a non-book product page gets no status field', async () => {
 
     assert.equal(result.field, null);
     assert.equal(result.sent.length, 0);
+});
+
+test('Kindle edition is recognised (digital-text, no books-catalog)', async () => {
+    const result = await run({
+        html: amazonKindlePage(),
+        url: AMAZON_URL,
+        storage: { selectedLibrary: STUTTGART, selectedLanguage: 'de' },
+        onMessage: () => ({ success: true, totalItems: 2, available: true, items: [] })
+    });
+
+    // The old gate required data-category="books-catalog" and therefore never
+    // fired on Kindle pages.
+    assert.match(result.text, /Sofort ausleihbar/);
+});
+
+test('book page without #nav-subnav is recognised via breadcrumb', async () => {
+    const result = await run({
+        html: amazonBookPageWithoutNav(),
+        url: AMAZON_URL,
+        storage: { selectedLibrary: STUTTGART, selectedLanguage: 'de' },
+        onMessage: () => ({ success: true, totalItems: 1, available: true, items: [] })
+    });
+
+    assert.match(result.text, /Sofort ausleihbar/);
 });
 
 test('a Goodreads book page works the same way', async () => {

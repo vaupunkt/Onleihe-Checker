@@ -117,7 +117,7 @@ Die Version steht in `platform/manifest.chrome.json`, `platform/manifest.firefox
 
 | Symptom | Ursache |
 |---|---|
-| Kein Statusfeld auf einer Amazon-Seite | Es ist keine Buchseite – die Erweiterung prüft die Kategorie-Navigation (`books-catalog`). |
+| Kein Statusfeld auf einer Amazon-Seite | Keine Buchseite erkannt. Diagnose: `tools/diagnose-page.js` in die Browser-Konsole einfügen – zeigt pro Signal, was fehlt. |
 | „Bitte wähle deine Onleihe-Bibliothek" | Im Popup noch keine Bibliothek gespeichert. |
 | „Nicht im Onleihe-Katalog vorhanden" | Echte Katalog-Lücke, kein Fehler. Kleinere Verbünde haben viele Titel nicht. |
 | „Onleihe-Abfrage fehlgeschlagen" | API-Problem – Statuscode steht in der Meldung. `npm run smoke` prüft alle Verbünde. |
@@ -127,8 +127,35 @@ Die Version steht in `platform/manifest.chrome.json`, `platform/manifest.firefox
 
 MIT
 
+## Rechtliche Einordnung
+
+**Ungeklärt — vor einer Store-Veröffentlichung zu prüfen.** Die genutzte API ist die Backend-
+Schnittstelle der öffentlichen Onleihe-Web-App. Es wird nichts umgangen: kein Login, keine
+Zugangsdaten, keine Schutzmaßnahme. Das Gast-Token stellt Onleihe anonymen Besuchern selbst aus.
+
+Es gibt aber **keine dokumentierte öffentliche API und keine Nutzungserlaubnis**, und der API-Host
+untersagt automatisierten Zugriff ausdrücklich:
+
+```
+$ curl https://api.onleihe.de/robots.txt
+User-agent: *
+Disallow: /
+```
+
+robots.txt ist kein Gesetz und richtet sich an Crawler, nicht an ein Programm, das auf
+ausdrückliche Nutzeranweisung handelt. Es ist aber ein klares Signal des Betreibers. Zwei Fälle
+sind dabei zu trennen:
+
+| | Exponierung |
+|---|---|
+| **Laufzeit** (`onleihe-api.js`): eine Suchanfrage pro Buchseite, vom Nutzer ausgelöst | gering — funktional dasselbe, als tippe der Nutzer den Titel in die Onleihe-Suche |
+| **Build** (`tools/build_libraries.py`): 45 Verzeichnisseiten plus Host-Sondierungen | höher — genau der Bulk-Zugriff, den robots.txt adressiert; berührt zudem das Datenbankherstellerrecht (§ 87b UrhG) |
+
+Der Bulk-Zugriff passiert **einmalig beim Maintainer**, nicht in den Browsern der Nutzer. Die
+Build-Werkzeuge senden einen identifizierenden User-Agent, damit divibib den Verkehr zuordnen und
+bei Bedarf sperren kann.
+
 ## Haftungsausschluss
 
 Unabhängiges Projekt, weder von der divibib GmbH noch von Amazon oder Goodreads unterstützt oder
-geprüft. „Onleihe" ist eine Marke der divibib GmbH. Die Erweiterung nutzt die öffentlich
-erreichbare API der Onleihe-Web-App im Rahmen des normalen Katalogzugriffs.
+geprüft. „Onleihe" ist eine Marke der divibib GmbH.

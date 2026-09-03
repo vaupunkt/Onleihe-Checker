@@ -29,8 +29,11 @@ WORKERS = 16
 TIMEOUT = 40
 
 
+USER_AGENT = "onleihe-checker-smoketest (+https://github.com/vaupunkt/Onleihe-Checker)"
+
+
 def post_json(url, payload, token=None):
-    headers = {"Content-Type": "application/json"}
+    headers = {"Content-Type": "application/json", "User-Agent": USER_AGENT}
     if token:
         headers["Authorization"] = f"Bearer {token}"
     req = urllib.request.Request(

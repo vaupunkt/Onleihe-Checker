@@ -8,9 +8,18 @@ title: Problemlösung
 ## Nutzung
 
 ### Kein Statusfeld auf einer Amazon-Seite
-Die Erweiterung prüft, ob es sich wirklich um ein Buch handelt – sie sieht dafür die
-Kategorie-Navigation an (`books-catalog`). Auf Nicht-Buch-Produkten erscheint absichtlich nichts.
-Außerdem muss die Adresse `/dp/` oder `/gp/product/` enthalten, bei Goodreads `/book/show/`.
+Die Adresse muss `/dp/` oder `/gp/product/` enthalten, bei Goodreads `/book/show/`. Danach prüft
+die Erweiterung, ob es wirklich ein Buch ist – über **vier** unabhängige Signale:
+Kategorie-Navigation (`books-catalog` für Druck, `digital-text` für Kindle), Kindle-Titelelement,
+Breadcrumb („Bücher", „Kindle-Shop") oder buchspezifische Detailfelder (ISBN, Verlag, Seitenzahl).
+Greift keines, erscheint absichtlich nichts.
+
+Bis Version 1.2 hing das an einer einzigen Bedingung, `books-catalog` – bei **Kindle-Ausgaben** ist
+diese Kategorie `digital-text`, dort erschien das Feld deshalb nie.
+
+Zum Messen statt Raten: [`tools/diagnose-page.js`](https://github.com/vaupunkt/Onleihe-Checker/blob/main/tools/diagnose-page.js)
+in die Browser-Konsole der betroffenen Seite einfügen. Die Ausgabe zeigt pro Signal, was gefunden
+wurde, und ob die Seite erkannt würde.
 
 ### „Bitte wähle deine Onleihe-Bibliothek"
 Im Popup ist noch keine Bibliothek gespeichert. Symbol anklicken, Bibliothek suchen, **speichern**.
