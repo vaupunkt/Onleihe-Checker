@@ -66,7 +66,7 @@ allein der Suchbegriff aus Titel und Autor.
 npm install
 npm run build          # -> dist/chrome/, dist/firefox/ + Archive
 npm test               # Unit- und DOM-Integrationstests
-npm run smoke          # prüft die echte Onleihe-API (alle Verbünde)
+npm run smoke          # prüft die echte Onleihe-API (alle Verbünde; --sample N für weniger)
 npm run lint:firefox   # web-ext lint
 ```
 
@@ -151,9 +151,21 @@ sind dabei zu trennen:
 | **Laufzeit** (`onleihe-api.js`): eine Suchanfrage pro Buchseite, vom Nutzer ausgelöst | gering — funktional dasselbe, als tippe der Nutzer den Titel in die Onleihe-Suche |
 | **Build** (`tools/build_libraries.py`): 45 Verzeichnisseiten plus Host-Sondierungen | höher — genau der Bulk-Zugriff, den robots.txt adressiert; berührt zudem das Datenbankherstellerrecht (§ 87b UrhG) |
 
-Der Bulk-Zugriff passiert **einmalig beim Maintainer**, nicht in den Browsern der Nutzer. Die
-Build-Werkzeuge senden einen identifizierenden User-Agent, damit divibib den Verkehr zuordnen und
-bei Bedarf sperren kann.
+Der Bulk-Zugriff passiert **einmalig beim Maintainer**, nicht in den Browsern der Nutzer, und
+`tools/build_libraries.py` läuft bewusst **nicht** in der CI. Zur Zurückhaltung:
+
+- Die Build-Werkzeuge senden einen **identifizierenden User-Agent** statt sich als Browser zu
+  tarnen — divibib kann den Verkehr zuordnen und bei Bedarf sperren.
+- Nur 6 parallele Verbindungen, nicht 16.
+- Der wöchentliche CI-Lauf prüft eine **Stichprobe von 15 Verbünden**, nicht alle 123. Eine
+  API-Änderung ist global, eine Stichprobe erkennt sie genauso — bei einem Bruchteil der Anfragen.
+  Vollabdeckung gibt es lokal oder per `workflow_dispatch`.
+- Das Verzeichnis ändert sich langsam; `npm run libraries` ist für seltene, bewusste Läufe gedacht.
+
+Das Skript liegt offen im Repo, und das ist Absicht. Die API ist kein Geheimnis — sie steht in den
+JavaScript-Bundles, die jeder Besucher der Onleihe-Web-App lädt. Ein verstecktes Bulk-Skript
+schützte niemanden, machte `libraries.json` aber zu einem nicht reproduzierbaren, nicht prüfbaren
+Datenklumpen. Genau so sind die alten Daten unbemerkt verrottet.
 
 ## Haftungsausschluss
 

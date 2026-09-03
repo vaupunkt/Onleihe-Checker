@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Builds shared/libraries.json from the official Onleihe 3.0 API.
 
-Replaces the former Selenium scraper: the library list now comes from the public
-directory endpoint instead of the HTML of the help page (which returns 404 by now).
+Run this rarely - the library directory changes slowly, and this is the only
+part of the project that makes bulk requests.
+See the README before running it against anything but your own maintenance needs.
 
 Two steps:
 
@@ -28,7 +29,7 @@ API = "https://api.onleihe.de"
 DIRECTORY = f"{API}/user-application/v2/auth/libraries"
 DOMAINS = f"{API}/management/v1/auth/domains"
 PAGE_SIZE = 50
-WORKERS = 16
+WORKERS = 6  # Deliberately low: this is somebody else's API.
 TIMEOUT = 40
 
 REPO = Path(__file__).resolve().parent.parent

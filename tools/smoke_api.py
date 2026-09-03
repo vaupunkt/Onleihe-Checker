@@ -8,8 +8,13 @@ affordable.
 This is exactly the check that would have caught the migration to Onleihe 3.0:
 back then the old search URL stopped returning results and nothing raised an alarm.
 
-  python tools/smoke_api.py            # every consortium
-  python tools/smoke_api.py --limit 20 # quick run
+  python tools/smoke_api.py             # every consortium (manual, full coverage)
+  python tools/smoke_api.py --sample 15 # spread sample, used by the scheduled CI run
+  python tools/smoke_api.py --limit 20  # just the first 20
+
+An API change is global, so a spread sample detects it as reliably as full
+coverage while making far fewer requests. Full coverage is for manual runs; the
+scheduled job uses a sample so this check stays a light, well-behaved visitor.
 """
 
 import argparse
@@ -25,7 +30,7 @@ LOGIN = f"{API}/user-application/v1/auth/login"
 REPO = Path(__file__).resolve().parent.parent
 LIBRARIES = REPO / "shared" / "libraries.json"
 
-WORKERS = 16
+WORKERS = 6  # Deliberately low: this is somebody else's API.
 TIMEOUT = 40
 
 
@@ -89,10 +94,16 @@ def load_tenants():
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--limit", type=int, help="Only check the first N consortia")
+    ap.add_argument("--sample", type=int,
+                    help="Check N consortia spread evenly across the list")
     args = ap.parse_args()
 
     tenants = load_tenants()
-    if args.limit:
+    if args.sample and args.sample < len(tenants):
+        # Evenly spaced rather than random, so runs stay reproducible.
+        step = len(tenants) / args.sample
+        tenants = [tenants[int(i * step)] for i in range(args.sample)]
+    elif args.limit:
         tenants = tenants[: args.limit]
 
     print(f"Checking {len(tenants)} consortia against {API} ...")

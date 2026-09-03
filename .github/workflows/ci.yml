@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+    inputs:
+      full_smoke:
+        description: 'Run the API smoke test across every consortium instead of a sample'
+        type: boolean
+        default: false
   schedule:
     # Check against the real Onleihe API weekly. Fires if the API changes again.
     - cron: '17 5 * * 1'
@@ -50,5 +56,13 @@ jobs:
         with:
           python-version: '3.12'
 
+      # A sample by default: an API change is global, so 15 consortia detect it as
+      # reliably as 123 while making a fraction of the requests against someone
+      # else's service. Full coverage on demand via workflow_dispatch.
       - name: Check Onleihe API
-        run: python tools/smoke_api.py
+        run: |
+          if [ "${{ inputs.full_smoke }}" = "true" ]; then
+            python tools/smoke_api.py
+          else
+            python tools/smoke_api.py --sample 15
+          fi

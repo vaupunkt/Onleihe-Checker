@@ -107,5 +107,10 @@ Nur die Standardbibliothek von Python 3.9+ – kein Selenium, kein chromedriver.
 | `npm run smoke` | Gast-Token und Suche gegen **jeden** Verbund der echten API |
 | `npm run lint:firefox` | `web-ext lint` auf dem Firefox-Paket |
 
-Der Smoke-Test läuft wöchentlich in der CI. Genau diese Prüfung hätte die Migration auf Onleihe 3.0
-bemerkt, die die Erweiterung zuvor unbemerkt lahmgelegt hat.
+Der Smoke-Test läuft wöchentlich in der CI – als Stichprobe über 15 Verbünde, weil eine
+API-Änderung global ist und eine Stichprobe sie genauso erkennt. Vollabdeckung lokal mit
+`npm run smoke` oder per `workflow_dispatch`. Genau diese Prüfung hätte die Migration auf
+Onleihe 3.0 bemerkt, die die Erweiterung zuvor unbemerkt lahmgelegt hat.
+
+`tools/build_libraries.py` läuft bewusst **nicht** in der CI: es ist der einzige Teil des Projekts
+mit Bulk-Zugriff und für seltene, bewusste Läufe gedacht.
