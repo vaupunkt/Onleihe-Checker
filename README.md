@@ -1,4 +1,4 @@
-# Onleihe Checker
+# Onleihe Checker 2.0
 
 ![OnleiheChecker - PopUp Window](assets/174_1x_shots_so.png)
 
