@@ -2,11 +2,12 @@
 
 ![OnleiheChecker - PopUp Window](assets/174_1x_shots_so.png)
 
-Browser-Erweiterung für Chrome und Firefox: zeigt beim Stöbern auf **Amazon.de** und
-**Goodreads** direkt auf der Buchseite an, ob der Titel in deiner **Onleihe** verfügbar ist.
+Browser extension for Chrome and Firefox: while you browse **Amazon.de** and **Goodreads**, it
+shows right on the book page whether the title is available in your **Onleihe** (the German public
+libraries' ebook lending service).
 
-Nicht nur, *ob* er im Katalog steht – sondern ob er **gerade ausleihbar** oder **verliehen und
-vormerkbar** ist.
+Not just *whether* the catalogue holds it — but whether it is **available to borrow right now** or
+**on loan and reservable**.
 
 ## Installation
 
@@ -15,159 +16,120 @@ vormerkbar** ist.
 | Chrome | [Chrome Web Store](https://chromewebstore.google.com/detail/onleihe-checker/lbdbelkkmbogfjkeklmpfaijgpdnnncn?hl=de) |
 | Firefox | [Firefox Add-ons](https://addons.mozilla.org/de/firefox/addon/onleihechecker/) |
 
-Nach der Installation einmal auf das Symbol klicken, die eigene Bibliothek suchen und speichern.
-Es stehen **2232 Bibliotheken** in Deutschland, Österreich, der Schweiz und Luxemburg zur Wahl.
+After installing, click the icon once, search for your own library and save it. There are **2232
+libraries** to pick from, across Germany, Austria, Switzerland and Luxembourg.
 
-## Wie es funktioniert
+## How it works
 
 ```
-Amazon-/Goodreads-Buchseite
-        │  Titel + Autor auslesen
+Amazon / Goodreads book page
+        │  read title + author
         ▼
 content.js ──► background.js ──► api.onleihe.de
-        │                          Gast-Token + Suche
+        │                          guest token + search
         ◄──────────────────────────┘
-        │  Treffer + Verfügbarkeit
+        │  hits + availability
         ▼
-   Statusfeld auf der Seite
+   status field on the page
 ```
 
-Die Erweiterung nutzt die JSON-API von Onleihe 3.0. Ein **Gast-Token** genügt – es ist **kein
-Bibliothekskonto und keine Anmeldung** nötig, und es werden keine Zugangsdaten verarbeitet.
+The extension uses the JSON API of Onleihe 3.0. A **guest token** is enough — **no library account
+and no sign-in** is required, and no credentials are processed.
 
-Verwendete Endpunkte:
+Endpoints used:
 
-| Zweck | Aufruf |
+| Purpose | Call |
 |---|---|
-| Gast-Token | `POST /user-application/v1/auth/login` mit `{onleiheId, libraryId}` |
-| Suche | `POST /ui/v1/onleihe/{onleiheId}/search?libraryId=…` |
-| Bibliotheksverzeichnis (nur im Build) | `GET /user-application/v2/auth/libraries` |
+| Guest token | `POST /user-application/v1/auth/login` with `{onleiheId, libraryId}` |
+| Search | `POST /ui/v1/onleihe/{onleiheId}/search?libraryId=…` |
+| Library directory (build only) | `GET /user-application/v2/auth/libraries` |
 
-`onleiheId` und `libraryId` müssen zwischen Token und Suchanfrage zusammenpassen – ein Token ohne
-`libraryId`, dessen `?libraryId=` an der Suche mitgeschickt wird, wird mit `401` abgelehnt.
+`onleiheId` and `libraryId` have to match between the token and the search request — a token minted
+without `libraryId` whose `?libraryId=` is then sent along with the search is rejected with `401`.
 
-## Berechtigungen
+## Permissions
 
-Bewusst knapp gehalten:
+Deliberately kept minimal:
 
-| Berechtigung | Wofür |
+| Permission | What for |
 |---|---|
-| `storage` | gewählte Bibliothek und Sprache lokal merken |
-| `https://api.onleihe.de/*` | die Verfügbarkeitsabfrage |
-| `https://*.amazon.de/*`, `https://*.goodreads.com/*` | Buchdaten auf der Seite lesen und das Statusfeld einfügen |
+| `storage` | remember the selected library and language locally |
+| `https://api.onleihe.de/*` | the availability lookup |
+| `https://*.amazon.de/*`, `https://*.goodreads.com/*` | read book data on the page and insert the status field |
 
-Das Content-Script läuft **nur auf Buchseiten** (`/dp/`, `/gp/product/`, `/book/show/`), nicht auf
-allen Seiten dieser Domains. Es werden keine Daten an Dritte außer Onleihe gesendet; übertragen wird
-allein der Suchbegriff aus Titel und Autor.
+The content script runs **only on book pages** (`/dp/`, `/gp/product/`, `/book/show/`), not on every
+page of those domains. No data is sent to anyone other than Onleihe; what is transmitted is only the
+search term built from title and author.
 
-## Entwicklung
+## Development
 
 ```bash
 npm install
-npm run build          # -> dist/chrome/, dist/firefox/ + Archive
-npm test               # Unit- und DOM-Integrationstests
-npm run smoke          # prüft die echte Onleihe-API (alle Verbünde; --sample N für weniger)
+npm run build          # -> dist/chrome/, dist/firefox/ + archives
+npm test               # unit and DOM integration tests
+npm run smoke          # checks the real Onleihe API (every consortium; --sample N for fewer)
 npm run lint:firefox   # web-ext lint
 ```
 
-Laden zum Testen: in Chrome `chrome://extensions` → *Entpackte Erweiterung laden* → `dist/chrome`.
-In Firefox `npx web-ext run --source-dir dist/firefox`.
+Loading it for testing: in Chrome, `chrome://extensions` → *Load unpacked* → `dist/chrome`. In
+Firefox, `npx web-ext run --source-dir dist/firefox`.
 
-### Aufbau
+### Layout
 
 ```
-shared/       gemeinsamer Quellcode beider Builds
-  browser-api.js   wählt den Promise-Namespace (chrome.* / browser.*)
-  i18n.js          Übersetzungen, DE/EN, zur Laufzeit umschaltbar
-  onleihe-api.js   Zugriff auf die Onleihe-3.0-API
-  background.js    vermittelt die Abfrage
-  content.js       liest die Buchseite, zeigt das Statusfeld
-  popup.js/.html   Bibliothekswahl
-  libraries.json   erzeugt, nicht von Hand pflegen
+shared/       source shared by both builds
+  browser-api.js   picks the promise-based namespace (chrome.* / browser.*)
+  i18n.js          translations, DE/EN, switchable at runtime
+  onleihe-api.js   access to the Onleihe 3.0 API
+  background.js    relays the lookup
+  content.js       reads the book page, shows the status field
+  popup.js/.html   library selection
+  libraries.json   generated, do not edit by hand
 platform/     manifest.chrome.json (MV3), manifest.firefox.json (MV3)
-tools/        Build, Datenaufbau, Tests
-dist/         Build-Ausgabe (nicht eingecheckt)
+tools/        build, data generation, tests
+dist/         build output (not checked in)
 ```
 
-Chrome und Firefox teilen denselben Code; nur die Manifeste unterscheiden sich. Änderungen also
-immer in `shared/` – nie in `dist/`.
+Chrome and Firefox share the same code; only the manifests differ. So always change `shared/` —
+never `dist/`.
 
-Immer über `OnleiheBrowser` auf die Erweiterungs-APIs zugreifen, nie direkt über `chrome.*` oder
-`browser.*`: in Firefox ist `chrome.*` callback-basiert, ein `await` darauf liefert stillschweigend
-`undefined`.
+Always reach the extension APIs through `OnleiheBrowser`, never through `chrome.*` or `browser.*`
+directly: in Firefox `chrome.*` is callback-based, and awaiting it silently yields `undefined`.
 
-### Bibliotheksdaten aktualisieren
+### Updating the library data
 
 ```bash
 npm run libraries      # python3 tools/build_libraries.py
 ```
 
-Holt das Verzeichnis von der API, verwirft interne Test-Mandanten und ordnet jedem Verbund den
-Katalog-Host zu (für den „Im Katalog anzeigen"-Link). Der Host ist aus der `onleiheId` nicht
-rückwärts auflösbar, deshalb löst das Skript die alten Onleihe-2.x-Adressen aus
-`tools/legacy_base_urls.json` über deren Redirects auf und ergänzt Kandidaten aus Bibliotheks- und
-Ortsnamen. Verbünde ohne bekannten Host funktionieren weiterhin – nur der Deep-Link entfällt.
+Fetches the directory from the API, discards the operator's internal test tenants, and maps each
+consortium to its catalogue host (for the "show in catalogue" link). The host cannot be resolved
+backwards from the `onleiheId`, so the script follows the redirects of the old Onleihe 2.x addresses
+in `tools/legacy_base_urls.json` and adds candidates derived from library and city names. Consortia
+without a known host still work — only the deep link is omitted.
 
-### Version anheben
+### Bumping the version
 
-Die Version steht in `platform/manifest.chrome.json`, `platform/manifest.firefox.json` und
-`package.json`. Die Archivnamen leitet `tools/build.sh` daraus ab.
+The version lives in `platform/manifest.chrome.json`, `platform/manifest.firefox.json` and
+`package.json`. `tools/build.sh` derives the archive names from it.
 
-## Fehlersuche
+## Troubleshooting
 
-| Symptom | Ursache |
+| Symptom | Cause |
 |---|---|
-| Kein Statusfeld auf einer Amazon-Seite | Keine Buchseite erkannt. Diagnose: `tools/diagnose-page.js` in die Browser-Konsole einfügen – zeigt pro Signal, was fehlt. |
-| „Bitte wähle deine Onleihe-Bibliothek" | Im Popup noch keine Bibliothek gespeichert. |
-| „Nicht im Onleihe-Katalog vorhanden" | Echte Katalog-Lücke, kein Fehler. Kleinere Verbünde haben viele Titel nicht. |
-| „Onleihe-Abfrage fehlgeschlagen" | API-Problem – Statuscode steht in der Meldung. `npm run smoke` prüft alle Verbünde. |
-| Kein „Im Katalog anzeigen"-Link | Für diesen Verbund ist kein Host bekannt; die Prüfung selbst funktioniert. |
+| No status field on an Amazon page | Not recognised as a book page. To diagnose, paste `tools/diagnose-page.js` into the browser console — it reports what is missing, signal by signal. |
+| "Bitte wähle deine Onleihe-Bibliothek" | No library saved in the popup yet. |
+| "Nicht im Onleihe-Katalog vorhanden" | A genuine gap in the catalogue, not a failure. Smaller consortia do not carry many titles. |
+| "Onleihe-Abfrage fehlgeschlagen" | An API problem — the status code is in the message. `npm run smoke` checks every consortium. |
+| No "show in catalogue" link | No host is known for that consortium; the availability check itself still works. |
 
-## Lizenz
+The user-facing strings are German and English; the table above quotes the German ones.
+
+## Licence
 
 MIT
 
-## Rechtliche Einordnung
+## Disclaimer
 
-**Ungeklärt — vor einer Store-Veröffentlichung zu prüfen.** Die genutzte API ist die Backend-
-Schnittstelle der öffentlichen Onleihe-Web-App. Es wird nichts umgangen: kein Login, keine
-Zugangsdaten, keine Schutzmaßnahme. Das Gast-Token stellt Onleihe anonymen Besuchern selbst aus.
-
-Es gibt aber **keine dokumentierte öffentliche API und keine Nutzungserlaubnis**, und der API-Host
-untersagt automatisierten Zugriff ausdrücklich:
-
-```
-$ curl https://api.onleihe.de/robots.txt
-User-agent: *
-Disallow: /
-```
-
-robots.txt ist kein Gesetz und richtet sich an Crawler, nicht an ein Programm, das auf
-ausdrückliche Nutzeranweisung handelt. Es ist aber ein klares Signal des Betreibers. Zwei Fälle
-sind dabei zu trennen:
-
-| | Exponierung |
-|---|---|
-| **Laufzeit** (`onleihe-api.js`): eine Suchanfrage pro Buchseite, vom Nutzer ausgelöst | gering — funktional dasselbe, als tippe der Nutzer den Titel in die Onleihe-Suche |
-| **Build** (`tools/build_libraries.py`): 45 Verzeichnisseiten plus Host-Sondierungen | höher — genau der Bulk-Zugriff, den robots.txt adressiert; berührt zudem das Datenbankherstellerrecht (§ 87b UrhG) |
-
-Der Bulk-Zugriff passiert **einmalig beim Maintainer**, nicht in den Browsern der Nutzer, und
-`tools/build_libraries.py` läuft bewusst **nicht** in der CI. Zur Zurückhaltung:
-
-- Die Build-Werkzeuge senden einen **identifizierenden User-Agent** statt sich als Browser zu
-  tarnen — divibib kann den Verkehr zuordnen und bei Bedarf sperren.
-- Nur 6 parallele Verbindungen, nicht 16.
-- Der wöchentliche CI-Lauf prüft eine **Stichprobe von 15 Verbünden**, nicht alle 123. Eine
-  API-Änderung ist global, eine Stichprobe erkennt sie genauso — bei einem Bruchteil der Anfragen.
-  Vollabdeckung gibt es lokal oder per `workflow_dispatch`.
-- Das Verzeichnis ändert sich langsam; `npm run libraries` ist für seltene, bewusste Läufe gedacht.
-
-Das Skript liegt offen im Repo, und das ist Absicht. Die API ist kein Geheimnis — sie steht in den
-JavaScript-Bundles, die jeder Besucher der Onleihe-Web-App lädt. Ein verstecktes Bulk-Skript
-schützte niemanden, machte `libraries.json` aber zu einem nicht reproduzierbaren, nicht prüfbaren
-Datenklumpen. Genau so sind die alten Daten unbemerkt verrottet.
-
-## Haftungsausschluss
-
-Unabhängiges Projekt, weder von der divibib GmbH noch von Amazon oder Goodreads unterstützt oder
-geprüft. „Onleihe" ist eine Marke der divibib GmbH.
+An independent project, neither endorsed nor reviewed by divibib GmbH, Amazon or Goodreads.
+"Onleihe" is a trademark of divibib GmbH.
