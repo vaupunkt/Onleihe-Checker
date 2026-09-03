@@ -5,6 +5,8 @@ title: Unterstützte Bibliotheken
 
 # 🌍 Unterstützte Bibliotheken
 
+> **Hinweis:** Der Scraper läuft nicht mehr (Quellseite entfernt).
+
 ## Web Scraper Abdeckung
 Der Scraper extrahiert aktuell Bibliotheken aus dem deutschen Bereich:
 - 🇩🇪 **Deutschland** - Alle deutschen Bibliotheken und regionale Netzwerke

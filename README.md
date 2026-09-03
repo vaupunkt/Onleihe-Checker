@@ -1,4 +1,17 @@
 # Onleihe Scraper & Checker
+
+> ## ⚠️ Currently not working — a rewrite is in progress
+>
+> Onleihe has migrated to **Onleihe 3.0**, a client-side rendered web app. Its search page no
+> longer ships the results in the HTML, so the extension cannot read them and reports
+> **"no results found" for every library**. The published **version 1.2** in both stores is
+> affected.
+>
+> **A rewrite against the Onleihe 3.0 JSON API is under way** 
+>
+> Everything below describes version 1.2 and is kept for reference. Until the new version ships,
+> please search the Onleihe catalogue directly.
+
 ![OnleiheChecker - PopUp Window](assets/174_1x_shots_so.png)
 
 A Python web scraper and Chrome extension for German digital library services (Onleihe). This project consists of two main components:
@@ -7,6 +20,9 @@ A Python web scraper and Chrome extension for German digital library services (O
 2. **Chrome Extension**: Checks book availability in your local Onleihe library while browsing Amazon.de and Goodreads
 
 ## 🚀 Quick Start
+
+> **Note:** the store builds below are version 1.2 and do not work at the moment — see the notice
+> at the top.
 
 ### Chrome Extension (Recommended)
 **[📥 Install from Chrome Web Store](https://chromewebstore.google.com/detail/onleihe-checker/lbdbelkkmbogfjkeklmpfaijgpdnnncn?hl=de)**
@@ -54,6 +70,9 @@ For development or manual installation, see [Installation Guide](#-installation)
 ## 🚀 Features
 
 ### Web Scraper
+> **Broken:** the help page this reads was removed and now returns 404. The rewrite replaces the
+> scraper with the official directory endpoint of the Onleihe API.
+
 - Scrapes German Onleihe libraries from the official help pages
 - Handles cookie banners and dynamic content loading
 - Exports clean, structured library data to JSON

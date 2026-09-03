@@ -251,6 +251,33 @@
                 margin-top: 1rem;
             }
         }
+
+        /* Deprecation-Hinweis: Onleihe 3.0 */
+        .deprecation-notice {
+            max-width: 800px;
+            margin: 1.5rem auto 0;
+            padding: 1rem 1.25rem;
+            border: 2px solid #d97706;
+            border-left-width: 6px;
+            border-radius: 8px;
+            background: #fffbeb;
+            color: #7c2d12;
+            line-height: 1.55;
+        }
+
+        [data-theme="dark"] .deprecation-notice {
+            background: #2a1f0d;
+            color: #fcd34d;
+            border-color: #b45309;
+        }
+
+        .deprecation-notice h2 {
+            margin: 0 0 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .deprecation-notice p { margin: 0.5rem 0; }
+        .deprecation-notice a { color: inherit; text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -269,6 +296,21 @@
         {% endif %}
     </div>
     
+
+    <div class="deprecation-notice">
+        <h2>⚠️ Funktioniert derzeit nicht</h2>
+        <p>
+            Onleihe hat auf <strong>Onleihe 3.0</strong> umgestellt. Die Suchseite baut ihre
+            Ergebnisse jetzt im Browser auf und liefert sie nicht mehr im HTML mit – die
+            Erweiterung kann sie deshalb nicht auslesen und meldet bei
+            <strong>jeder</strong> Bibliothek „Keine Ergebnisse gefunden".
+        </p>
+        <p>
+            Betroffen ist die veröffentlichte <strong>Version 1.2</strong> in beiden Stores. Auch
+            der Python-Scraper läuft nicht mehr, da seine Quellseite entfernt wurde.
+        </p>
+    </div>
+
     <div class="content">
         {{ content }}
         

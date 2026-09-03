@@ -2,3 +2,5 @@
 /venv
 /chromedriver*
 *.zip
+/node_modules/
+/dist/

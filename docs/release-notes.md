@@ -5,6 +5,8 @@ title: Release Notes
 
 # 📋 Release Notes
 
+> **Status:** Version 1.2 funktioniert seit der Umstellung auf Onleihe 3.0 nicht mehr.
+
 ---
 
 ## Version 1.2.0 - Enhanced Release

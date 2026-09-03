@@ -5,7 +5,18 @@ title: Problemlösung
 
 # 🐛 Problemlösung
 
+## „Keine Ergebnisse gefunden" bei jeder Bibliothek
+
+Das ist derzeit **kein Konfigurationsfehler**, sondern die Umstellung auf Onleihe 3.0: die
+Suchseite liefert ihre Ergebnisse nicht mehr im HTML mit, die Erweiterung kann sie deshalb nicht
+auslesen. Betroffen ist Version 1.2 in beiden Stores.
+
+Es hilft weder eine andere Bibliothek noch eine Neuinstallation.
+
 ## Scraper-Probleme
+
+> **Hinweis:** Der Scraper läuft nicht mehr – die Hilfeseite, die er ausliest, wurde entfernt und
+> antwortet mit 404. Die folgenden Hinweise betreffen nur den historischen Stand.
 
 ### ChromeDriver nicht gefunden
 ```bash
