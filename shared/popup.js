@@ -1,4 +1,4 @@
-// popup.js - Bibliothekswahl und Sprachumschaltung.
+// popup.js - library selection and language switching.
 
 (() => {
     'use strict';
@@ -40,14 +40,14 @@
 
     function showMessage(text, type = 'info') {
         elements.message.textContent = text;
-        // Die Klassen heißen .info-box/.success-box/.error-box - der Firefox-Build
-        // setzte hier nur `${type}` und blieb deshalb ungestylt.
+        // The classes are .info-box/.success-box/.error-box - the Firefox build
+        // set only `${type}` here and therefore stayed unstyled.
         elements.message.className = `message-box ${type}-box`;
         clearTimeout(messageTimer);
         messageTimer = setTimeout(() => elements.message.classList.add('hidden'), MESSAGE_TIMEOUT);
     }
 
-    /** "Stadtbibliothek Stuttgart" plus Ort, damit gleichnamige Bibliotheken unterscheidbar sind. */
+    /** "Stadtbibliothek Stuttgart" plus city, so libraries sharing a name stay distinguishable. */
     function describeLibrary(library) {
         const location = [library.postalCode, library.city].filter(Boolean).join(' ');
         return location ? `${library.name} · ${location}` : library.name;
@@ -107,7 +107,7 @@
         closeDropdown();
     }
 
-    /** Sucht über Name und Ort - "Stuttgart" findet auch die Stadtbibliothek. */
+    /** Searches name and city - "Stuttgart" also finds the Stadtbibliothek. */
     function filterLibraries(term) {
         const needle = term.trim().toLowerCase();
         if (!needle) {
@@ -128,12 +128,12 @@
                     browserApi.tabs
                         .sendMessage(tab.id, { action: 'language_changed', language })
                         .catch(() => {
-                            // Kein Content-Script in diesem Tab - nichts zu tun.
+                            // No content script in this tab - nothing to do.
                         })
                 )
             );
         } catch {
-            // tabs.query kann ohne passende Berechtigung fehlschlagen; unkritisch.
+            // tabs.query can fail without the matching permission; not critical.
         }
     }
 
@@ -156,8 +156,8 @@
             return;
         }
 
-        // Ein Objekt statt zwei Einzelwerte: onleiheId und libraryId müssen
-        // zusammen gespeichert werden, sonst passt das API-Token nicht.
+        // One object instead of two separate values: onleiheId and libraryId must
+        // be stored together, otherwise the API token will not match.
         await browserApi.storage.local.set({ selectedLibrary });
         showMessage(t('popup.library.saved', selectedLibrary.name), 'success');
     }
@@ -224,7 +224,7 @@
             renderDropdown(visibleLibraries);
             await restoreSelection();
         } catch (error) {
-            console.error('Onleihe Checker: Bibliotheken konnten nicht geladen werden', error);
+            console.error('Onleihe Checker: could not load libraries', error);
             showMessage(t('popup.error.loading'), 'error');
         }
     }

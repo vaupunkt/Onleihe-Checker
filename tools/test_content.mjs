@@ -1,10 +1,10 @@
-// Integrationstests für content.js in einem simulierten DOM.
+// Integration tests for content.js against a simulated DOM.
 //
 //   npm test
 //
-// Baut Amazon- und Goodreads-Seiten nach, stellt eine Attrappe der
-// Erweiterungs-APIs bereit und prüft, was das Statusfeld am Ende anzeigt.
-// Ohne Netzzugriff: die Antwort des Background-Scripts wird gestellt.
+// Rebuilds Amazon and Goodreads pages, provides a stub of the extension APIs
+// and checks what the status field ends up showing. No network access: the
+// background script's response is stubbed.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -49,12 +49,12 @@ function goodreadsBookPage({ title = 'The Steppenwolf', author = 'Hermann Hesse'
 }
 
 /**
- * Lädt die Erweiterungsskripte in eine simulierte Seite.
+ * Loads the extension scripts into a simulated page.
  * @param {Object} options
- * @param {string} options.html - Seiteninhalt
- * @param {string} options.url - Adresse der Seite
- * @param {Object} options.storage - Inhalt von storage.local
- * @param {Function} options.onMessage - Antwort auf check_availability
+ * @param {string} options.html - page content
+ * @param {string} options.url - page address
+ * @param {Object} options.storage - contents of storage.local
+ * @param {Function} options.onMessage - response to check_availability
  */
 async function run({ html, url, storage = {}, onMessage, keepOpen = false }) {
     const dom = new JSDOM(html, { url, runScripts: 'outside-only', pretendToBeVisual: true });
@@ -77,7 +77,7 @@ async function run({ html, url, storage = {}, onMessage, keepOpen = false }) {
         window.eval(source);
     }
 
-    // Auf das Statusfeld warten - content.js arbeitet asynchron.
+    // Wait for the status field - content.js works asynchronously.
     for (let i = 0; i < 60; i += 1) {
         const message = window.document.querySelector('#onleihe-status-message');
         if (message?.textContent?.trim() && !message.textContent.includes('Lade Onleihe')) {
@@ -98,9 +98,9 @@ async function run({ html, url, storage = {}, onMessage, keepOpen = false }) {
         close: () => window.close()
     };
 
-    // content.js hält per setInterval nach SPA-Navigation Ausschau. Bleibt das
-    // Fenster offen, halten dessen Timer die Eventloop am Leben und node --test
-    // beendet sich nie - deshalb hier schließen, sobald alles ausgelesen ist.
+    // content.js watches for SPA navigation via setInterval. If the window stays
+    // open its timers keep the event loop alive and node --test never exits -
+    // hence closing it here, once everything has been read out.
     if (!keepOpen) {
         window.close();
     }
@@ -112,7 +112,7 @@ const GOODREADS_URL = 'https://www.goodreads.com/book/show/16631.Steppenwolf';
 
 // --------------------------------------------------------------------------
 
-test('verfügbarer Titel wird als sofort ausleihbar gemeldet', async () => {
+test('an available title is reported as available now', async () => {
     const result = await run({
         html: amazonBookPage(),
         url: AMAZON_URL,
@@ -131,7 +131,7 @@ test('verfügbarer Titel wird als sofort ausleihbar gemeldet', async () => {
     assert.equal(result.link, 'https://stuttgart.onleihe.de/search?searchTerm=Der%20Steppenwolf%20Hesse');
 });
 
-test('Suchbegriff besteht aus Titel ohne Untertitel plus Autor-Nachname', async () => {
+test('search term is the title without subtitle plus the author surname', async () => {
     const result = await run({
         html: amazonBookPage({ title: 'Der Steppenwolf: Roman', author: 'Hermann Hesse' }),
         url: AMAZON_URL,
@@ -144,7 +144,7 @@ test('Suchbegriff besteht aus Titel ohne Untertitel plus Autor-Nachname', async 
     assert.equal(request.libraryId, STUTTGART.libraryId);
 });
 
-test('Titel mit Punkt wird nicht abgeschnitten', async () => {
+test('a title containing a period is not truncated', async () => {
     const result = await run({
         html: amazonBookPage({ title: 'Dr. Jekyll and Mr. Hyde', author: 'Robert Louis Stevenson' }),
         url: AMAZON_URL,
@@ -152,11 +152,11 @@ test('Titel mit Punkt wird nicht abgeschnitten', async () => {
     });
 
     const request = result.sent.find((m) => m.action === 'check_availability');
-    // Die frühere Fassung schickte hier "Dr" los.
+    // The previous version sent off "Dr" here.
     assert.equal(request.searchTerm, 'Dr. Jekyll and Mr. Hyde Stevenson');
 });
 
-test('Medienarten werden aufgeschlüsselt angezeigt', async () => {
+test('media types are shown broken down', async () => {
     const result = await run({
         html: amazonBookPage(),
         url: AMAZON_URL,
@@ -173,12 +173,12 @@ test('Medienarten werden aufgeschlüsselt angezeigt', async () => {
         })
     });
 
-    // Die alte Fassung schränkte per pMediaType=400001 still auf E-Books ein.
+    // The old version silently restricted to ebooks via pMediaType=400001.
     assert.match(result.text, /7 E-Book/);
     assert.match(result.text, /1 Hörbuch/);
 });
 
-test('vollständig verliehener Titel wird als vormerkbar gemeldet', async () => {
+test('a fully lent title is reported as reservable', async () => {
     const result = await run({
         html: amazonBookPage(),
         url: AMAZON_URL,
@@ -190,7 +190,7 @@ test('vollständig verliehener Titel wird als vormerkbar gemeldet', async () => 
     assert.doesNotMatch(result.text, /Sofort ausleihbar/);
 });
 
-test('null Treffer sind kein Fehler', async () => {
+test('zero hits are not an error', async () => {
     const result = await run({
         html: amazonBookPage(),
         url: AMAZON_URL,
@@ -203,7 +203,7 @@ test('null Treffer sind kein Fehler', async () => {
     assert.match(result.text, /Direkt im Onleihe-Katalog suchen/);
 });
 
-test('API-Fehler wird als Fehler angezeigt, nicht als "nicht gefunden"', async () => {
+test('an API failure is shown as an error, not as not found', async () => {
     const result = await run({
         html: amazonBookPage(),
         url: AMAZON_URL,
@@ -216,18 +216,19 @@ test('API-Fehler wird als Fehler angezeigt, nicht als "nicht gefunden"', async (
     assert.doesNotMatch(result.text, /Nicht im Onleihe-Katalog/);
 });
 
-test('ohne gewählte Bibliothek erscheint ein Hinweis statt einer Abfrage', async () => {
+test('without a selected library a hint appears instead of a query', async () => {
     const result = await run({
         html: amazonBookPage(),
         url: AMAZON_URL,
         storage: { selectedLanguage: 'de' }
     });
 
+    // Asserts against the German UI text - the test pins selectedLanguage to 'de'.
     assert.match(result.text, /Bibliothek/);
     assert.equal(result.sent.filter((m) => m.action === 'check_availability').length, 0);
 });
 
-test('Bibliothek ohne Host: Prüfung ja, aber kein Katalog-Link', async () => {
+test('library without a host: check runs, but no catalog link', async () => {
     const { host, ...withoutHost } = STUTTGART;
     const result = await run({
         html: amazonBookPage(),
@@ -240,7 +241,7 @@ test('Bibliothek ohne Host: Prüfung ja, aber kein Katalog-Link', async () => {
     assert.equal(result.link, null);
 });
 
-test('Nicht-Buch-Produktseite bekommt kein Statusfeld', async () => {
+test('a non-book product page gets no status field', async () => {
     const result = await run({
         html: amazonBookPage({ isBook: false }),
         url: 'https://www.amazon.de/Pfanne/dp/B00TEST123',
@@ -251,7 +252,7 @@ test('Nicht-Buch-Produktseite bekommt kein Statusfeld', async () => {
     assert.equal(result.sent.length, 0);
 });
 
-test('Goodreads-Buchseite funktioniert genauso', async () => {
+test('a Goodreads book page works the same way', async () => {
     const result = await run({
         html: goodreadsBookPage(),
         url: GOODREADS_URL,
@@ -264,7 +265,7 @@ test('Goodreads-Buchseite funktioniert genauso', async () => {
     assert.equal(request.searchTerm, 'The Steppenwolf Hesse');
 });
 
-test('Statusfeld wird nicht doppelt eingefügt', async () => {
+test('the status field is not inserted twice', async () => {
     const result = await run({
         html: amazonBookPage(),
         url: AMAZON_URL,
@@ -275,8 +276,8 @@ test('Statusfeld wird nicht doppelt eingefügt', async () => {
     assert.equal(result.fieldCount, 1);
 });
 
-test('ohne gespeicherte Sprache gilt die Browsersprache', async () => {
-    // jsdom meldet navigator.language = 'en-US'.
+test('without a stored language the browser language applies', async () => {
+    // jsdom reports navigator.language = 'en-US'.
     const result = await run({
         html: amazonBookPage(),
         url: AMAZON_URL,
@@ -286,7 +287,7 @@ test('ohne gespeicherte Sprache gilt die Browsersprache', async () => {
     assert.match(result.text, /Available now/);
 });
 
-test('Sprachwechsel übersetzt die sichtbare Meldung neu', async () => {
+test('a language switch re-translates the visible message', async () => {
     const result = await run({
         html: amazonBookPage(),
         url: AMAZON_URL,
@@ -297,8 +298,8 @@ test('Sprachwechsel übersetzt die sichtbare Meldung neu', async () => {
 
     assert.match(result.text, /Sofort ausleihbar/);
 
-    // Die frühere Fassung spielte den bereits übersetzten String erneut ein,
-    // der Text blieb beim Wechsel unverändert stehen.
+    // The previous version replayed the already-translated string, so the text
+    // stayed unchanged across a switch.
     result.window.__onMessage({ action: 'language_changed', language: 'en' }, {}, () => {});
 
     const updated = result.window.document.querySelector('#onleihe-status-message').textContent;
@@ -307,7 +308,7 @@ test('Sprachwechsel übersetzt die sichtbare Meldung neu', async () => {
     result.close();
 });
 
-test('kein Markup aus Fremddaten im Statusfeld', async () => {
+test('no markup from foreign data in the status field', async () => {
     const evil = { ...STUTTGART, name: '<img src=x onerror=alert(1)>' };
     const result = await run({
         html: amazonBookPage(),
@@ -317,5 +318,5 @@ test('kein Markup aus Fremddaten im Statusfeld', async () => {
     });
 
     assert.equal(result.field.querySelectorAll('img').length, 0);
-    assert.match(result.text, /<img/); // als Text vorhanden, nicht als Element
+    assert.match(result.text, /<img/); // present as text, not as an element
 });

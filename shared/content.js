@@ -11,22 +11,22 @@
     const MAX_ATTEMPTS = 3;
     const RETRY_DELAY = 2000;
 
-    // Nur diese Trennzeichen leiten einen Untertitel ein
+    // Only these characters introduce a subtitle
     const SUBTITLE_SEPARATORS = [':', '|', '(', '[', '—', '–'];
     const MIN_TITLE_LENGTH = 3;
 
-    /** Zustand des Statusfelds als Key + Argumente, damit ein Sprachwechsel neu übersetzen kann. */
+    /** Status field state as key + arguments, so a language switch can re-translate it. */
     let statusField = null;
     let statusState = null;
     let checkInProgress = false;
 
     // ==========================================================================
-    // DOM-Hilfsfunktionen
+    // DOM helpers
     // ==========================================================================
 
     /**
-     * Wartet, bis ein Element im DOM erscheint.
-     * @returns {Promise<HTMLElement|null>} null bei Zeitüberschreitung.
+     * Waits until an element appears in the DOM.
+     * @returns {Promise<HTMLElement|null>} null on timeout.
      */
     function waitForElement(selector, timeout = ELEMENT_TIMEOUT) {
         const existing = document.querySelector(selector);
@@ -62,7 +62,7 @@
     }
 
     // ==========================================================================
-    // Seitenerkennung
+    // Page detection
     // ==========================================================================
 
     function getCurrentSite() {
@@ -77,8 +77,8 @@
     }
 
     /**
-     * Prüft, ob die aktuelle Seite eine unterstützte Buchseite ist.
-     * Wird pro Durchlauf einmal aufgerufen und durchgegeben.
+     * Checks whether the current page is a supported book page.
+     * Called once per run and passed along.
      */
     function detectSupportedPage() {
         const site = getCurrentSite();
@@ -89,8 +89,8 @@
             if (!isProductPage) {
                 return { site, isValid: false };
             }
-            // Amazon liefert Bücher unter derselben /dp/-Struktur wie alles andere;
-            // die Kategorie-Navigation unterscheidet sie.
+            // Amazon serves books under the same /dp/ structure as everything
+            // else; the category navigation is what tells them apart.
             const booksNav = document.querySelector('#nav-subnav[data-category="books-catalog"]');
             return { site, isValid: Boolean(booksNav) };
         }
@@ -103,10 +103,10 @@
     }
 
     // ==========================================================================
-    // Buchdaten auslesen
+    // Reading book data
     // ==========================================================================
 
-    /** Schneidet einen Untertitel ab, lässt den Titel aber unangetastet, wenn zu wenig übrig bliebe. */
+    /** Strips a subtitle, but leaves the title alone if too little would remain. */
     function cleanTitle(fullTitle) {
         if (!fullTitle) {
             return null;
@@ -181,7 +181,7 @@
         return { title, author: extractLastName(fullAuthorName) };
     }
 
-    /** ISBN nur bei Bedarf lesen */
+    /** Reads the ISBN only when needed. */
     function getIsbnFromPage(site) {
         const pattern = /(\d{13}|\d{10}|\d{9}[Xx])/;
 
@@ -216,7 +216,7 @@
         return site === 'amazon' ? getBookInfoFromAmazon() : getBookInfoFromGoodreads();
     }
 
-    /** Baut den Suchbegriff. Mehrere Wörter werden serverseitig UND-verknüpft. */
+    /** Builds the search term. Multiple words are AND-combined server-side. */
     function buildSearchTerm(site) {
         const { title, author } = getBookInfo(site);
         if (title) {
@@ -226,7 +226,7 @@
     }
 
     // ==========================================================================
-    // Statusfeld
+    // Status field
     // ==========================================================================
 
     function createStatusField() {
@@ -341,8 +341,8 @@
             return;
         }
 
-        // Bewusst textContent statt innerHTML: Titel, Bibliotheksname und
-        // Fehlertexte sind Fremddaten und dürfen kein Markup einbringen.
+        // textContent rather than innerHTML on purpose: title, library name and
+        // error texts are foreign data and must not introduce markup.
         message.textContent = '';
         const text = t(state.key, ...(state.args || []));
 
@@ -354,8 +354,8 @@
             message.append(strong);
         }
 
-        // Aufschlüsselung nach Medienart: die alte Fassung schränkte die Suche
-        // still auf E-Books ein, Hörbücher fielen unter den Tisch.
+        // Breakdown by media type: the previous version silently restricted the
+        // search to ebooks, so audiobooks were dropped.
         if (state.mediaTypes?.length) {
             const summary = state.mediaTypes
                 .map((entry) => `${entry.count} ${t(`media.${entry.mediaType}`)}`)
@@ -378,7 +378,7 @@
     }
 
     // ==========================================================================
-    // Ablauf
+    // Flow
     // ==========================================================================
 
     function describeError(response) {
@@ -490,7 +490,7 @@
                 return;
             } catch (error) {
                 if (attempt === MAX_ATTEMPTS) {
-                    console.error('Onleihe Checker: Prüfung fehlgeschlagen', error);
+                    console.error('Onleihe Checker: availability check failed', error);
                     if (statusField) {
                         renderStatus({
                             type: 'error',
@@ -506,7 +506,7 @@
     }
 
     // ==========================================================================
-    // Start und Navigation
+    // Startup and navigation
     // ==========================================================================
 
     browserApi.runtime.onMessage.addListener((request, _sender, sendResponse) => {

@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
-"""Erzeugt shared/libraries.json aus der offiziellen Onleihe-3.0-API.
+"""Builds shared/libraries.json from the official Onleihe 3.0 API.
 
-Ersetzt den früheren Selenium-Scraper: die Bibliotheksliste kommt jetzt aus dem
-öffentlichen Verzeichnis-Endpunkt, nicht mehr aus dem HTML der Hilfeseite (die
-inzwischen 404 liefert).
+Replaces the former Selenium scraper: the library list now comes from the public
+directory endpoint instead of the HTML of the help page (which returns 404 by now).
 
-Zwei Schritte:
+Two steps:
 
-1. Verzeichnis paginieren -> Name, Ort, PLZ, onleiheId, libraryId pro Bibliothek.
-2. Host-Mapping pro onleiheId aufbauen, damit die Erweiterung einen
-   "Im Katalog anzeigen"-Link setzen kann. Der Host ist aus der onleiheId nicht
-   rückwärts auflösbar, deshalb vorwärts: bekannte Hosts -> Redirect folgen ->
+1. Paginate the directory -> name, city, postal code, onleiheId, libraryId per library.
+2. Build a host mapping per onleiheId so the extension can offer a
+   "show in catalog" link. The host cannot be resolved backwards from the
+   onleiheId, so go forwards instead: known hosts -> follow redirect ->
    /management/v1/auth/domains?host=... -> onleiheId.
 """
 
@@ -46,14 +45,14 @@ def get_json(url):
 
 
 def fetch_directory():
-    """Alle Seiten des Bibliotheksverzeichnisses einsammeln."""
+    """Collects every page of the library directory."""
     first = get_json(f"{DIRECTORY}?page=1&size={PAGE_SIZE}")
     if not first:
-        sys.exit("Verzeichnis-Endpunkt nicht erreichbar")
+        sys.exit("Directory endpoint unreachable")
 
     entries = list(first["content"])
     total_pages = first["totalPages"]
-    print(f"Verzeichnis: {first['totalItems']} Bibliotheken auf {total_pages} Seiten")
+    print(f"Directory: {first['totalItems']} libraries across {total_pages} pages")
 
     def page(n):
         d = get_json(f"{DIRECTORY}?page={n}&size={PAGE_SIZE}")
@@ -64,15 +63,15 @@ def fetch_directory():
             entries.extend(chunk)
 
     if len(entries) < first["totalItems"]:
-        print(f"  Warnung: nur {len(entries)} von {first['totalItems']} Einträgen geladen")
+        print(f"  Warning: only loaded {len(entries)} of {first['totalItems']} entries")
     return entries
 
 
 def resolve_final_host(url):
-    """Redirects folgen und den endgültigen Host zurückgeben.
+    """Follows redirects and returns the final host.
 
-    Die alten baseURLs zeigen auf Onleihe 2.x (www.onleihe.de/<slug>/), das per
-    301 auf <slug>.onleihe.de umleitet und dabei den Pfad verwirft.
+    The old baseURLs point at Onleihe 2.x (www.onleihe.de/<slug>/), which 301s to
+    <slug>.onleihe.de and drops the path along the way.
     """
     try:
         req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "onleihe-checker-build"})
@@ -85,24 +84,24 @@ def resolve_final_host(url):
 
 
 def collect_candidate_hosts(legacy_path):
-    """Host-Kandidaten aus den alten Onleihe-2.x-Adressen gewinnen.
+    """Derives host candidates from the old Onleihe 2.x addresses.
 
-    tools/legacy_base_urls.json hält die 229 Adressen aus der Zeit vor der
-    Migration. Sie zeigen auf www.onleihe.de/<slug>/ und leiten heute auf den
-    neuen Host <slug>.onleihe.de um - genau die Zuordnung, die gebraucht wird.
+    tools/legacy_base_urls.json holds the 229 addresses from before the migration.
+    They point at www.onleihe.de/<slug>/ and today redirect to the new host
+    <slug>.onleihe.de - exactly the mapping that is needed here.
     """
     if not legacy_path.exists():
-        print(f"  Keine Altdaten unter {legacy_path} - Host-Mapping bleibt leer")
+        print(f"  No legacy data at {legacy_path} - host mapping stays empty")
         return []
 
     base_urls = sorted(set(json.loads(legacy_path.read_text(encoding="utf-8"))))
-    print(f"Host-Mapping: {len(base_urls)} alte baseURLs werden aufgelöst")
+    print(f"Host mapping: resolving {len(base_urls)} legacy baseURLs")
 
     with ThreadPoolExecutor(WORKERS) as ex:
         hosts = ex.map(resolve_final_host, base_urls)
 
     candidates = {h for h in hosts if h}
-    # Die direkten Hosts der Altdaten mitnehmen: manche antworten ohne Redirect.
+    # Include the legacy hosts as-is: some answer without a redirect.
     candidates |= {urlparse(u).netloc for u in base_urls}
     return sorted(c for c in candidates if c and ":" not in c)
 
@@ -116,10 +115,10 @@ def slugify(text):
 
 
 def slug_host_candidates(entries):
-    """Host-Kandidaten aus Bibliotheks- und Ortsnamen ableiten.
+    """Derives host candidates from library and city names.
 
-    Fängt die Verbünde auf, die in den Altdaten fehlten - vor allem CH/AT/LU,
-    die der alte Scraper komplett übersprungen hat.
+    Catches the consortia missing from the legacy data - above all CH/AT/LU,
+    which the old scraper skipped entirely.
     """
     candidates = set()
     for entry in entries:
@@ -141,7 +140,7 @@ def host_to_onleihe(host):
 
 
 def build_host_map(hosts):
-    """onleiheId -> Host. Kürzester Host gewinnt, das ist der kanonische."""
+    """onleiheId -> host. The shortest host wins, that is the canonical one."""
     with ThreadPoolExecutor(WORKERS) as ex:
         results = [r for r in ex.map(host_to_onleihe, hosts) if r]
 
@@ -150,11 +149,11 @@ def build_host_map(hosts):
         current = host_map.get(onleihe_id)
         if current is None or (len(host), host) < (len(current), current):
             host_map[onleihe_id] = host
-    print(f"  {len(host_map)} Verbünde einem Host zugeordnet ({len(results)} Treffer)")
+    print(f"  mapped {len(host_map)} consortia to a host ({len(results)} matches)")
     return host_map
 
 
-# Interne Mandanten des Betreibers, keine echten Bibliotheken.
+# The operator's internal tenants, not real libraries.
 TEST_TENANT_PATTERNS = (
     re.compile(r"^divibib[\s_-]*t?-?\d*$", re.I),
     re.compile(r"^test\b", re.I),
@@ -186,9 +185,9 @@ def normalize(entry, host_map):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--skip-hosts", action="store_true",
-                    help="Host-Mapping überspringen (schnell, aber ohne Katalog-Links)")
+                    help="Skip the host mapping (fast, but without catalog links)")
     ap.add_argument("--legacy", type=Path, default=REPO / "tools" / "legacy_base_urls.json",
-                    help="Alte Onleihe-2.x-Adressen als Host-Kandidatenquelle")
+                    help="Old Onleihe 2.x addresses used as host candidates")
     ap.add_argument("--out", type=Path, default=OUT)
     args = ap.parse_args()
 
@@ -197,7 +196,7 @@ def main():
     test_entries = [e for e in entries if is_test_entry(e)]
     entries = [e for e in entries if not is_test_entry(e)]
     if test_entries:
-        print(f"  {len(test_entries)} interne Test-Mandanten verworfen")
+        print(f"  discarded {len(test_entries)} internal test tenants")
 
     host_map = {}
     if not args.skip_hosts:
@@ -205,12 +204,12 @@ def main():
         if hosts:
             host_map = build_host_map(hosts)
 
-        # Verbünde ohne Host über Namens-/Ortsslugs nachziehen.
+        # Fill in consortia without a host via name/city slugs.
         unmapped = {e["onleiheId"] for e in entries if e.get("onleiheId") not in host_map}
         if unmapped:
             rest = [e for e in entries if e.get("onleiheId") in unmapped]
             extra_hosts = slug_host_candidates(rest)
-            print(f"Host-Mapping: {len(unmapped)} Verbünde offen, {len(extra_hosts)} Slug-Kandidaten")
+            print(f"Host mapping: {len(unmapped)} consortia left, {len(extra_hosts)} slug candidates")
             extra_map = build_host_map(extra_hosts)
             for onleihe_id, host in extra_map.items():
                 host_map.setdefault(onleihe_id, host)
@@ -218,7 +217,7 @@ def main():
     libraries = [normalize(e, host_map) for e in entries]
     libraries = [lib for lib in libraries if lib["name"] and lib["onleiheId"] and lib["libraryId"]]
 
-    # Exakte Duplikate entfernen; die Altdaten hatten 18 davon.
+    # Drop exact duplicates; the legacy data contained 18 of them.
     seen, unique = set(), []
     for lib in libraries:
         key = (lib["name"], lib["onleiheId"], lib["libraryId"])
@@ -233,10 +232,15 @@ def main():
 
     tenants = {l["onleiheId"] for l in unique}
     with_host = sum(1 for l in unique if l.get("host"))
-    print(f"\n{len(unique)} Bibliotheken -> {args.out.relative_to(REPO)}")
-    print(f"  {len(tenants)} Verbünde, {with_host} Einträge mit Host-Link")
+    # --out may point outside the repo, where relative_to() would raise.
+    try:
+        shown = args.out.relative_to(REPO)
+    except ValueError:
+        shown = args.out
+    print(f"\n{len(unique)} libraries -> {shown}")
+    print(f"  {len(tenants)} consortia, {with_host} entries with a host link")
     if len(libraries) != len(unique):
-        print(f"  {len(libraries) - len(unique)} exakte Duplikate entfernt")
+        print(f"  removed {len(libraries) - len(unique)} exact duplicates")
 
 
 if __name__ == "__main__":

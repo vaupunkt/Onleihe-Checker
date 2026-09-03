@@ -7,10 +7,10 @@
 
     const REQUEST_TIMEOUT = 15000;
     const PAGE_SIZE = 10;
-    // Sicherheitsabstand, damit ein Token nicht mitten im Request abläuft.
+    // Safety margin so a token cannot expire in the middle of a request.
     const TOKEN_EXPIRY_MARGIN_MS = 60_000;
 
-    /** Fehler mit maschinenlesbarem Grund, damit das UI Fehler von Null-Treffern trennen kann. */
+    /** Error with a machine-readable reason, so the UI can tell failures from zero hits. */
     class OnleiheApiError extends Error {
         constructor(reason, detail) {
             super(detail ? `${reason}: ${detail}` : reason);
@@ -20,14 +20,14 @@
         }
     }
 
-    /** accessToken je (onleiheId, libraryId). Tokens laufen ~30 Tage. */
+    /** accessToken per (onleiheId, libraryId). Tokens last about 30 days. */
     const tokenCache = new Map();
 
     function cacheKey(onleiheId, libraryId) {
         return `${onleiheId}|${libraryId || ''}`;
     }
 
-    /** Ablaufzeitpunkt aus dem JWT lesen, ohne Signaturprüfung (nur Cache-Steuerung). */
+    /** Reads the expiry from the JWT without verifying the signature (cache control only). */
     function readTokenExpiry(accessToken) {
         try {
             const payload = accessToken.split('.')[1];
@@ -103,7 +103,7 @@
         return url.toString();
     }
 
-    /** Freitextsuche */
+    /** Free-text search. */
     function buildSearchBody(searchTerm, size) {
         return {
             query: [{ query: searchTerm, fields: [] }],
@@ -160,11 +160,11 @@
     }
 
     /**
-     * Verfügbarkeit eines Titels in einer Onleihe prüfen.
+     * Checks the availability of a title in one Onleihe.
      *
      * @returns {Promise<{totalItems:number, available:boolean, items:Array, mediaTypes:Array}>}
-     * @throws {OnleiheApiError} bei Netz-, Auth-, Timeout- oder HTTP-Fehlern.
-     *   Ein leeres Ergebnis ist kein Fehler, sondern totalItems === 0.
+     * @throws {OnleiheApiError} on network, auth, timeout or HTTP errors.
+     *   An empty result is not an error - it is totalItems === 0.
      */
     async function checkAvailability({ onleiheId, libraryId, searchTerm, size = PAGE_SIZE }) {
         if (!onleiheId || !searchTerm) {
@@ -174,7 +174,7 @@
         let accessToken = await getToken(onleiheId, libraryId);
         let response = await postSearch(onleiheId, libraryId, searchTerm, size, accessToken);
 
-        // Ein abgelaufenes oder serverseitig verworfenes Token einmal erneuern.
+        // Renew a token once if it expired or was discarded server-side.
         if (response.status === 401 || response.status === 403) {
             accessToken = await getToken(onleiheId, libraryId, { forceRefresh: true });
             response = await postSearch(onleiheId, libraryId, searchTerm, size, accessToken);

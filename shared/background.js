@@ -1,9 +1,10 @@
-// background.js - Service Worker.
+// background.js - service worker.
 //
-// Nimmt Suchanfragen des Content-Scripts an und stellt sie an api.onleihe.de.
-// Der Umweg über das Background-Script ist nötig, weil das Content-Script auf
-// amazon.de/goodreads.com läuft und von dort keine Cross-Origin-Anfrage an
-// Onleihe stellen darf - hier greift die Host-Permission.
+// Accepts search requests from the content script and forwards them to
+// api.onleihe.de. The detour through the background script is necessary because
+// the content script runs on amazon.de/goodreads.com and may not make a
+// cross-origin request to Onleihe from there - the host permission applies here.
+
 if (!self.OnleiheApi && typeof importScripts === 'function') {
     importScripts('browser-api.js', 'onleihe-api.js');
 }
@@ -37,5 +38,5 @@ browserApi.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     }
 
     handleCheckAvailability(request).then(sendResponse);
-    return true; // Antwort erfolgt asynchron.
+    return true; // The response is sent asynchronously.
 });

@@ -1,14 +1,14 @@
 {
   "extensionName": {
     "message": "Onleihe Checker",
-    "description": "Name der Erweiterung"
+    "description": "Name of the extension"
   },
   "extensionDescription": {
     "message": "Prüft beim Stöbern auf Amazon.de und Goodreads, ob ein Buch in deiner Onleihe verfügbar ist.",
-    "description": "Beschreibung im Store und in der Erweiterungsübersicht"
+    "description": "Store and extension listing description"
   },
   "actionTitle": {
     "message": "Onleihe Checker – Bibliothek wählen",
-    "description": "Tooltip des Symbols in der Symbolleiste"
+    "description": "Toolbar icon tooltip"
   }
 }

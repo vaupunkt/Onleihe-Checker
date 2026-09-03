@@ -1,13 +1,3 @@
-#!/usr/bin/env bash
-# Baut die Erweiterung für Chrome und Firefox aus shared/ + platform/.
-#
-# Ersetzt das frühere package_firefox.sh (das die Version hartcodiert hatte und
-# kein Chrome-Gegenstück besaß). Die Version steht nur noch in den Manifesten.
-#
-#   tools/build.sh              # beide Ziele bauen und packen
-#   tools/build.sh chrome       # nur Chrome
-#   tools/build.sh --no-zip     # nur dist/, ohne Archive
-
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -22,7 +12,7 @@ for arg in "$@"; do
     case "$arg" in
         --no-zip) make_zip=false ;;
         chrome|firefox) targets+=("$arg") ;;
-        *) echo "Unbekanntes Argument: $arg" >&2; exit 2 ;;
+        *) echo "Unknown argument: $arg" >&2; exit 2 ;;
     esac
 done
 
@@ -32,7 +22,7 @@ fi
 
 require_file() {
     if [ ! -f "$1" ]; then
-        echo "Fehlt: ${1#$REPO/}" >&2
+        echo "Missing: ${1#$REPO/}" >&2
         exit 1
     fi
 }
@@ -55,7 +45,7 @@ build() {
     rm -rf "$out"
     mkdir -p "$out"
 
-    # Nur die Laufzeitdateien kopieren, keine Tests oder Notizen.
+    # Copy only the runtime files, no tests or notes.
     cp "$SHARED"/*.js "$SHARED"/*.html "$SHARED"/libraries.json "$out/"
     cp -R "$SHARED/icons" "$out/icons"
     cp -R "$SHARED/_locales" "$out/_locales"
