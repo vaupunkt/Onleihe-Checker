@@ -1,3 +1,15 @@
+# Onleihe Checker v1.3 – Sunset Release
+
+**The extension is being discontinued.** Onleihe did not consent to the use of its interface, and Onleihe libraries are moving to Libby over the coming year.
+
+- Removed all requests to Onleihe servers; the extension no longer makes any network requests
+- Removed content scripts on Amazon.de and Goodreads
+- Reduced permissions to `storage`
+- Stored settings (library, language) are deleted on update
+- One-time notice page after the update; the popup only shows the notice and a "remove extension" button
+
+---
+
 # Onleihe Checker v1.2 - Enhanced Release
 
 🎉 **Improved release with better performance and user experience!**

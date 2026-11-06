@@ -5,7 +5,19 @@ title: Release Notes
 
 # 📋 Release Notes
 
-> **Status:** Version 1.2 funktioniert seit der Umstellung auf Onleihe 3.0 nicht mehr.
+> **Status:** Project discontinued. Version 1.3 is the final update.
+
+---
+
+## Version 1.3 – Sunset Release
+
+Onleihe did not consent to the use of its interface, and Onleihe libraries are moving to Libby over the coming year. The extension is therefore being discontinued.
+
+- ✅ No more requests to Onleihe servers, no network requests at all
+- ✅ Removed content scripts on Amazon.de and Goodreads
+- ✅ Only permission: `storage`
+- ✅ Stored settings are deleted on update
+- ✅ Notice page with a "remove extension" button
 
 ---
 
